@@ -513,42 +513,29 @@ provider = config.build_provider()
 ---
 
 ### Task 2.3: Prompt Templates
-**File:** `agent/prompts.py`
-**Reference:** RM11_Biography_Best_Practices.md, RM11_Data_Quality_Rules.md
+**File:** `rmtool/agent/prompts.py`
+**Reference:** RM11_Biography_Best_Practices.md, RM11_Data_Quality_Rules.md, RM11_Timeline_Construction.md
 
-- [ ] System prompts for biography generation
-- [ ] System prompts for data quality analysis
-- [ ] System prompts for Q&A
-- [ ] System prompts for timeline curation
-- [ ] Few-shot examples for each task
-- [ ] Variable substitution (person data, events, etc.)
-- [ ] Prompt versioning
-- [ ] Unit tests (test_prompts.py)
+- [✓] Prompt registry with versioned templates
+- [✓] System prompts for biography, data quality, Q&A, and timeline generation
+- [✓] Few-shot exemplars included per workflow
+- [✓] Safe substitution helper APIs (`get_prompt`, `render_prompt`)
+- [✓] Unit tests for registry integrity (`tests/unit/test_prompts.py`)
 
-**Example Templates:**
+**Example Usage:**
 ```python
-BIOGRAPHY_SYSTEM_PROMPT = """
-You are a professional genealogist writing biographical narratives.
-Follow the 9-section structure:
-1. Introduction
-2. Early Life & Family Background
-...
+from rmtool.agent.prompts import render_prompt
 
-Guidelines:
-- Use 3rd person past tense
-- Handle uncertainty with qualifiers: "likely", "probably", "about"
-- Respect privacy rules (110-year rule, IsPrivate flags)
-- Cite sources when available
-"""
-
-DATA_QUALITY_PROMPT = """
-Analyze the following genealogical data for quality issues.
-Check for:
-- Logical inconsistencies (death before birth, etc.)
-- Missing required information
-- Referential integrity problems
-...
-"""
+prompt_text = render_prompt(
+    "quality",
+    {
+        "quality_summary": "...",
+        "critical_issues": "...",
+        "high_issues": "...",
+        "medium_issues": "...",
+        "low_issues": "...",
+    },
+)
 ```
 
 ---
@@ -1375,12 +1362,12 @@ RM11/
 
 ### Phase 2: AI Integration (Working Prototype - AI Layer)
 - [x] 2.1: LLM Provider Abstraction
-- [ ] 2.2: Configuration Management
-- [ ] 2.3: Prompt Templates
+- [x] 2.2: Configuration Management
+- [x] 2.3: Prompt Templates
 - [ ] 2.4: Agent Core
 - [ ] 2.5: LangChain Tools
 
-**Progress:** 1/5 tasks
+**Progress:** 3/5 tasks
 
 ### Phase 3: Output Generators (Working Prototype - Output)
 - [ ] 3.1: Biography Generator

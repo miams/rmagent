@@ -82,6 +82,17 @@ from rmtool.config.config import load_app_config
 config = load_app_config()
 provider = config.build_provider()  # Anthropic/OpenAI/Ollama based on .env
 db_path = config.database.database_path
+
+from rmtool.agent.prompts import render_prompt
+biography_prompt = render_prompt(
+    "biography",
+    {
+        "person_summary": "...",
+        "timeline_overview": "...",
+        "relationship_notes": "...",
+        "source_notes": "...",
+    },
+)
 ```
 
 ## Usage

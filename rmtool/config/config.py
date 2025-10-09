@@ -15,8 +15,15 @@ from typing import ClassVar, Dict, Optional, Set
 from dotenv import load_dotenv
 try:
     from pydantic import BaseModel, Field, ValidationError, field_validator
+    from pydantic import ConfigDict  # type: ignore
 except ImportError:  # pragma: no cover - compatibility for Pydantic v1
     from pydantic import BaseModel, Field, ValidationError, validator as field_validator  # type: ignore
+
+    class ConfigDict(dict):  # type: ignore
+        """Fallback stub for Pydantic v1 compatibility."""
+
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
 
 from rmtool.agent.llm_provider import (
     LLMError,
@@ -161,8 +168,11 @@ class AppConfig(BaseModel):
     citation: CitationSettings
     logging: LoggingSettings
 
-    class Config:
-        arbitrary_types_allowed = True
+    if isinstance(ConfigDict, dict):  # pragma: no cover - legacy pydantic v1
+        class Config:
+            arbitrary_types_allowed = True
+    else:
+        model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def ensure_directories(self) -> None:
         """Create output directories as needed."""

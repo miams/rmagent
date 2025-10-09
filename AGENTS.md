@@ -12,6 +12,7 @@ This repository curates documentation and sample datasets for analyzing the Root
 - `sqlite3 data/Iiams.rmtree ".tables"` confirms table coverage when documenting schema updates.
 - `sqlite3 data/Iiams.rmtree < scripts/query.sql` runs reproducible query suites; include the script you reference.
 - `bash tools/export_schema.sh` (create if needed) should wrap any repeatable extraction so future agents can rerun it unchanged.
+- Use [Astral's `uv`](https://github.com/astral-sh/uv) for Python dependency management, environment activation, and running Python/pytest commands (`uv run`, `uv pip`, etc.).
 
 ## Coding Style & Naming Conventions
 - Markdown: start documents with a single `#` heading, follow with sentence-case section titles, and include intra-doc tables of contents only when exceeding three sections.
