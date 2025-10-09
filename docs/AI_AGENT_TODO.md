@@ -236,23 +236,57 @@ date.to_datetime()     # datetime(1896, 3, 2)
 
 ---
 
-### Task 1.5: BLOB Parsers
-**Files:** `rmlib/parsers/blob_parser.py`
+### Task 1.5: BLOB Parsers ✅ COMPLETE
+**File:** `rmtool/rmlib/parsers/blob_parser.py`
 **Reference:** RM11_BLOB_SourceFields.md, RM11_BLOB_CitationFields.md, RM11_BLOB_SourceTemplateFieldDefs.md
+**Completed:** 2025-10-09
 
-- [ ] Parse SourceTable.Fields (UTF-8 with BOM)
-- [ ] Parse CitationTable.Fields (UTF-8 without BOM)
-- [ ] Parse SourceTemplateTable.FieldDefs
-- [ ] Handle malformed XML gracefully
-- [ ] Extract field name/value pairs
-- [ ] Extract template field definitions
-- [ ] Unit tests (test_blob_parser.py)
+- [✓] Parse SourceTable.Fields (UTF-8 with BOM)
+- [✓] Parse CitationTable.Fields (UTF-8 with/without BOM)
+- [✓] Parse SourceTemplateTable.FieldDefs
+- [✓] Handle malformed XML gracefully
+- [✓] Extract field name/value pairs
+- [✓] Extract template field definitions
+- [✓] Unit tests (test_blob_parser.py) - 24 tests, 91% coverage
 
-**Example API:**
+**API:**
 ```python
+# Parse source fields
 fields = parse_source_fields(blob_data)
 # Returns: {'Author': 'Smith, John', 'Title': 'Census Records', ...}
+
+# Parse citation fields
+fields = parse_citation_fields(blob_data)
+# Returns: {'Page': '123'}
+
+# Parse template definitions
+template_fields = parse_template_field_defs(blob_data)
+# Returns: [TemplateField(name='Author', type='Name', ...), ...]
 ```
+
+**Features:**
+- **3 parsing functions:**
+  - `parse_source_fields()` - SourceTable.Fields BLOB
+  - `parse_citation_fields()` - CitationTable.Fields BLOB
+  - `parse_template_field_defs()` - SourceTemplateTable.FieldDefs BLOB
+- **TemplateField dataclass** for template definitions
+- **BLOBParseError exception** for error handling
+- **UTF-8 BOM handling** - Automatic detection and decoding
+- **HTML entity decoding** - Automatic via XML parser
+- **Malformed XML handling** - Graceful error messages
+- **Helper functions:**
+  - `has_blob_data()` - Check if BLOB exists
+  - `is_freeform_source()` - Detect free-form sources
+  - `get_citation_level_fields()` - Extract citation fields from template
+  - `get_source_level_fields()` - Extract source fields from template
+
+**Test coverage:**
+- 24 comprehensive tests across 5 test classes
+- Source fields parsing (free-form, template, BOM, entities, errors)
+- Citation fields parsing (Page, Find-a-Grave, etc.)
+- Template definitions (field types, hints, citation_field flag)
+- Helper functions
+- Real-world examples (books, census, online databases)
 
 ---
 
