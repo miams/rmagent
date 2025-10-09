@@ -919,16 +919,23 @@ Commands:
 
 ---
 
-### Task 4.2: Person Command
+### Task 4.2: Person Command ✅ COMPLETE
 **File:** `cli/commands/person.py`
+**Completed:** 2025-10-09
 
-- [ ] `rmagent person <id>` - Show person details
-- [ ] `rmagent person <id> --events` - Show all events
-- [ ] `rmagent person <id> --ancestors` - Show ancestor tree
-- [ ] `rmagent person <id> --descendants` - Show descendant tree
-- [ ] `rmagent person <id> --family` - Show immediate family
-- [ ] Rich table formatting
-- [ ] Integration tests
+- [✓] `rmagent person <id>` - Show person details
+- [✓] `rmagent person <id> --events` - Show all events
+- [✓] `rmagent person <id> --ancestors` - Show ancestor tree
+- [✓] `rmagent person <id> --descendants` - Show descendant tree
+- [✓] `rmagent person <id> --family` - Show immediate family
+- [✓] Rich table formatting
+- [✓] Integration tests
+
+**Implementation Notes:**
+- Fixed QueryService method calls (get_parents, get_spouses, get_children, get_descendants)
+- Added _get_value() helper to safely access sqlite3.Row values
+- Fixed all CLI command files to use correct config attribute names (database_path, sqlite_extension_path)
+- All command options tested and working correctly
 
 **Example:**
 ```bash
@@ -1540,7 +1547,7 @@ RM11/
 
 ### Phase 4: CLI Interface (Working Prototype - Complete)
 - [x] 4.1: CLI Framework
-- [ ] 4.2: Person Command
+- [x] 4.2: Person Command
 - [ ] 4.3: Biography Command
 - [ ] 4.4: Quality Command
 - [ ] 4.5: Ask Command (Q&A)
@@ -1548,7 +1555,7 @@ RM11/
 - [ ] 4.7: Export Command (Hugo)
 - [ ] 4.8: Search Command
 
-**Progress:** 1/8 tasks
+**Progress:** 2/8 tasks
 
 ### 🎯 Milestone 1: Working Prototype
 **Status:** ✅ Complete (Checkpoint verified 2025-10-09)

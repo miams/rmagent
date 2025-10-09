@@ -9,6 +9,14 @@ from rmagent.rmlib.queries import QueryService
 console = Console()
 
 
+def _get_value(row, key, default=''):
+    """Safely get value from sqlite3.Row object."""
+    try:
+        return row[key] if row[key] is not None else default
+    except (KeyError, IndexError):
+        return default
+
+
 @click.command()
 @click.argument('person_id', type=int)
 @click.option('--events', is_flag=True, help='Show all events')
@@ -38,9 +46,9 @@ def person(ctx, person_id: int, events: bool, ancestors: bool, descendants: bool
                 raise click.Abort()
 
             # Display person header
-            name = f"{person_data.get('Given', '')} {person_data.get('Surname', '')}".strip()
-            birth_year = person_data.get('BirthYear', '?')
-            death_year = person_data.get('DeathYear', '?')
+            name = f"{_get_value(person_data, 'Given')} {_get_value(person_data, 'Surname')}".strip()
+            birth_year = _get_value(person_data, 'BirthYear', '?')
+            death_year = _get_value(person_data, 'DeathYear', '?')
             console.print(f"\n[bold]📋 Person: {name}[/bold] ({birth_year}–{death_year})")
             console.print("─" * 50)
 
@@ -56,12 +64,12 @@ def person(ctx, person_id: int, events: bool, ancestors: bool, descendants: bool
 
                     for event in event_rows:
                         from rmagent.rmlib.parsers.date_parser import parse_rm_date
-                        date_str = event.get('Date', '')
+                        date_str = _get_value(event, 'Date')
                         formatted_date = parse_rm_date(date_str).format_display() if date_str else ''
                         table.add_row(
                             formatted_date,
-                            event.get('EventType', ''),
-                            event.get('Place', ''),
+                            _get_value(event, 'EventType'),
+                            _get_value(event, 'Place'),
                         )
                     console.print(table)
                 else:
@@ -69,29 +77,33 @@ def person(ctx, person_id: int, events: bool, ancestors: bool, descendants: bool
 
             # Show family if requested
             if family:
-                # Get parents
-                parents = queries.get_person_parents(person_id)
-                if parents:
+                # Get parents (returns single row with FatherID/MotherID or None)
+                parents_row = queries.get_parents(person_id)
+                if parents_row:
                     console.print("\n[bold]Parents:[/bold]")
-                    for parent in parents:
-                        role = "Father" if parent.get('Sex') == 1 else "Mother"
-                        parent_name = f"{parent.get('Given', '')} {parent.get('Surname', '')}".strip()
-                        console.print(f"  • {role}: {parent_name}")
+                    # Check for father
+                    if _get_value(parents_row, 'FatherID'):
+                        father_name = f"{_get_value(parents_row, 'FatherGiven')} {_get_value(parents_row, 'FatherSurname')}".strip()
+                        console.print(f"  • Father: {father_name}")
+                    # Check for mother
+                    if _get_value(parents_row, 'MotherID'):
+                        mother_name = f"{_get_value(parents_row, 'MotherGiven')} {_get_value(parents_row, 'MotherSurname')}".strip()
+                        console.print(f"  • Mother: {mother_name}")
 
                 # Get spouses
-                spouses = queries.get_person_spouses(person_id)
+                spouses = queries.get_spouses(person_id)
                 if spouses:
                     console.print("\n[bold]Spouses:[/bold]")
                     for spouse in spouses:
-                        spouse_name = f"{spouse.get('Given', '')} {spouse.get('Surname', '')}".strip()
+                        spouse_name = f"{_get_value(spouse, 'Given')} {_get_value(spouse, 'Surname')}".strip()
                         console.print(f"  • {spouse_name}")
 
                 # Get children
-                children = queries.get_person_children(person_id)
+                children = queries.get_children(person_id)
                 if children:
                     console.print("\n[bold]Children:[/bold]")
                     for child in children:
-                        child_name = f"{child.get('Given', '')} {child.get('Surname', '')}".strip()
+                        child_name = f"{_get_value(child, 'Given')} {_get_value(child, 'Surname')}".strip()
                         console.print(f"  • {child_name}")
 
             # Show ancestors if requested
@@ -100,8 +112,8 @@ def person(ctx, person_id: int, events: bool, ancestors: bool, descendants: bool
                 if ancestor_rows:
                     console.print(f"\n[bold]Ancestors:[/bold] (4 generations)")
                     for ancestor in ancestor_rows:
-                        ancestor_name = f"{ancestor.get('Given', '')} {ancestor.get('Surname', '')}".strip()
-                        gen = ancestor.get('generation', 1)
+                        ancestor_name = f"{_get_value(ancestor, 'Given')} {_get_value(ancestor, 'Surname')}".strip()
+                        gen = _get_value(ancestor, 'Generation', 1)
                         indent = "  " * gen
                         console.print(f"{indent}• {ancestor_name} (gen {gen})")
                 else:
@@ -109,12 +121,12 @@ def person(ctx, person_id: int, events: bool, ancestors: bool, descendants: bool
 
             # Show descendants if requested
             if descendants:
-                descendant_rows = queries.get_direct_descendants(person_id, generations=4)
+                descendant_rows = queries.get_descendants(person_id, generations=4)
                 if descendant_rows:
                     console.print(f"\n[bold]Descendants:[/bold] (4 generations)")
                     for descendant in descendant_rows:
-                        descendant_name = f"{descendant.get('Given', '')} {descendant.get('Surname', '')}".strip()
-                        gen = descendant.get('generation', 1)
+                        descendant_name = f"{_get_value(descendant, 'Given')} {_get_value(descendant, 'Surname')}".strip()
+                        gen = _get_value(descendant, 'Generation', 1)
                         indent = "  " * gen
                         console.print(f"{indent}• {descendant_name} (gen {gen})")
                 else:

@@ -73,8 +73,8 @@ def timeline(
             # Create generator
             config = ctx.load_config()
             generator = TimelineGenerator(
-                db=config.database.db_path,
-                extension_path=config.database.extension_path,
+                db=config.database.database_path,
+                extension_path=config.database.sqlite_extension_path,
             )
 
             # Generate timeline

@@ -51,12 +51,12 @@ class CLIContext:
         """Get database connection (creates if needed)."""
         if not self.db:
             config = self.load_config()
-            db_path = config.database.db_path
+            db_path = config.database.database_path
             if not db_path:
                 raise click.UsageError(
                     "No database specified. Use --database option or set RM_DATABASE_PATH in config/.env"
                 )
-            extension_path = config.database.extension_path
+            extension_path = config.database.sqlite_extension_path
             self.db = RMDatabase(db_path, extension_path=extension_path)
         return self.db
 

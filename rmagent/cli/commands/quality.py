@@ -62,8 +62,8 @@ def quality(ctx, format: str, output: Optional[Path], sample_limit: int):
             # Create generator
             config = ctx.load_config()
             generator = QualityReportGenerator(
-                db=config.database.db_path,
-                extension_path=config.database.extension_path,
+                db=config.database.database_path,
+                extension_path=config.database.sqlite_extension_path,
                 sample_limit=sample_limit,
             )
 

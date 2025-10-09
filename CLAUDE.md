@@ -476,9 +476,10 @@ See `docs/AI_AGENT_TODO.md` for complete task list (38 tasks across 7 phases):
 - ✅ Timeline generation (TimelineJS3 JSON/HTML)
 - ✅ Hugo blog post export
 
-**Phase 4: CLI Interface** (Tasks 4.1-4.8) - In Progress (1/8 tasks)
+**Phase 4: CLI Interface** (Tasks 4.1-4.8) - In Progress (2/8 tasks)
 - ✅ Task 4.1: CLI Framework (Click, Rich, global options, 7 command modules, 23 tests)
-- ⏭️ Tasks 4.2-4.8: Command implementations (person, bio, quality, ask, timeline, export, search)
+- ✅ Task 4.2: Person Command (query person with --events, --family, --ancestors, --descendants)
+- ⏭️ Tasks 4.3-4.8: Command implementations (bio, quality, ask, timeline, export, search)
 
 **Milestones:**
 - ✅ **Milestone 1: Working Prototype** - COMPLETE (2025-10-09)
@@ -513,9 +514,10 @@ See `docs/AI_AGENT_TODO.md` for complete task list (38 tasks across 7 phases):
 - ✅ Task 3.3: Timeline Generator (TimelineJS3 JSON/HTML, 29 tests, 90% coverage)
 - ✅ Task 3.4: Hugo Exporter (single/batch export, 24 tests, 91% coverage)
 
-**📍 Phase 4: CLI Interface - IN PROGRESS (1/8 tasks)**
+**📍 Phase 4: CLI Interface - IN PROGRESS (2/8 tasks)**
 - ✅ Task 4.1: CLI Framework (Click + Rich, 7 command modules, 23 tests, 100% pass)
-- ⏭️ Tasks 4.2-4.8: Command implementations (person, bio, quality, ask, timeline, export, search)
+- ✅ Task 4.2: Person Command (query person with --events, --family, --ancestors, --descendants)
+- ⏭️ Tasks 4.3-4.8: Command implementations (bio, quality, ask, timeline, export, search)
 
 **📊 Test Coverage / Test Hints:**
 - `uv run pytest` executes the full unit suite (18 modules under `tests/unit`).
@@ -526,7 +528,7 @@ See `docs/AI_AGENT_TODO.md` for complete task list (38 tasks across 7 phases):
 - Use `uv run pytest --cov=rmagent --cov-report=html` for optional coverage reports (output in `htmlcov/`).
 
 **⏭️ Next Tasks:**
-- Phase 4: Complete CLI command implementations (Tasks 4.2-4.8)
+- Phase 4: Complete CLI command implementations (Tasks 4.3-4.8)
 
 **Completed Documentation (as of 2025-01-08):**
 
@@ -741,7 +743,7 @@ See `docs/AI_AGENT_TODO.md` for implementation roadmap:
 - **Phase 1:** Foundation (Tasks 1.1-1.9) ✅ COMPLETE
 - **Phase 2:** AI Integration (Tasks 2.1-2.5) ✅ COMPLETE
 - **Phase 3:** Output Generators (Tasks 3.1-3.4) ✅ COMPLETE
-- **Phase 4:** CLI Interface (Tasks 4.1-4.8) - 📍 IN PROGRESS (1/8 tasks complete)
+- **Phase 4:** CLI Interface (Tasks 4.1-4.8) - 📍 IN PROGRESS (2/8 tasks complete)
 - **Phase 5:** Testing & Quality (Tasks 5.1-5.4)
 - **Phase 6:** Documentation (Tasks 6.1-6.3)
 - **Phase 7:** Production Polish (Tasks 7.1-7.5)

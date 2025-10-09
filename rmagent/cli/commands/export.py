@@ -90,8 +90,8 @@ def hugo(
         # Create exporter
         config = ctx.load_config()
         exporter = HugoExporter(
-            db=config.database.db_path,
-            extension_path=config.database.extension_path,
+            db=config.database.database_path,
+            extension_path=config.database.sqlite_extension_path,
             media_base_path=media_base_path,
         )
 

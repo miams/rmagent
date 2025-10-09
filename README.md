@@ -261,11 +261,12 @@ See `docs/AI_AGENT_TODO.md` for the complete development roadmap.
 - ✅ Timeline generator (TimelineJS3 JSON/HTML, 29 tests)
 - ✅ Hugo blog exporter (single/batch export, 24 tests)
 
-**📍 Phase 4: CLI Interface - IN PROGRESS (1/8 tasks)**
+**📍 Phase 4: CLI Interface - IN PROGRESS (2/8 tasks)**
 - ✅ CLI Framework (Click + Rich, global options, 7 command modules, 23 tests)
-- ⏭️ Command implementations (person, bio, quality, ask, timeline, export, search)
+- ✅ Person Command (query person with --events, --family, --ancestors, --descendants)
+- ⏭️ Command implementations (bio, quality, ask, timeline, export, search)
 
-**⏭️ Next Tasks:** Complete Phase 4 CLI command implementations (Tasks 4.2-4.8)
+**⏭️ Next Tasks:** Complete Phase 4 CLI command implementations (Tasks 4.3-4.8)
 
 See `docs/AI_AGENT_TODO.md` for detailed progress and roadmap.
 
