@@ -33,9 +33,15 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ### Clone and Install
 
 ```bash
-cd RM11
+# Clone the repository
+git clone git@github.com:miams/rmagent.git
+cd rmagent
+
+# Install dependencies
 uv sync
 ```
+
+**Note:** SSH access requires `ssh-add ~/.ssh/miams-github` for authentication.
 
 This creates a virtual environment in `.venv/` and installs all dependencies.
 
@@ -163,9 +169,25 @@ See `docs/AI_AGENT_TODO.md` for the complete development roadmap.
 
 ## Status
 
-🚧 **Currently in development** - Working Prototype phase (Tasks 1.1-1.3 complete)
+🚧 **Currently in development** - Working Prototype phase
+
+**Progress:** Phase 1 Foundation - Tasks 1.1-1.8 complete (8/9)
+- ✅ Database connection with RMNOCASE support
+- ✅ Pydantic data models
+- ✅ Date parser (24-char RM11 format)
+- ✅ BLOB parsers (XML source/citation/template fields)
+- ✅ Place parser (comma-delimited hierarchy)
+- ✅ Name parser (primary/alternate, context-aware)
+- ✅ Query service (15 optimized patterns)
+- 🚧 Data quality validator (in progress)
 
 See `docs/AI_AGENT_TODO.md` for detailed progress and roadmap.
+
+## Repository
+
+- **GitHub:** https://github.com/miams/rmagent
+- **Clone:** `git clone git@github.com:miams/rmagent.git`
+- **SSH Key:** `ssh-add ~/.ssh/miams-github`
 
 ## License
 
@@ -173,4 +195,6 @@ MIT License - See LICENSE file for details
 
 ## Author
 
-Michael Iams (https://github.com/miams)
+Michael Iams
+- GitHub: https://github.com/miams
+- Repository: https://github.com/miams/rmagent

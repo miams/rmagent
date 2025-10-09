@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Repository Information
+
+- **Name:** rmagent - AI-Powered Genealogy Agent for RootsMagic
+- **GitHub:** https://github.com/miams/rmagent
+- **Clone:** `git clone git@github.com:miams/rmagent.git`
+- **SSH Authentication:** `ssh-add ~/.ssh/miams-github`
+
 ## Overview
 
 This repository contains comprehensive documentation and analysis tools for RootsMagic 11 (RM11), a genealogy software application. The goal is to enable AI agents to read and analyze RootsMagic SQLite databases to identify data quality issues, generate biographies, family histories, and timelines.
@@ -9,7 +16,7 @@ This repository contains comprehensive documentation and analysis tools for Root
 ## Repository Structure
 
 ```
-RM11/
+rmagent/
 ├── rmtool/                    # Main Python package (AI agent implementation)
 │   ├── __init__.py
 │   ├── rmlib/                # Core library (database access, parsers, queries)
@@ -631,11 +638,72 @@ See RM11_Date_Format.md for complete specification. Basic structure:
 - **Biography structure** - 9 sections (see RM11_Biography_Best_Practices.md)
 - **Uncertainty qualifiers** - "likely", "probably", "about", "circa", etc.
 
+## Git Workflow
+
+### Repository Setup
+
+The project is hosted on GitHub at **miams/rmagent**:
+
+```bash
+# Clone repository (requires SSH key)
+git clone git@github.com:miams/rmagent.git
+cd rmagent
+
+# Configure SSH authentication
+ssh-add ~/.ssh/miams-github
+
+# Verify connection
+ssh -T git@github.com
+```
+
+### Branch Strategy
+
+- **main** - Stable, production-ready code
+- **develop** - Integration branch for completed features
+- **feature/** - Feature branches for new development
+
+### Common Git Operations
+
+```bash
+# Check status
+git status
+
+# Add changes
+git add .
+
+# Commit with descriptive message
+git commit -m "feat: implement place parser with 55 tests"
+
+# Push to remote
+git push origin main
+
+# Pull latest changes
+git pull origin main
+
+# Create feature branch
+git checkout -b feature/data-quality-validator
+
+# Merge feature to main
+git checkout main
+git merge feature/data-quality-validator
+```
+
+### Commit Message Conventions
+
+Use conventional commit format:
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation changes
+- `test:` - Adding or updating tests
+- `refactor:` - Code refactoring
+- `chore:` - Maintenance tasks
+
 ## Future Development
 
-See `docs/DATA_PARSING_TODO.md` for comprehensive task list to enable:
-- Complete data quality analysis
-- Biography generation from facts
-- Timeline construction
-- Source citation formatting
-- Relationship graph analysis
+See `docs/AI_AGENT_TODO.md` for implementation roadmap:
+- **Phase 1:** Foundation (Tasks 1.1-1.9) - 8/9 complete
+- **Phase 2:** AI Integration (Tasks 2.1-2.5)
+- **Phase 3:** Output Generators (Tasks 3.1-3.4)
+- **Phase 4:** CLI Interface (Tasks 4.1-4.8)
+
+See `docs/DATA_PARSING_TODO.md` for documentation tasks (mostly complete)
