@@ -76,11 +76,14 @@ class QualityReportGenerator:
 
         self.extension_path = Path(extension_path)
         self.sample_limit = sample_limit
+        self._last_report: Optional[QualityReport] = None
 
     def generate(
         self,
         format: ReportFormat = ReportFormat.MARKDOWN,
         output_path: Optional[Path | str] = None,
+        category_filter: Optional[str] = None,
+        severity_filter: Optional[QualitySeverity] = None,
     ) -> str:
         """
         Generate a data quality report.
@@ -88,6 +91,8 @@ class QualityReportGenerator:
         Args:
             format: Output format (markdown, html, or csv)
             output_path: Optional path to write output file
+            category_filter: Filter by category name
+            severity_filter: Filter by severity level
 
         Returns:
             Formatted report as string (or CSV writes directly to file)
@@ -97,6 +102,13 @@ class QualityReportGenerator:
         """
         # Run validation
         quality_report = self._run_validation()
+
+        # Store for summary display
+        self._last_report = quality_report
+
+        # Apply filters
+        if category_filter or severity_filter:
+            quality_report = self._apply_filters(quality_report, category_filter, severity_filter)
 
         # Format report based on requested type
         if format == ReportFormat.MARKDOWN:
@@ -130,6 +142,51 @@ class QualityReportGenerator:
                 return _validate(db)
         else:
             raise ValueError("No database provided")
+
+    def _apply_filters(
+        self,
+        report: QualityReport,
+        category_filter: Optional[str],
+        severity_filter: Optional[QualitySeverity],
+    ) -> QualityReport:
+        """Apply category and severity filters to the report."""
+        filtered_issues = report.issues
+
+        # Apply category filter
+        if category_filter:
+            filtered_issues = [
+                issue for issue in filtered_issues
+                if issue.category == category_filter
+            ]
+
+        # Apply severity filter
+        if severity_filter:
+            filtered_issues = [
+                issue for issue in filtered_issues
+                if issue.severity == severity_filter
+            ]
+
+        # Recalculate totals for filtered issues
+        totals_by_severity = {
+            severity: sum(issue.count for issue in filtered_issues if issue.severity == severity)
+            for severity in QualitySeverity
+        }
+
+        totals_by_category: Dict[str, int] = {}
+        for issue in filtered_issues:
+            totals_by_category.setdefault(issue.category, 0)
+            totals_by_category[issue.category] += issue.count
+
+        # Update summary with filtered issue count
+        summary = report.summary.copy()
+        summary['issue_total'] = sum(issue.count for issue in filtered_issues)
+
+        return QualityReport(
+            issues=filtered_issues,
+            totals_by_severity=totals_by_severity,
+            totals_by_category=totals_by_category,
+            summary=summary,
+        )
 
     # ---- Markdown Formatting ----
 

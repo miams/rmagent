@@ -42,7 +42,7 @@ class CLIContext:
             self.config = load_app_config()
             # Override with CLI options if provided
             if self.database_path:
-                self.config.database.db_path = self.database_path
+                self.config.database.database_path = self.database_path
             if self.llm_provider:
                 self.config.llm.default_provider = self.llm_provider
         return self.config

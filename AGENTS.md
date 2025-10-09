@@ -32,3 +32,57 @@ Only commit sanitized genealogical data; scrub personal details before adding fi
 ## Observability
 - Set `LOG_LEVEL=DEBUG` in `config/.env` to stream verbose logs.
 - LLM prompt/response JSON traces (prompt text, completion, provider, model, token totals, latency) write to `LLM_DEBUG_LOG_FILE` (default `logs/llm_debug.jsonl`) for reproducible debugging.
+
+## Current Implementation Status (2025-10-10)
+
+### Completed Phases
+- **Phase 1: Foundation** (9/9 tasks) ✅ - Database access, parsers, queries, quality validation
+- **Phase 2: AI Integration** (5/5 tasks) ✅ - Multi-LLM support, prompts, agent core, LangChain tools
+- **Phase 3: Output Generators** (4/4 tasks) ✅ - Biography, quality reports, timelines, Hugo export
+- **Phase 4: CLI Interface** (6/8 tasks) 📍 - Command-line interface (in progress)
+
+### Available CLI Commands
+All commands use `uv run rmagent [command]` prefix:
+
+- **`person <id>`** - Query person information with optional flags:
+  - `--events` - Show all life events
+  - `--family` - Show immediate family (parents, spouses, children)
+  - `--ancestors` - Show ancestor tree (default 3 generations)
+  - `--descendants` - Show descendant tree
+
+- **`bio <id>`** - Generate biographies:
+  - `--length` (short/standard/comprehensive)
+  - `--citation-style` (footnote/parenthetical/narrative)
+  - `--no-ai` - Template-based generation (no LLM required)
+  - `--output` - Save to file
+
+- **`quality`** - Run data quality validation (24 rules):
+  - `--category` - Filter by category (required/logical/integrity/sources/dates/values)
+  - `--severity` - Filter by severity (critical/high/medium/low)
+  - `--format` - Output format (markdown/html/csv)
+  - `--output` - Save to file
+
+- **`ask <question>`** - Interactive Q&A (requires LLM):
+  - `--interactive` - Conversation mode with memory
+
+- **`timeline <id>`** - Generate interactive timelines:
+  - `--format` (json/html) - JSON for embedding or HTML for standalone viewer
+  - `--group-by-phase` - Group events by life phases
+  - `--include-family` - Include spouse/children events
+  - `--output` - Save to file
+
+- **`export hugo <id>`** - Export to Hugo blog format (⏭️ implementation pending)
+- **`search`** - Search database by name/place (⏭️ implementation pending)
+
+### Testing Status
+- **Total Unit Tests:** 229+ tests across 18 modules
+- **Test Coverage:** 30-99% across components (85%+ for generators, 68-88% for CLI commands)
+- **Test Framework:** pytest with coverage reporting (`uv run pytest --cov=rmagent`)
+
+### Next Development Tasks
+1. Complete `export hugo` command implementation (Task 4.7)
+2. Complete `search` command implementation (Task 4.8)
+3. Comprehensive integration testing (Phase 5)
+4. User documentation (Phase 6)
+
+See `docs/AI_AGENT_TODO.md` for detailed roadmap and progress tracking.

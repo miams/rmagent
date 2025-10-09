@@ -32,16 +32,15 @@ def ask(ctx, question: str, interactive: bool):
     try:
         config = ctx.load_config()
         agent = GenealogyAgent(
-            db=ctx.get_database(),
             llm_provider=config.build_provider(),
+            db_path=config.database.database_path,
+            extension_path=config.database.sqlite_extension_path,
         )
 
         if interactive:
             # Interactive conversation mode
             console.print("\n[bold]Interactive Q&A Mode[/bold]")
             console.print("Type 'exit' or 'quit' to end the conversation\n")
-
-            conversation_history = []
 
             while True:
                 # Get question from user
@@ -51,20 +50,14 @@ def ask(ctx, question: str, interactive: bool):
                     console.print("\n[dim]Goodbye![/dim]")
                     break
 
-                # Get answer from agent
+                # Get answer from agent (agent maintains conversation memory)
                 with console.status("[dim]Thinking...[/dim]"):
-                    answer = agent.ask(user_question, context=conversation_history)
+                    result = agent.ask(user_question)
 
                 # Display answer
                 console.print()
-                console.print(Markdown(answer))
+                console.print(Markdown(result.text))
                 console.print()
-
-                # Add to conversation history
-                conversation_history.append({
-                    'question': user_question,
-                    'answer': answer,
-                })
 
         else:
             # Single question mode
@@ -74,11 +67,11 @@ def ask(ctx, question: str, interactive: bool):
 
             # Get answer from agent
             with console.status("[dim]Searching database...[/dim]"):
-                answer = agent.ask(question)
+                result = agent.ask(question)
 
             # Display answer
             console.print()
-            console.print(Markdown(answer))
+            console.print(Markdown(result.text))
             console.print()
 
     except Exception as e:

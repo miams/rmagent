@@ -476,10 +476,14 @@ See `docs/AI_AGENT_TODO.md` for complete task list (38 tasks across 7 phases):
 - ✅ Timeline generation (TimelineJS3 JSON/HTML)
 - ✅ Hugo blog post export
 
-**Phase 4: CLI Interface** (Tasks 4.1-4.8) - In Progress (2/8 tasks)
+**Phase 4: CLI Interface** (Tasks 4.1-4.8) - In Progress (6/8 tasks)
 - ✅ Task 4.1: CLI Framework (Click, Rich, global options, 7 command modules, 23 tests)
 - ✅ Task 4.2: Person Command (query person with --events, --family, --ancestors, --descendants)
-- ⏭️ Tasks 4.3-4.8: Command implementations (bio, quality, ask, timeline, export, search)
+- ✅ Task 4.3: Biography Command (all length/citation options, --no-ai mode, 8 tests)
+- ✅ Task 4.4: Quality Command (category/severity filters, Rich tables, 8 tests)
+- ✅ Task 4.5: Ask Command (Q&A with conversation memory, 3 tests, requires LLM)
+- ✅ Task 4.6: Timeline Command (JSON/HTML formats, life phases, 7 tests, 78% coverage)
+- ⏭️ Tasks 4.7-4.8: Command implementations (export, search)
 
 **Milestones:**
 - ✅ **Milestone 1: Working Prototype** - COMPLETE (2025-10-09)
@@ -488,7 +492,7 @@ See `docs/AI_AGENT_TODO.md` for complete task list (38 tasks across 7 phases):
 
 ### Current Project Status
 
-**Implementation Progress (as of 2025-10-09):**
+**Implementation Progress (as of 2025-10-10):**
 
 **✅ Phase 1: Foundation - COMPLETE (9/9 tasks)**
 - ✅ Task 1.1: Project Setup (uv, dependencies, configuration)
@@ -514,10 +518,14 @@ See `docs/AI_AGENT_TODO.md` for complete task list (38 tasks across 7 phases):
 - ✅ Task 3.3: Timeline Generator (TimelineJS3 JSON/HTML, 29 tests, 90% coverage)
 - ✅ Task 3.4: Hugo Exporter (single/batch export, 24 tests, 91% coverage)
 
-**📍 Phase 4: CLI Interface - IN PROGRESS (2/8 tasks)**
+**📍 Phase 4: CLI Interface - IN PROGRESS (6/8 tasks)**
 - ✅ Task 4.1: CLI Framework (Click + Rich, 7 command modules, 23 tests, 100% pass)
 - ✅ Task 4.2: Person Command (query person with --events, --family, --ancestors, --descendants)
-- ⏭️ Tasks 4.3-4.8: Command implementations (bio, quality, ask, timeline, export, search)
+- ✅ Task 4.3: Biography Command (all length/citation options, --no-ai mode, 8 tests, 88% coverage)
+- ✅ Task 4.4: Quality Command (category/severity filters, Rich tables, 8 tests)
+- ✅ Task 4.5: Ask Command (Q&A with conversation memory, 3 tests, 68% coverage, requires LLM)
+- ✅ Task 4.6: Timeline Command (JSON/HTML formats, --include-family, 7 tests, 78% coverage)
+- ⏭️ Tasks 4.7-4.8: Command implementations (export, search)
 
 **📊 Test Coverage / Test Hints:**
 - `uv run pytest` executes the full unit suite (18 modules under `tests/unit`).
@@ -743,9 +751,12 @@ See `docs/AI_AGENT_TODO.md` for implementation roadmap:
 - **Phase 1:** Foundation (Tasks 1.1-1.9) ✅ COMPLETE
 - **Phase 2:** AI Integration (Tasks 2.1-2.5) ✅ COMPLETE
 - **Phase 3:** Output Generators (Tasks 3.1-3.4) ✅ COMPLETE
-- **Phase 4:** CLI Interface (Tasks 4.1-4.8) - 📍 IN PROGRESS (2/8 tasks complete)
+- **Phase 4:** CLI Interface (Tasks 4.1-4.8) - 📍 IN PROGRESS (6/8 tasks complete)
 - **Phase 5:** Testing & Quality (Tasks 5.1-5.4)
 - **Phase 6:** Documentation (Tasks 6.1-6.3)
 - **Phase 7:** Production Polish (Tasks 7.1-7.5)
+
+**Completed CLI Commands:** person, bio, quality, ask, timeline (6/8)
+**Remaining:** export (Hugo), search
 
 See `docs/DATA_PARSING_TODO.md` for documentation tasks (mostly complete)

@@ -129,42 +129,123 @@ quality_summary = agent.analyze_data_quality()
 
 ## Usage
 
-All commands use the `uv run` prefix to run in the virtual environment:
+All commands use the `uv run rmagent` prefix to run in the virtual environment.
 
 ### Query a Person
 
 ```bash
+# Basic person info
+uv run rmagent person 1
+
+# With all events
 uv run rmagent person 1 --events
+
+# With family information (parents, spouses, children)
+uv run rmagent person 1 --family
+
+# With ancestors (default: 3 generations)
+uv run rmagent person 1 --ancestors
+
+# With descendants
+uv run rmagent person 1 --descendants
 ```
 
 ### Generate a Biography
 
 ```bash
-uv run rmagent bio 1 --length standard --output bio.md
+# Basic biography (template-based, no AI required)
+uv run rmagent bio 1 --no-ai
+
+# AI-powered biography with different lengths
+uv run rmagent bio 1 --length short
+uv run rmagent bio 1 --length standard
+uv run rmagent bio 1 --length comprehensive
+
+# With different citation styles
+uv run rmagent bio 1 --citation-style footnote
+uv run rmagent bio 1 --citation-style parenthetical
+uv run rmagent bio 1 --citation-style narrative
+
+# Save to file
+uv run rmagent bio 1 --output bio.md
+
+# Without sources section
+uv run rmagent bio 1 --no-sources
 ```
 
 ### Run Data Quality Checks
 
 ```bash
+# Run all quality checks
+uv run rmagent quality
+
+# Filter by severity
 uv run rmagent quality --severity critical
+uv run rmagent quality --severity high
+
+# Filter by category
+uv run rmagent quality --category logical
+uv run rmagent quality --category sources
+
+# Generate different formats
+uv run rmagent quality --format markdown --output quality.md
+uv run rmagent quality --format html --output quality.html
+uv run rmagent quality --format csv --output quality.csv
+
+# Combined filters
+uv run rmagent quality --category logical --severity high --output issues.md
 ```
 
-### Ask Questions
+### Ask Questions (Requires LLM)
 
 ```bash
+# Single question
 uv run rmagent ask "Who were John Smith's parents?"
+
+# Interactive conversation mode
+uv run rmagent ask --interactive
 ```
 
 ### Create Timeline
 
 ```bash
+# Generate JSON timeline (for embedding)
 uv run rmagent timeline 1 --output timeline.json
+
+# Generate standalone HTML viewer
+uv run rmagent timeline 1 --format html --output timeline.html
+
+# Group by life phases
+uv run rmagent timeline 1 --group-by-phase
+
+# Include family member events
+uv run rmagent timeline 1 --include-family
 ```
 
 ### Export to Hugo
 
 ```bash
+# Export single person to Hugo blog format
 uv run rmagent export hugo 1 --output-dir content/people
+
+# Export with timeline included
+uv run rmagent export hugo 1 --output-dir content/people --include-timeline
+
+# Export multiple people
+uv run rmagent export hugo 1 2 3 --output-dir content/people
+```
+
+### Search Database
+
+```bash
+# Search by name
+uv run rmagent search --name "Smith"
+
+# Search by place
+uv run rmagent search --place "Maryland"
+
+# Limit results
+uv run rmagent search --name "Smith" --limit 10
 ```
 
 ## Project Structure
@@ -261,12 +342,17 @@ See `docs/AI_AGENT_TODO.md` for the complete development roadmap.
 - ✅ Timeline generator (TimelineJS3 JSON/HTML, 29 tests)
 - ✅ Hugo blog exporter (single/batch export, 24 tests)
 
-**📍 Phase 4: CLI Interface - IN PROGRESS (2/8 tasks)**
-- ✅ CLI Framework (Click + Rich, global options, 7 command modules, 23 tests)
+**📍 Phase 4: CLI Interface - IN PROGRESS (6/8 tasks)**
+- ✅ CLI Framework (Click + Rich, global options, 7 command modules)
 - ✅ Person Command (query person with --events, --family, --ancestors, --descendants)
-- ⏭️ Command implementations (bio, quality, ask, timeline, export, search)
+- ✅ Biography Command (all length/citation options, --no-ai mode, 8 tests, 88% coverage)
+- ✅ Quality Command (category/severity filters, Rich tables, 8 tests)
+- ✅ Ask Command (Q&A with conversation memory, 3 tests, 68% coverage, requires LLM)
+- ✅ Timeline Command (JSON/HTML formats, --include-family, 7 tests, 78% coverage)
+- ⏭️ Export Command (Hugo blog export)
+- ⏭️ Search Command (name/place search with phonetic matching)
 
-**⏭️ Next Tasks:** Complete Phase 4 CLI command implementations (Tasks 4.3-4.8)
+**⏭️ Next Tasks:** Complete remaining CLI commands (export, search)
 
 See `docs/AI_AGENT_TODO.md` for detailed progress and roadmap.
 

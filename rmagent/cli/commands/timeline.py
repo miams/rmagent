@@ -33,9 +33,9 @@ console = Console()
     help='Group events by life phases',
 )
 @click.option(
-    '--include-private',
+    '--include-family',
     is_flag=True,
-    help='Include private events',
+    help='Include family events (spouse, children)',
 )
 @click.pass_obj
 def timeline(
@@ -44,7 +44,7 @@ def timeline(
     format: str,
     output: Optional[Path],
     group_by_phase: bool,
-    include_private: bool,
+    include_family: bool,
 ):
     """
     Generate timeline for a person.
@@ -83,7 +83,7 @@ def timeline(
                 format=format_enum,
                 output_path=output,
                 group_by_phase=group_by_phase,
-                include_private=include_private,
+                include_family=include_family,
             )
 
             progress.update(task, completed=True)

@@ -87,8 +87,9 @@ def bio(
             # Create generator
             config = ctx.load_config()
             agent = None if no_ai else GenealogyAgent(
-                db=None,  # Will be set by generator
                 llm_provider=config.build_provider(),
+                db_path=config.database.database_path,
+                extension_path=config.database.sqlite_extension_path,
             )
 
             generator = BiographyGenerator(
