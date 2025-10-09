@@ -1,4 +1,4 @@
-"""RMTool output generators."""
+"""RMAgent output generators."""
 
 from rmtool.generators.biography import (
     Biography,

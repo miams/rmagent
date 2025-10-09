@@ -1,5 +1,5 @@
 """
-Prompt templates for the RMTool AI agent layer.
+Prompt templates for the RMAgent AI agent layer.
 
 Provides reusable system prompts with version metadata and helper utilities
 for formatting canonical genealogy workflows (biography, quality analysis,

@@ -1,5 +1,5 @@
 """
-Biography generator for RMTool.
+Biography generator for RMAgent.
 
 Generates formatted biographical narratives following the 9-section structure
 from RM11_Biography_Best_Practices.md. Handles privacy rules, citation formatting,

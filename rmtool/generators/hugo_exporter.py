@@ -1,5 +1,5 @@
 """
-Hugo blog post exporter for RMTool.
+Hugo blog post exporter for RMAgent.
 
 Generates Hugo-compatible Markdown files with YAML front matter for creating
 static site biographies. Integrates biography content, timelines, media, and

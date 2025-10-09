@@ -1,4 +1,4 @@
-# RMTool - AI-Powered Genealogy Agent for RootsMagic
+# RMAgent - AI-Powered Genealogy Agent for RootsMagic
 
 AI-powered command-line tool for analyzing RootsMagic databases, generating biographies, and conducting genealogical research.
 

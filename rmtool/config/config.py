@@ -1,5 +1,5 @@
 """
-Centralized configuration loading for RMTool.
+Centralized configuration loading for RMAgent.
 
 Loads settings from environment variables (with optional .env support),
 validates required values, and exposes helper utilities to instantiate

@@ -1,17 +1,17 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository. It stays current with the RMAgent codebase; review it before making changes.
 
 ## Repository Information
 
-- **Name:** rmagent - AI-Powered Genealogy Agent for RootsMagic
+- **Name:** RMAgent – AI-powered genealogy agent for RootsMagic 11
 - **GitHub:** https://github.com/miams/rmagent
 - **Clone:** `git clone git@github.com:miams/rmagent.git`
 - **SSH Authentication:** `ssh-add ~/.ssh/miams-github`
 
 ## Overview
 
-This repository contains comprehensive documentation and analysis tools for RootsMagic 11 (RM11), a genealogy software application. The goal is to enable AI agents to read and analyze RootsMagic SQLite databases to identify data quality issues, generate biographies, family histories, and timelines.
+This repository powers RMAgent: documentation plus a Python tooling stack for RootsMagic 11 (RM11). It equips AI agents to query RM11 SQLite databases, diagnose data-quality issues, and generate rich narratives. The latest agent version feeds biographies with sibling order, parental ages, migration clues, and intra-family loss timelines while logging every LLM prompt/response for reproducibility.
 
 ## Repository Structure
 
@@ -19,6 +19,21 @@ This repository contains comprehensive documentation and analysis tools for Root
 rmagent/
 ├── rmtool/                    # Main Python package (AI agent implementation)
 │   ├── __init__.py
+│   ├── agent/                # AI agent (LLM integration helpers)
+│   │   ├── genealogy_agent.py # High-level agent orchestration
+│   │   ├── prompts.py        # Prompt templates
+│   │   ├── tools.py          # LangChain tool shims
+│   │   ├── llm_provider.py   # Multi-provider abstraction (Anthropic/OpenAI/Ollama)
+│   │   └── __init__.py
+│   ├── config/               # In-package config helpers
+│   │   ├── config.py         # Pydantic settings & provider builder
+│   │   └── __init__.py
+│   ├── generators/           # Narrative and export pipelines
+│   │   ├── biography.py      # AI-assisted biography scaffolding
+│   │   ├── quality_report.py # Data-quality report builder
+│   │   ├── timeline.py       # TimelineJS3 export support
+│   │   ├── hugo_exporter.py  # Hugo blog export helpers
+│   │   └── __init__.py
 │   ├── rmlib/                # Core library (database access, parsers, queries)
 │   │   ├── __init__.py
 │   │   ├── database.py       # Database connection with RMNOCASE support
@@ -31,38 +46,14 @@ rmagent/
 │   │       ├── blob_parser.py
 │   │       ├── place_parser.py
 │   │       └── name_parser.py
-│   ├── agent/                # AI agent (LLM integration)
-│   │   ├── __init__.py
-│   │   ├── llm_provider.py   # Multi-provider abstraction (Anthropic/OpenAI/Ollama)
-│   │   ├── genealogy_agent.py # Main agent class
-│   │   ├── prompts.py        # Prompt templates
-│   │   └── tools.py          # LangChain tools
-│   ├── generators/           # Output generators
-│   │   ├── __init__.py
-│   │   ├── biography.py      # 9-section biography generation
-│   │   ├── quality_report.py # Data quality reports
-│   │   ├── timeline.py       # TimelineJS3 generation
-│   │   └── hugo_exporter.py  # Hugo blog post export
-│   ├── cli/                  # Command-line interface
-│   │   ├── __init__.py
-│   │   ├── main.py           # CLI entry point
-│   │   └── commands/         # CLI commands (person, bio, quality, ask, etc.)
-│   │       ├── __init__.py
-│   │       ├── person.py
-│   │       ├── bio.py
-│   │       ├── quality.py
-│   │       ├── ask.py
-│   │       ├── timeline.py
-│   │       ├── export.py
-│   │       └── search.py
-│   └── config/               # Configuration
-│       ├── __init__.py
-│       ├── config.py
-│       └── prompts/          # Prompt template files
+│   └── cli/                  # CLI entry point (not yet wired; scaffolding only)
+│
+├── config/                   # Runtime configuration files (outside package)
+│   ├── .env.example          # Template for `config/.env`
+│   └── prompts/              # Reserved for prompt overrides (if any)
 │
 ├── tests/                    # Test suite
-│   ├── unit/                 # Unit tests
-│   └── integration/          # Integration tests
+│   └── unit/                 # Unit tests (pytest)
 │
 ├── data/                     # RootsMagic database files
 │   └── Iiams.rmtree         # Sample RM11 database for testing
@@ -101,9 +92,7 @@ rmagent/
 │   └── python_example.py    # Working Python examples
 │
 ├── templates/                # Output templates (Jinja2)
-├── config/                   # Config files
-│   ├── .env.example         # Configuration template
-│   └── prompts/             # Prompt template files
+├── logs/                     # Runtime logs (rmtool.log, llm_debug.jsonl)
 │
 ├── archive/                  # Source files (archived)
 │   ├── RM11_schema.txt
@@ -415,24 +404,24 @@ The schema includes extensive indexes for:
 
 ## AI Agent Implementation (rmtool/)
 
-**Status:** 🚧 In Development - Working Prototype Phase
+**Status:** ✅ Working prototype with multi-provider LLM adapter and enriched biography contexts (Phase 2 complete)
 
 ### Project Setup
 
-The `rmtool/` package uses **[uv](https://github.com/astral-sh/uv)** for fast Python package management:
+The `rmtool/` package uses **[uv](https://github.com/astral-sh/uv)** for fast Python package management. Runtime settings live in `config/.env`:
 
 ```bash
-# Install dependencies (first time setup)
+# Copy environment template on first checkout
+cp config/.env.example config/.env
+
+# Install dependencies
 uv sync
 
 # Install with dev dependencies
 uv sync --extra dev
 
-# Run any command in the virtual environment
-uv run <command>
-
-# Example: Run CLI
-uv run rmtool --help
+# Run ad-hoc Python inside the managed environment
+uv run python -m rmtool.rmlib.prototype --help   # Legacy CLI prototype
 ```
 
 ### Development Workflow
@@ -444,15 +433,26 @@ uv run black .
 # Lint code
 uv run ruff check .
 
-# Type check
+# Type check (namespace package)
 uv run mypy rmtool/
 
-# Run tests
+# Run the full test suite (pytest auto-discovers tests/unit)
 uv run pytest
 
-# Run tests with coverage
+# Example: focus on a specific module
+uv run pytest tests/unit/test_agent.py
+
+# Optional: coverage
 uv run pytest --cov=rmtool --cov-report=html
 ```
+
+### Recent Enhancements (2025-10)
+
+- **Family-aware biographies:** `rmtool/agent/genealogy_agent.py` now injects spouses, children, siblings, parental ages, migrations, and in-lifetime family deaths into the `biography` prompt context.
+- **Structured LLM logging:** `rmtool/agent/llm_provider.py` streams JSONL debug entries (prompt, response, provider, model, tokens, latency) to `logs/llm_debug.jsonl` whenever `LOG_LEVEL=DEBUG` in `config/.env`.
+- **Provider configuration:** `rmtool/config/config.py` centralizes defaults (LLM/database/output/privacy/logging) and exposes `load_app_config()` / `AppConfig.build_provider()` helpers for scripts and LangChain tooling.
+- **Enriched SQL accessors:** `rmtool/rmlib/queries.py` exposes marriage, spouse, child, and sibling detail (dates/places) to support the new biography context and LangChain tools.
+- **LangChain adapters:** `rmtool/agent/tools.py` bundles query + validation tools for drop-in use inside chains/agents.
 
 ### Implementation Roadmap
 
@@ -506,12 +506,12 @@ See `docs/AI_AGENT_TODO.md` for complete task list (38 tasks across 7 phases):
 - ✅ Task 2.4: Agent Core (GenealogyAgent with context builders)
 - ✅ Task 2.5: LangChain Tools (query, events, validation, search)
 
-**📊 Test Coverage:**
-- Total: 229 unit tests
-- Parsers: 157 tests (date, BLOB, place, name)
-- Query service: 16 tests
-- Agent/Config: 56 tests
-- Coverage: 91-99% across modules
+**📊 Test Coverage / Test Hints:**
+- `uv run pytest` executes the full unit suite (17 modules under `tests/unit`).
+- Parser suites: `test_date_parser.py`, `test_place_parser.py`, `test_name_parser.py`, `test_blob_parser.py`.
+- Agent/config suites: `test_agent.py`, `test_tools.py`, `test_config.py`, `test_llm_provider.py`.
+- Generator suites: `test_biography_generator.py`, `test_quality_report.py`, `test_timeline_generator.py`, `test_hugo_exporter.py`.
+- Use `uv run pytest --cov=rmtool --cov-report=html` for optional coverage reports (output in `htmlcov/`).
 
 **⏭️ Next Phase:**
 - Phase 3: Output Generators (biography, quality report, timeline, Hugo export)

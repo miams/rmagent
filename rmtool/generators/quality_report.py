@@ -1,5 +1,5 @@
 """
-Data quality report generator for RMTool.
+Data quality report generator for RMAgent.
 
 Generates formatted data quality reports from validation results. Supports
 multiple output formats (Markdown, HTML, CSV) and provides comprehensive

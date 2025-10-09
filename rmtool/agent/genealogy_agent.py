@@ -1,5 +1,5 @@
 """
-Core genealogy agent orchestration for RMTool.
+Core genealogy agent orchestration for RMAgent.
 
 The GenealogyAgent composes the RM database layer, query helpers,
 data-quality validator, and prompt registry to expose higher-level

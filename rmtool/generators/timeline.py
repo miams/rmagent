@@ -1,5 +1,5 @@
 """
-Timeline generator for RMTool.
+Timeline generator for RMAgent.
 
 Generates interactive timelines from RootsMagic data in TimelineJS3 format.
 Supports both JSON output (for embedding) and standalone HTML viewer.

@@ -1,5 +1,5 @@
 """
-LangChain-style tool wrappers for RMTool.
+LangChain-style tool wrappers for RMAgent.
 
 These small adapters expose commonly used query patterns and quality checks
 so they can be plugged into LangChain (or similar) agents. Tools are designed
