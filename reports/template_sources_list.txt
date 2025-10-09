@@ -1,0 +1,281 @@
+================================================================================
+TEMPLATE-BASED SOURCES IN Iiams.rmtree
+================================================================================
+
+Total template-based sources: 114
+Unique templates used: 32
+
+
+Template ID: 3
+Template Name: Ancestral File, online database
+Source Count: 1
+--------------------------------------------------------------------------------
+  [ 239] Database: Ancestral File - master source record
+
+Template ID: 14
+Template Name: Book, General (Author(s) known)
+Source Count: 1
+--------------------------------------------------------------------------------
+  [ 241] Book: Weaver, Michael E. The Guard Wars: the 28th Infantry Division in World War II (2010)
+
+Template ID: 15
+Template Name: Book, General (Author(s) unknown or unidentified)
+Source Count: 4
+--------------------------------------------------------------------------------
+  [ 839] Book: Prince George's County, Maryland, Land Records 1739-1743 (1997)*
+  [ 908] Book: American Genealogical-Biographical Index, Vol. 88 (1974)*
+  [ 965] Book: Biographical Record of Champaign County Illinois (1900)
+  [2290] Book: Portrait and Biographical record of Johnson and Pettis counties, Missouri (1895)
+
+Template ID: 21
+Template Name: Book, Reprint (Author(s) known)
+Source Count: 1
+--------------------------------------------------------------------------------
+  [ 927] Book: Newman, Harry Wright - Anne Arundel Gentry (1970)
+
+Template ID: 22
+Template Name: Book, Series, by collection (Author(s) known)
+Source Count: 9
+--------------------------------------------------------------------------------
+  [ 829] Book: Skinner, Vernon - Abstracts of the Testamentary Proceedings of the Prerogative Court of Maryland (2004)
+  [ 831] Book: Dodd, Rosemary - Abstracts of Land Records of Anne Arundel County, Maryland (1662-1703), Volume 1 (1991)
+  [ 832] Book: Dodd, Rosemary - Abstracts of Land Records of Anne Arundel County, Maryland (1699-1709), Volume 2 (1991) full book
+  [ 833] Book: Dodd, Rosemary - Abstracts of Land Records of Anne Arundel County, Maryland (1709-1719), Volume 3 (1991)
+  [ 834] Book: Dodd, Rosemary - Abstracts of Land Records of Anne Arundel County, Maryland (1719-1728), Volume 4 (1991)
+  [ 835] Book: Dodd, Rosemary - Abstracts of Land Records of Anne Arundel County, Maryland (1728-1737), Volume 5 (1991)
+  [ 836] Book: Dodd, Rosemary - Abstracts of Land Records of Anne Arundel County, Maryland (1737-1744), Volume 6 (1991)
+  [ 837] Book: Dodd, Rosemary - Abstracts of Land Records of Anne Arundel County, Maryland (1744-1754), Volume 7 (1991)
+  [2366] Book: Dodd, Rosemary - Abstracts of Land Records of Anne Arundel County, Maryland (1699-1709), Volume 2 (1991) (digitigized pages)
+
+Template ID: 78
+Template Name: Discussion Forum & List
+Source Count: 1
+--------------------------------------------------------------------------------
+  [ 181] Online Forum - Ancestry.com Ijams
+
+Template ID: 103
+Template Name: Journal Article, print
+Source Count: 1
+--------------------------------------------------------------------------------
+  [2047] Periodical: Maryland Genealogical Society Bulletin/Journal.  Volume 52, Number 2 (2011)*
+
+Template ID: 111
+Template Name: Letters
+Source Count: 1
+--------------------------------------------------------------------------------
+  [ 942] Letter: 1931-12-09 - Elisha Bernard Iams to Harry Wright Newman
+
+Template ID: 141
+Template Name: Newspaper, Print Edition
+Source Count: 1
+--------------------------------------------------------------------------------
+  [2377] Newspapers: Ohio, Haycock - Republican-Courier
+
+Template ID: 151
+Template Name: Periodical (Serial)
+Source Count: 9
+--------------------------------------------------------------------------------
+  [ 909] Periodical: Anne Arundel Readings. Volume 01 No. 1 (Jan 1998)*
+  [ 910] Periodical: Anne Arundel Readings. Volume 01 No. 2 page 29 (July 1998)*
+  [ 911] Periodical: Anne Arundel Readings. Volume 01 No. 2 page 24 (July 1998)*
+  [ 912] Periodical: Anne Arundel Readings. Volume 01 No. 2 page 45 (July 1998)*
+  [ 913] Periodical: Anne Arundel Readings. Volume 05 No. 2 (July 2002)*
+  [2300] Periodical: Historical Journal of the More Family. Volume 1, Issue 18 (Apr 1912)
+  [3938] Periodical: Anne Arundel Readings. Volume 15 No. 2 (July 2012)*
+  [3939] Periodical: Anne Arundel Readings. Volume 13 No. 1 (Jan 2010)*
+  [3949] Periodical: Maryland Historical Magazine, Vol 2, Num 4 (1907)* (general info)
+
+Template ID: 186
+Template Name: Vital Records (local, certificates)
+Source Count: 1
+--------------------------------------------------------------------------------
+  [2240] Marriage Records: Washington, King County Marriage Records, 1855-Present - Joten, Theodore
+
+Template ID: 197
+Template Name: Website "as book"
+Source Count: 5
+--------------------------------------------------------------------------------
+  [ 236] Website: Imes, James - The James Anthony Imes Family Tree of America
+  [2245] Website: Osterholm Family Tree.
+  [2271] Website: Gopher Genealogy
+  [2299] Website: Andrews - McMurry Family History
+  [3942] Website: Early Colonial Settlers of Southern Maryland and Virginia's Northern Neck Counties
+
+Template ID: 199
+Template Name: Wills (Recorded)
+Source Count: 1
+--------------------------------------------------------------------------------
+  [3107] Wills and Probate Records: Maryland, Anne Arundel - Iiams, William (1670-1738)
+
+Template ID: 239
+Template Name: Court Records (online databases)
+Source Count: 3
+--------------------------------------------------------------------------------
+  [ 923] Index: Maryland - Chancery Papers 1713-1853
+  [ 925] Court Records: Maryland - Proceedings of the Maryland Court of Appeals, 1695-1729
+  [3457] Court Records: Maryland - Proceedings of the Court of Chancery, 1669-1679
+
+Template ID: 247
+Template Name: Thesis, unpublished
+Source Count: 2
+--------------------------------------------------------------------------------
+  [3964] Thesis: Kems-Nocerito, Michelle L. - The History of London Town, Maryland - A Case Study of an Eighteenth-Century Chesapeake Tobacco Port (2003)*
+  [3965] Thesis: Hosier, James Walter - Traveller's comments on Virginia taverns, ordinaries and other accomodations from 1750 to 1812 (1964)*
+
+Template ID: 270
+Template Name: Tax rolls (state/colony)
+Source Count: 1
+--------------------------------------------------------------------------------
+  [ 922] Index: Maryland, Anne Arundel - Tax Assessement of 1783
+
+Template ID: 374
+Template Name: Historical Records, databases (online)
+Source Count: 1
+--------------------------------------------------------------------------------
+  [2038] Database: Preble County Historical Records
+
+Template ID: 424
+Template Name: Military Records, Databases
+Source Count: 1
+--------------------------------------------------------------------------------
+  [ 830] Database: American Civil War Database
+
+Template ID: 430
+Template Name: Directories (City or County) (images, online)
+Source Count: 3
+--------------------------------------------------------------------------------
+  [ 930] Directory: Maryland, Baltimore, 1848 - Matchett's Baltimore Directory for 1847-48
+  [ 931] Directory: Maryland, Baltimore, 1856 - Matchett's Baltimore Directory for 1855-56*
+  [3950] Directory: Maryland, Baltimore, 1901 - Polk's Baltimore Directory for 1901
+
+Template ID: 439
+Template Name: Ancestry Record
+Source Count: 1
+--------------------------------------------------------------------------------
+  [2454] Database: U.S. Public Records Index, 1950-1993, Volume 1
+
+Template ID: 10001
+Template Name: _Website (with multiple databases) (mdi)
+Source Count: 2
+--------------------------------------------------------------------------------
+  [ 171] Database: Headstones Provided for Deceased Union Civil War Veterans, 1879-1903
+  [ 172] Database: Iowa, Muscatine County, Iowa Civil War Soldiers
+
+Template ID: 10002
+Template Name: _Vital Records (state, certificates, online) Abstract (mdi)
+Source Count: 4
+--------------------------------------------------------------------------------
+  [ 163] Marriage Records: Iowa, County Marriages, 1838-1934
+  [2239] Birth Records: Idaho, Birth Index, 1861-1911 - Curren, Dollie Henretta
+  [2247] Marriage Records: Pennsylvania County Marriages 1885-1950
+  [2249] Death Records: Washington "Washington Death Certificates, 1907-1960"
+
+Template ID: 10003
+Template Name: _Basic Ancestry Database Template (mdi)
+Source Count: 1
+--------------------------------------------------------------------------------
+  [ 164] Database: Ancestry.com Public Member Tree - Edmund Luck / John Scott trees
+
+Template ID: 10005
+Template Name: _Vital Records (state-level, online derivatives) (mdi)
+Source Count: 3
+--------------------------------------------------------------------------------
+  [ 168] Marriage Records: Ohio 1800-1958
+  [2228] Database: Washington State Digital Archives
+  [2444] Marriage Records: North Carolina 1741-2011 - Ancestry
+
+Template ID: 10006
+Template Name: _Book, General (Author(s) known) (mdi)
+Source Count: 35
+--------------------------------------------------------------------------------
+  [ 177] Book: Peden, Henry C. - Anne Arundel County Maryland Marriage References (2002)
+  [ 179] Book: Jordan, Weymouth - North Carolina Troops 1861-1865: A Roster (1989)
+  [ 180] Book: Jourdan, Elise -  Early Families of Southern Maryland (1992-2000)
+  [ 825] Book: Peden, Henry C. - Revolutionary Patriots of Maryland 1775-1783, Second Supplement (1992)
+  [ 826] Book: Peden, Henry C. - Revolutionary Patriots of Maryland 1775-1783, A Supplement (2002)
+  [ 827] Book: Pierce, Alycon - Selected Final Payment Vouchers 1818-1864 Baltimore:Maryland (1997)
+  [ 828] Book: Newman, Harry Wright - Maryland Revolutionary Records (1967)
+  [ 838] Book: Peden, Henry C. - Revolutionary Patriots of Maryland 1775-1783 (2002)
+  [ 914] Book: Hall, Robert W. - Landgrants of Anne Arundel County Maryland 1650-1704 South River Hundred (2002)*
+  [ 915] Book: Stirling, Bettie - Maryland Oaths of Fidelity (1971)
+  [ 916] Book: Crowl, Philip A. - Maryland During and After the Revolution: A Political and Economic Study (1943)
+  [ 917] Book: Peden, Henry C. - Maryland Public Service Records (1775-1783)
+  [ 918] Book: Peden, Henry C. - Maryland Society Sons of the American Revolution, Centennial History 1889-1989 (1988)
+  [ 919] Book: Wright, F. Edward - Maryland Miltia, Volume 2 (1979)
+  [ 920] Book: Toomey, Daniel - Index to the Roster of the Maryland Volunteers (1861-1865) (1986)
+  [ 921] Book: Maryland Records Div. - Maryland in World War II, Register of Service Personnel, Vol 2, E-J  (1965)
+  [ 924] Book: Barnes, Robert - Colonial Families of Maryland II (2014)
+  [ 929] Book: McWilliams, Jane W. - Annapolis, City on the Severn (2011)
+  [ 933] Book: Iiames, Roberta Wright - History of William Iiams (1997)*
+  [ 941] Book: Bush, Fred - The Centennial Atlas of Athens County, Ohio (1905)*
+  [2039] Book: Esarey, Logan - History of Indiana from Its Exploration to 1922 (1922)
+  [2040] Book: Bradsby, H.C. - History of Vigo County Indiana (1891)*
+  [2045] Book: Barnes, Robert - Marriages and Deaths from the Maryland Gazette, 1727-1839 (1973)*+
+  [2172] Book: Hanna, William - The History of Greene County Pennsylvania (1882)*
+  [2173] Book: Leckey, Howard - The Ten-Mile Country (1977)
+  [2291] Book: Evans, Henry Ridgely - Founders of the Colonial Families of Ridgely, Dorsey and Greeberry of Maryland (1935)*
+  [2292] Book: Laubach Family Association - History of the Johann Reinhart Laubach Family (1993)
+  [2293] Book: Barnes, Robert - Gleanings from Maryland Newspapers (1727-1775) (1976)*
+  [2294] Book: Barnes, Robert - Gleanings from Maryland Newspapers (1776-1785) (1975)*
+  [2295] Book: Barnes, Robert - Gleanings from Maryland Newspapers (1786-1790) (1975)*
+  [2296] Book: Barnes, Robert - Maryland Marriage Evidences (1634-1718) (2009)*
+  [2297] Book: Barnes, Robert - Maryland Marriages (1634-1777) (1975)*
+  [2304] Book: Carothers, Bettie - Maryland Oath of Allegiance (1991)
+  [2306] Book: Lobdell, Julia Harrison - Simon Lobdell (1676) of Milford, Conn. and his Descendants (1907)
+  [3940] Book: Genealogical Society of Allegany County - Allegany County, Maryland Rural Cememeteries (1990)
+
+Template ID: 10007
+Template Name: _Book, Image copy (online) (mdi)
+Source Count: 2
+--------------------------------------------------------------------------------
+  [ 175] Book: Boyer, Karen - Wilderness Pioneers of America  (2008)
+  [2274] Book: Glass, George W. - Miscellaneous families, Allcorn to York (undated)*
+
+Template ID: 10011
+Template Name: _Website (with multiple databases) (mdi)
+Source Count: 2
+--------------------------------------------------------------------------------
+  [ 231] Database: Headstones Provided for Deceased Union Civil War Veterans, 1879-1903
+  [ 232] Database: Iowa, Muscatine County, Iowa Civil War Soldiers
+
+Template ID: 10014
+Template Name: Find-a-grave
+Source Count: 1
+--------------------------------------------------------------------------------
+  [2185] Find-a-Grave
+
+Template ID: 10015
+Template Name: _Vital Records (state, certificates, online with URL Detail) Abstract (mdi)
+Source Count: 10
+--------------------------------------------------------------------------------
+  [2100] Database: Iowa County Births, 1880-1935. FamilySearch.
+  [2190] Death Records: Florida, "Florida, Death Index, 1877-1998"
+  [2227] Marriage Records: Idaho, County Marriages, 1864-1950
+  [2241] Marriage Records: Washington, County Marriages, 1855-2008 - Joten, Theodore
+  [2252] Marriage Records: New Jersey Marriages, 1678-1985
+  [2253] Marriage Records: New Jersey, Marriages, 1670-1980
+  [2254] Marriage Records: Iowa County Births 1880-1935
+  [2258] Death Records: Idaho, "Idaho Death Certificates 1911-1937"
+  [2270] Death Records: Illinois, "Illinois Deaths and Stillbirths, 1916-1947"
+  [2447] Death Records: Idaho, "Idaho Death Certificates 1938-1961"
+
+Template ID: 10016
+Template Name: _Social Security Death Index (SSDI) (FHL combined with SSDMF)
+Source Count: 1
+--------------------------------------------------------------------------------
+  [2242] Death Records: SSDI - FamilySearch (with number)
+
+Template ID: 10018
+Template Name: _FamilySearch Family Tree
+Source Count: 1
+--------------------------------------------------------------------------------
+  [2286] Database: FamilySearch Family Tree
+
+Template ID: 10019
+Template Name: _Vital Records (state, certificates, online) FamilySearch - Ohio
+Source Count: 4
+--------------------------------------------------------------------------------
+  [2433] Death Records: Ohio, "Ohio Deaths, 1908-1953" - death certificates
+  [2436] Death Records: Arizona, "Arizona Deaths, 1870-1951" - death certificates
+  [2437] Death Records: Texas, "Texas Deaths, 1890-1976" - death certificates
+  [2438] Death Records: Missouri, "Missouri Deaths, 1910-1965" - death certificates

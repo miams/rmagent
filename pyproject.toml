@@ -1,0 +1,83 @@
+[project]
+name = "rmtool"
+version = "0.1.0"
+description = "AI-powered genealogy agent for RootsMagic databases - data quality analysis, biography generation, and research assistance"
+readme = "README.md"
+authors = [
+    { name = "Michael Iams", email = "m.ichaeliams@gmail.com" }
+]
+requires-python = ">=3.11"
+license = { text = "MIT" }
+keywords = ["genealogy", "rootsmagic", "ai", "biography", "data-quality"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: End Users/Desktop",
+    "Topic :: Sociology :: Genealogy",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+dependencies = [
+    # Core utilities
+    "pydantic>=2.0",
+    "python-dotenv>=1.0",
+
+    # CLI and output
+    "click>=8.0",
+    "rich>=13.0",
+    "jinja2>=3.0",
+    "pyyaml>=6.0",
+
+    # AI providers
+    "anthropic>=0.18.0",
+    "openai>=1.10.0",
+    "ollama>=0.1.0",
+    "langchain>=0.1.0",
+    "langchain-anthropic>=0.1.0",
+    "langchain-openai>=0.0.5",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "pytest-mock>=3.0",
+    "pytest-asyncio>=0.21.0",
+
+    # Code quality
+    "black>=23.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0",
+]
+
+[project.scripts]
+rmtool = "rmtool.cli.main:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=rmtool --cov-report=html --cov-report=term"
