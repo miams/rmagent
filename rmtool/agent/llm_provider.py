@@ -2,15 +2,19 @@
 LLM provider abstraction with multi-provider support.
 
 Implements Anthropic, OpenAI, and Ollama adapters with retry handling,
-token usage metrics, and a minimal factory for provider lookup.
+token usage metrics, structured debug logging, and a minimal factory for
+provider lookup.
 """
 
 from __future__ import annotations
 
+import json
+import logging
 import os
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any, Callable, Dict, Optional, Tuple, Type
 
 try:  # Optional dependency
@@ -89,10 +93,17 @@ class LLMProvider(ABC):
         """Invoke provider with retry semantics."""
         attempts = 0
         last_error: Optional[Exception] = None
+        invoke_kwargs = dict(kwargs)
+        if "max_tokens" not in invoke_kwargs and self.default_max_tokens is not None:
+            invoke_kwargs["max_tokens"] = self.default_max_tokens
         while attempts < self.retry_config.max_attempts:
             try:
-                result = self._invoke(prompt, **kwargs)
-                return self._with_cost(result)
+                start = time.perf_counter()
+                result = self._invoke(prompt, **invoke_kwargs)
+                elapsed = time.perf_counter() - start
+                result = self._with_cost(result)
+                self._log_debug(prompt, result, elapsed, invoke_kwargs)
+                return result
             except Exception as exc:  # pragma: no cover - retry path
                 last_error = exc
                 attempts += 1
@@ -122,6 +133,25 @@ class LLMProvider(ABC):
     @abstractmethod
     def _invoke(self, prompt: str, **kwargs: Any) -> LLMResult:
         """Concrete providers implement this call."""
+
+    def _log_debug(self, prompt: str, result: LLMResult, elapsed: float, kwargs: Dict[str, Any]) -> None:
+        debug_logger = logging.getLogger("rmtool.llm_debug")
+        if not debug_logger.isEnabledFor(logging.DEBUG):
+            return
+        log_entry = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "provider": self.__class__.__name__,
+            "model": result.model,
+            "max_tokens": kwargs.get("max_tokens"),
+            "temperature": kwargs.get("temperature"),
+            "prompt_tokens": result.usage.prompt_tokens,
+            "completion_tokens": result.usage.completion_tokens,
+            "total_tokens": result.usage.total_tokens,
+            "duration_ms": round(elapsed * 1000, 3),
+            "prompt": prompt,
+            "response": result.text,
+        }
+        debug_logger.debug(json.dumps(log_entry))
 
 
 class AnthropicProvider(LLMProvider):

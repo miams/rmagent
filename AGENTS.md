@@ -28,3 +28,7 @@ Adopt Conventional Commit prefixes (`docs:`, `data:`, `refactor:`) followed by c
 
 ## Data Handling & Security Tips
 Only commit sanitized genealogical data; scrub personal details before adding fixtures. Reference sensitive upstream files from `archive/` rather than copying content into editable areas. When ingesting new datasets, note provenance, anonymization steps, and storage location so downstream agents can audit compliance.
+
+## Observability
+- Set `LOG_LEVEL=DEBUG` in `config/.env` to stream verbose logs.
+- LLM prompt/response JSON traces (prompt text, completion, provider, model, token totals, latency) write to `LLM_DEBUG_LOG_FILE` (default `logs/llm_debug.jsonl`) for reproducible debugging.

@@ -226,9 +226,13 @@ SELECT
   father.PersonID AS FatherID,
   fn.Surname AS FatherSurname,
   fn.Given AS FatherGiven,
+  fn.BirthYear AS FatherBirthYear,
+  fn.DeathYear AS FatherDeathYear,
   mother.PersonID AS MotherID,
   mn.Surname AS MotherSurname,
-  mn.Given AS MotherGiven
+  mn.Given AS MotherGiven,
+  mn.BirthYear AS MotherBirthYear,
+  mn.DeathYear AS MotherDeathYear
 FROM PersonTable p
 LEFT JOIN ChildTable ct
   ON p.PersonID = ct.ChildID
@@ -255,7 +259,14 @@ SELECT
   cn.Given,
   cn.BirthYear,
   cn.DeathYear,
-  child.Sex
+  child.Sex,
+  f.FamilyID,
+  birth.Date AS BirthDate,
+  birth.SortDate AS BirthSortDate,
+  birth_place.Name AS BirthPlace,
+  death.Date AS DeathDate,
+  death.SortDate AS DeathSortDate,
+  death_place.Name AS DeathPlace
 FROM FamilyTable f
 JOIN ChildTable ct
   ON f.FamilyID = ct.FamilyID
@@ -264,9 +275,22 @@ JOIN PersonTable child
 JOIN NameTable cn
   ON child.PersonID = cn.OwnerID
   AND cn.IsPrimary = 1
+LEFT JOIN EventTable birth
+  ON birth.OwnerType = 0
+  AND birth.OwnerID = child.PersonID
+  AND birth.EventType = 1
+LEFT JOIN PlaceTable birth_place
+  ON birth.PlaceID = birth_place.PlaceID
+LEFT JOIN EventTable death
+  ON death.OwnerType = 0
+  AND death.OwnerID = child.PersonID
+  AND death.EventType = 2
+LEFT JOIN PlaceTable death_place
+  ON death.PlaceID = death_place.PlaceID
 WHERE f.FatherID = ?
    OR f.MotherID = ?
-ORDER BY cn.BirthYear,
+ORDER BY COALESCE(birth.SortDate, 9223372036854775807),
+         cn.BirthYear,
          cn.Surname,
          cn.Given
 """
@@ -321,7 +345,11 @@ SELECT DISTINCT
   sn.DeathYear,
   f.FamilyID,
   marriage.Date AS MarriageDate,
-  marriage.SortDate AS MarriageSortDate
+  marriage.SortDate AS MarriageSortDate,
+  marriage_place.Name AS MarriagePlace,
+  death.Date AS DeathDate,
+  death.SortDate AS DeathSortDate,
+  death_place.Name AS DeathPlace
 FROM FamilyTable f
 JOIN PersonTable spouse
   ON spouse.PersonID = f.FatherID
@@ -333,9 +361,17 @@ LEFT JOIN EventTable marriage
   ON marriage.OwnerType = 1
   AND marriage.OwnerID = f.FamilyID
   AND marriage.EventType = 300
+LEFT JOIN PlaceTable marriage_place
+  ON marriage.PlaceID = marriage_place.PlaceID
+LEFT JOIN EventTable death
+  ON death.OwnerType = 0
+  AND death.OwnerID = spouse.PersonID
+  AND death.EventType = 2
+LEFT JOIN PlaceTable death_place
+  ON death.PlaceID = death_place.PlaceID
 WHERE (f.FatherID = ? OR f.MotherID = ?)
   AND spouse.PersonID != ?
-ORDER BY marriage.SortDate,
+ORDER BY COALESCE(marriage.SortDate, 9223372036854775807),
          sn.Surname,
          sn.Given
 """

@@ -8,9 +8,10 @@ LLM providers declared in `rmtool.agent.llm_provider`.
 
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
-from typing import ClassVar, Dict, Optional, Set
+from typing import Any, ClassVar, Dict, Optional, Set
 
 from dotenv import load_dotenv
 try:
@@ -45,11 +46,26 @@ def _parse_bool(value: Optional[str], default: bool) -> bool:
     return value.lower() in {"1", "true", "yes", "on"}
 
 
+def _parse_int(value: Optional[str], default: Optional[int]) -> Optional[int]:
+    """Parse optional integer values."""
+    if value is None or value == "":
+        return default
+    try:
+        return int(value)
+    except ValueError as exc:  # pragma: no cover - validation will surface error
+        raise ValueError(f"Invalid integer value '{value}'") from exc
+
+
+_LOGGING_CONFIGURED = False
+DEFAULT_ENV_PATH = Path("config/.env")
+
+
 class LLMSettings(BaseModel):
     """Large language model configuration settings."""
 
     default_provider: str = Field(default="anthropic")
     default_temperature: float = Field(default=0.2)
+    max_tokens: Optional[int] = Field(default=1024)
     anthropic_api_key: Optional[str] = None
     anthropic_model: Optional[str] = None
     openai_api_key: Optional[str] = None
@@ -78,16 +94,18 @@ class LLMSettings(BaseModel):
         if self.default_provider == "ollama" and not self.ollama_base_url:
             raise ValueError("OLLAMA_BASE_URL is required for default provider 'ollama'")
 
-    def provider_kwargs(self) -> Dict[str, Optional[str]]:
+    def provider_kwargs(self) -> Dict[str, Optional[Any]]:
         """Return kwargs for instantiating the configured provider."""
         provider = self.default_provider
-        kwargs: Dict[str, Optional[str]] = {"model": None, "temperature": self.default_temperature}
+        kwargs: Dict[str, Optional[Any]] = {"model": None, "temperature": self.default_temperature}
         if provider == "anthropic":
             kwargs["api_key"] = self.anthropic_api_key
             kwargs["model"] = self.anthropic_model
+            kwargs["max_tokens"] = self.max_tokens
         elif provider == "openai":
             kwargs["api_key"] = self.openai_api_key
             kwargs["model"] = self.openai_model
+            kwargs["max_tokens"] = self.max_tokens
         elif provider == "ollama":
             kwargs["base_url"] = self.ollama_base_url
             kwargs["model"] = self.ollama_model
@@ -146,6 +164,7 @@ class LoggingSettings(BaseModel):
 
     level: str = Field(default="INFO")
     log_file: Path = Field(default=Path("rmtool.log"))
+    json_log_file: Path = Field(default=Path("logs/llm_debug.jsonl"))
 
     @field_validator("level")
     @classmethod
@@ -155,6 +174,11 @@ class LoggingSettings(BaseModel):
     @field_validator("log_file")
     @classmethod
     def expand_path(cls, value: Path) -> Path:
+        return value.expanduser().resolve()
+
+    @field_validator("json_log_file")
+    @classmethod
+    def expand_json_path(cls, value: Path) -> Path:
         return value.expanduser().resolve()
 
 
@@ -178,6 +202,8 @@ class AppConfig(BaseModel):
         """Create output directories as needed."""
         self.output.output_dir.mkdir(parents=True, exist_ok=True)
         self.output.export_dir.mkdir(parents=True, exist_ok=True)
+        self.logging.log_file.parent.mkdir(parents=True, exist_ok=True)
+        self.logging.json_log_file.parent.mkdir(parents=True, exist_ok=True)
 
     def build_provider(self) -> LLMProvider:
         """Instantiate the configured default LLM provider."""
@@ -186,16 +212,56 @@ class AppConfig(BaseModel):
         return get_provider(self.llm.default_provider, **provider_kwargs)
 
 
-def load_app_config(env_path: Optional[Path] = None, auto_create_dirs: bool = True) -> AppConfig:
+def configure_logging(settings: LoggingSettings) -> None:
+    """Configure global logging handlers (idempotent)."""
+    global _LOGGING_CONFIGURED
+    if _LOGGING_CONFIGURED:
+        return
+
+    settings.log_file.parent.mkdir(parents=True, exist_ok=True)
+    settings.json_log_file.parent.mkdir(parents=True, exist_ok=True)
+
+    log_level = getattr(logging, settings.level.upper(), logging.INFO)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s %(name)s: %(message)s")
+
+    root_logger = logging.getLogger()
+    root_logger.setLevel(log_level)
+
+    file_handler = logging.FileHandler(settings.log_file, mode="a")
+    file_handler.setLevel(log_level)
+    file_handler.setFormatter(formatter)
+    root_logger.addHandler(file_handler)
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+    console_handler.setFormatter(formatter)
+    root_logger.addHandler(console_handler)
+
+    debug_logger = logging.getLogger("rmtool.llm_debug")
+    debug_logger.setLevel(logging.DEBUG)
+    json_handler = logging.FileHandler(settings.json_log_file, mode="a")
+    json_handler.setLevel(logging.DEBUG)
+    json_handler.setFormatter(logging.Formatter("%(message)s"))
+    debug_logger.addHandler(json_handler)
+
+    _LOGGING_CONFIGURED = True
+
+
+def load_app_config(
+    env_path: Optional[Path] = None,
+    auto_create_dirs: bool = True,
+    configure_logger: bool = True,
+) -> AppConfig:
     """
     Load application configuration.
 
     Args:
-        env_path: Optional path to a .env file. Defaults to project root .env if present.
+        env_path: Optional path to a .env file. Defaults to config/.env when not provided.
         auto_create_dirs: When True, create output/export directories.
+        configure_logger: When True, configure global logging handlers.
     """
     if env_path is None:
-        env_path = Path(".env")
+        env_path = DEFAULT_ENV_PATH
     if env_path.exists():
         load_dotenv(env_path, override=True)
 
@@ -203,6 +269,7 @@ def load_app_config(env_path: Optional[Path] = None, auto_create_dirs: bool = Tr
         llm_settings = LLMSettings(
             default_provider=_env("DEFAULT_LLM_PROVIDER", "anthropic"),
             default_temperature=float(_env("LLM_TEMPERATURE", "0.2")),
+            max_tokens=_parse_int(_env("LLM_MAX_TOKENS", "1024"), 1024),
             anthropic_api_key=_env("ANTHROPIC_API_KEY"),
             anthropic_model=_env("ANTHROPIC_MODEL", "claude-3-5-sonnet-20250110"),
             openai_api_key=_env("OPENAI_API_KEY"),
@@ -233,6 +300,7 @@ def load_app_config(env_path: Optional[Path] = None, auto_create_dirs: bool = Tr
         logging_settings = LoggingSettings(
             level=_env("LOG_LEVEL", "INFO"),
             log_file=Path(_env("LOG_FILE", "rmtool.log")),
+            json_log_file=Path(_env("LLM_DEBUG_LOG_FILE", "logs/llm_debug.jsonl")),
         )
 
         config = AppConfig(
@@ -249,6 +317,9 @@ def load_app_config(env_path: Optional[Path] = None, auto_create_dirs: bool = Tr
     if auto_create_dirs:
         config.ensure_directories()
 
+    if configure_logger:
+        configure_logging(config.logging)
+
     try:
         config.llm.ensure_credentials()
     except ValueError as exc:
@@ -256,4 +327,4 @@ def load_app_config(env_path: Optional[Path] = None, auto_create_dirs: bool = Tr
     return config
 
 
-__all__ = ["AppConfig", "load_app_config"]
+__all__ = ["AppConfig", "load_app_config", "configure_logging"]

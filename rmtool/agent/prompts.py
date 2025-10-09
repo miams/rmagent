@@ -53,7 +53,11 @@ BIOGRAPHY_TEMPLATE = PromptTemplate(
         "Respond in Markdown with section headings and cite supporting Rootsmagic sources.\n\n"
         "Person Summary:\n{person_summary}\n\n"
         "Timeline Highlights:\n{timeline_overview}\n\n"
+        "Early Life Insights:\n{early_life_overview}\n\n"
+        "Family Summary:\n{family_overview}\n\n"
+        "Sibling Notes:\n{sibling_summary}\n\n"
         "Key Relationships:\n{relationship_notes}\n\n"
+        "Family Losses:\n{family_loss_notes}\n\n"
         "Notable Sources:\n{source_notes}\n\n"
         "If data is missing, acknowledge gaps and suggest next research steps."
     ),

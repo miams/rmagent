@@ -102,6 +102,7 @@ rmagent/
 │
 ├── templates/                # Output templates (Jinja2)
 ├── config/                   # Config files
+│   ├── .env.example         # Configuration template
 │   └── prompts/             # Prompt template files
 │
 ├── archive/                  # Source files (archived)
@@ -111,7 +112,6 @@ rmagent/
 ├── .venv/                    # Virtual environment (created by uv)
 ├── pyproject.toml           # Python project configuration (uv/pip)
 ├── uv.lock                  # Dependency lock file
-├── .env.example             # Configuration template
 ├── .gitignore               # Git ignore rules
 ├── README.md                # User documentation
 └── CLAUDE.md                # This file
@@ -458,14 +458,17 @@ uv run pytest --cov=rmtool --cov-report=html
 
 See `docs/AI_AGENT_TODO.md` for complete task list (38 tasks across 7 phases):
 
-**Phase 1: Foundation** (Tasks 1.1-1.9)
-- ✅ Task 1.1: Project Setup (COMPLETE - see docs/SETUP_COMPLETE.md)
-- ⏭️ Task 1.2: Database Connection Module (NEXT)
-- Task 1.3-1.9: Data models, parsers, queries, quality validation
+**Phase 1: Foundation** (Tasks 1.1-1.9) ✅ COMPLETE
+- ✅ Task 1.1: Project Setup (uv, dependencies, configuration)
+- ✅ Task 1.2: Database Connection Module (RMDatabase with RMNOCASE)
+- ✅ Task 1.3-1.9: Data models, parsers, queries, quality validation
 
-**Phase 2: AI Integration** (Tasks 2.1-2.5)
-- Multi-LLM support (Anthropic Claude, OpenAI GPT-4, Ollama)
-- Prompt templates and agent core
+**Phase 2: AI Integration** (Tasks 2.1-2.5) ✅ COMPLETE
+- ✅ Multi-LLM support (Anthropic Claude, OpenAI GPT-4, Ollama)
+- ✅ Configuration management (`config/.env`, Pydantic settings)
+- ✅ Prompt templates (biography, quality, Q&A, timeline)
+- ✅ Agent core (GenealogyAgent with context builders)
+- ✅ LangChain tools (query, events, validation, search)
 
 **Phase 3: Output Generators** (Tasks 3.1-3.4)
 - Biography generation (9-section structure)
@@ -477,9 +480,9 @@ See `docs/AI_AGENT_TODO.md` for complete task list (38 tasks across 7 phases):
 - 8 CLI commands: person, bio, quality, ask, timeline, export, search
 
 **Milestones:**
-- 🎯 **Working Prototype**: Query person, generate basic bio, find quality issues
-- 🎯 **MVP**: All 5 core features working (quality analysis, bio, Q&A, timeline, Hugo)
-- 🎯 **Production Polish**: Performance, advanced features, enhancements
+- ✅ **Milestone 1: Working Prototype** - COMPLETE (2025-10-09)
+- 🎯 **Milestone 2: MVP** - In Progress (quality analysis, bio, Q&A, timeline, Hugo)
+- 🎯 **Milestone 3: Production Polish** - Performance, advanced features, enhancements
 
 ### Current Project Status
 
@@ -496,14 +499,22 @@ See `docs/AI_AGENT_TODO.md` for complete task list (38 tasks across 7 phases):
 - ✅ Task 1.8: Query Service (15 optimized patterns, 16 tests, 91% coverage)
 - ✅ Task 1.9: Data Quality Validator (24 validation rules across 6 categories)
 
+**✅ Phase 2: AI Integration - COMPLETE (5/5 tasks)**
+- ✅ Task 2.1: LLM Provider Abstraction (Anthropic/OpenAI/Ollama with retry/pricing)
+- ✅ Task 2.2: Configuration Management (`config/.env`, Pydantic settings, provider builder)
+- ✅ Task 2.3: Prompt Templates (biography, quality, Q&A, timeline with versioning)
+- ✅ Task 2.4: Agent Core (GenealogyAgent with context builders)
+- ✅ Task 2.5: LangChain Tools (query, events, validation, search)
+
 **📊 Test Coverage:**
-- Total: 173 unit tests
+- Total: 229 unit tests
 - Parsers: 157 tests (date, BLOB, place, name)
 - Query service: 16 tests
+- Agent/Config: 56 tests
 - Coverage: 91-99% across modules
 
 **⏭️ Next Phase:**
-- Phase 2: AI Integration (LLM providers, prompts, agent core)
+- Phase 3: Output Generators (biography, quality report, timeline, Hugo export)
 
 **Completed Documentation (as of 2025-01-08):**
 
@@ -715,9 +726,12 @@ Use conventional commit format:
 ## Future Development
 
 See `docs/AI_AGENT_TODO.md` for implementation roadmap:
-- **Phase 1:** Foundation (Tasks 1.1-1.9) - 8/9 complete
-- **Phase 2:** AI Integration (Tasks 2.1-2.5)
-- **Phase 3:** Output Generators (Tasks 3.1-3.4)
+- **Phase 1:** Foundation (Tasks 1.1-1.9) ✅ COMPLETE
+- **Phase 2:** AI Integration (Tasks 2.1-2.5) ✅ COMPLETE
+- **Phase 3:** Output Generators (Tasks 3.1-3.4) ⏭️ NEXT
 - **Phase 4:** CLI Interface (Tasks 4.1-4.8)
+- **Phase 5:** Testing & Quality (Tasks 5.1-5.4)
+- **Phase 6:** Documentation (Tasks 6.1-6.3)
+- **Phase 7:** Production Polish (Tasks 7.1-7.5)
 
 See `docs/DATA_PARSING_TODO.md` for documentation tasks (mostly complete)

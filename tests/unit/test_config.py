@@ -37,7 +37,7 @@ def test_load_app_config_from_env_file(tmp_path, monkeypatch):
     )
 
     monkeypatch.delenv("DEFAULT_LLM_PROVIDER", raising=False)
-    config = load_app_config(env_path=env_path, auto_create_dirs=True)
+    config = load_app_config(env_path=env_path, auto_create_dirs=True, configure_logger=False)
 
     assert config.llm.default_provider == "openai"
     assert config.output.output_dir == output_dir.resolve()
@@ -51,10 +51,11 @@ def test_missing_required_api_key_raises(tmp_path, monkeypatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "")
 
     with pytest.raises(LLMError):
-        load_app_config(env_path=env_path, auto_create_dirs=False)
+        load_app_config(env_path=env_path, auto_create_dirs=False, configure_logger=False)
 
 
-def test_invalid_citation_style(tmp_path):
+def test_invalid_citation_style(tmp_path, monkeypatch):
+    monkeypatch.delenv("DEFAULT_CITATION_STYLE", raising=False)
     env_path = tmp_path / "style.env"
     env_path.write_text(
         "\n".join(
@@ -66,4 +67,22 @@ def test_invalid_citation_style(tmp_path):
         )
     )
     with pytest.raises(LLMError):
-        load_app_config(env_path=env_path, auto_create_dirs=False)
+        load_app_config(env_path=env_path, auto_create_dirs=False, configure_logger=False)
+
+
+def test_llm_max_tokens_from_env(tmp_path, monkeypatch):
+    env_path = tmp_path / "tokens.env"
+    monkeypatch.setenv("DEFAULT_CITATION_STYLE", "footnote")
+    env_path.write_text(
+        "\n".join(
+            [
+                "DEFAULT_LLM_PROVIDER=openai",
+                "OPENAI_API_KEY=sk-test",
+                "OPENAI_MODEL=gpt-4o-mini",
+                "LLM_MAX_TOKENS=2048",
+                "RM_DATABASE_PATH=data/Iiams.rmtree",
+            ]
+        )
+    )
+    config = load_app_config(env_path=env_path, auto_create_dirs=False, configure_logger=False)
+    assert config.llm.max_tokens == 2048

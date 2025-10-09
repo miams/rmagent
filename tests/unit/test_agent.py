@@ -38,13 +38,80 @@ class StubQueryService:
     def __init__(self):
         self.person = {"PersonID": 1, "Given": "Michael", "Surname": "Iams", "BirthYear": 1968, "DeathYear": None}
         self.events = [
-            {"EventID": 1, "EventType": "Birth", "Date": "1968-04-30", "Place": "Arizona", "Details": ""},
-            {"EventID": 2, "EventType": "Education", "Date": "1988", "Place": "University of Arizona", "Details": "Graduated"},
+            {"EventID": 1, "EventType": "Birth", "Date": "1968-04-30", "Place": "Phoenix, Arizona", "Details": "", "SortDate": 19680430},
+            {"EventID": 2, "EventType": "Education", "Date": "1988", "Place": "University of Arizona", "Details": "Graduated", "SortDate": 19880000},
         ]
         self.ancestors = [
             {"PersonID": 1541, "Surname": "Iams", "Given": "Donald", "Relationship": "Father", "Generation": 1},
             {"PersonID": 1430, "Surname": "Shepherd", "Given": "Gail", "Relationship": "Mother", "Generation": 1},
         ]
+        self.parents = {
+            "FatherID": 1541,
+            "FatherSurname": "Iams",
+            "FatherGiven": "Donald",
+            "FatherBirthYear": 1930,
+            "FatherDeathYear": 2010,
+            "MotherID": 1430,
+            "MotherSurname": "Shepherd",
+            "MotherGiven": "Gail",
+            "MotherBirthYear": 1934,
+            "MotherDeathYear": None,
+        }
+        self.spouses = [
+            {
+                "PersonID": 2,
+                "Given": "Alexandra",
+                "Surname": "Cole",
+                "BirthYear": 1969,
+                "DeathYear": None,
+                "FamilyID": 10,
+                "MarriageDate": "1990-06-01",
+                "MarriagePlace": "Phoenix, Arizona",
+                "DeathDate": None,
+                "DeathPlace": "",
+            }
+        ]
+        self.children = [
+            {
+                "PersonID": 3,
+                "Given": "Jordan",
+                "Surname": "Iams",
+                "BirthYear": 1992,
+                "DeathYear": None,
+                "FamilyID": 10,
+                "BirthDate": "1992-01-15",
+                "BirthPlace": "Tempe, Arizona",
+                "BirthSortDate": 19920115,
+                "DeathDate": None,
+                "DeathPlace": "",
+            }
+        ]
+        self.parent_children = {
+            1541: [
+                {
+                    "PersonID": 1,
+                    "Given": "Michael",
+                    "Surname": "Iams",
+                    "BirthYear": 1968,
+                    "DeathYear": None,
+                    "BirthDate": "1968-04-30",
+                    "BirthPlace": "Phoenix, Arizona",
+                    "BirthSortDate": 19680430,
+                },
+                {
+                    "PersonID": 4,
+                    "Given": "Sara",
+                    "Surname": "Iams",
+                    "BirthYear": 1970,
+                    "DeathYear": 1999,
+                    "BirthDate": "1970-09-10",
+                    "BirthPlace": "Flagstaff, Arizona",
+                    "BirthSortDate": 19700910,
+                    "DeathDate": "1999-05-01",
+                    "DeathPlace": "Flagstaff, Arizona",
+                },
+            ]
+        }
 
     def get_person_with_primary_name(self, person_id: int):
         return dict(self.person) if person_id == self.person["PersonID"] else None
@@ -54,6 +121,17 @@ class StubQueryService:
 
     def get_direct_ancestors(self, person_id: int, generations: int = 3):
         return list(self.ancestors) if person_id == self.person["PersonID"] else []
+
+    def get_parents(self, person_id: int):
+        return dict(self.parents) if person_id == self.person["PersonID"] else None
+
+    def get_spouses(self, person_id: int):
+        return list(self.spouses) if person_id == self.person["PersonID"] else []
+
+    def get_children(self, person_id: int):
+        if person_id == self.person["PersonID"]:
+            return list(self.children)
+        return [dict(row) for row in self.parent_children.get(person_id, [])]
 
     def search_primary_names(self, surname=None, given=None, limit=10):
         return [dict(self.person)]
@@ -99,6 +177,10 @@ def test_generate_biography_calls_provider():
     assert result.text == "stub-response"
     assert provider.prompts
     assert "Michael Iams" in provider.prompts[0]
+    assert "Spouses:" in provider.prompts[0]
+    assert "Children:" in provider.prompts[0]
+    assert "Early Life Insights:" in provider.prompts[0]
+    assert "Family Losses:" in provider.prompts[0]
 
 
 def test_analyze_data_quality_returns_report():

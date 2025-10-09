@@ -86,7 +86,7 @@ RM11/
 - Sensitive data
 - Output files
 
-✅ **.env.example** - Configuration template
+✅ **config/.env.example** - Configuration template
 - LLM provider settings (Anthropic, OpenAI, Ollama)
 - Database paths
 - Output directories

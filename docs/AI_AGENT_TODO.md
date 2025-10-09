@@ -485,14 +485,14 @@ print(result.text)
 ### Task 2.2: Configuration Management ✅ COMPLETE
 **File:** `rmtool/config/config.py`
 
-- [✓] `.env`/environment loading with override support
+- [✓] `config/.env` environment loading with override support
 - [✓] Nested Pydantic settings (LLM, database, outputs, logging, privacy, citation)
 - [✓] Provider instantiation helper (`AppConfig.build_provider`)
 - [✓] Automatic directory creation for outputs/exports
 - [✓] Credential validation for configured provider
 - [✓] Unit tests covering env parsing and validation (`tests/unit/test_config.py`)
 
-**Example `.env`:**
+**Example `config/.env`:**
 ```
 DEFAULT_LLM_PROVIDER=openai
 OPENAI_API_KEY=sk-...
@@ -582,13 +582,14 @@ agent = create_langchain_agent(llm, tools)
 
 **Goal:** Generate formatted output in various formats
 
-### Task 3.1: Biography Generator
-**File:** `generators/biography.py`
+### Task 3.1: Biography Generator ✅ COMPLETE
+**File:** `rmtool/generators/biography.py`
 **Reference:** RM11_Biography_Best_Practices.md
+**Completed:** 2025-10-09
 
-- [ ] Extract person data (name, events, relationships)
-- [ ] Build context for AI (facts, sources, uncertainty levels)
-- [ ] Generate 9-section biography structure:
+- [✓] Extract person data (name, events, relationships)
+- [✓] Build context for AI (facts, sources, uncertainty levels)
+- [✓] Generate 9-section biography structure:
   1. Introduction
   2. Early Life & Family Background
   3. Education & Training
@@ -598,118 +599,284 @@ agent = create_langchain_agent(llm, tools)
   7. Death & Burial
   8. Legacy & Significance
   9. Sources & Notes
-- [ ] Handle length variations (short/standard/comprehensive)
-- [ ] Apply privacy rules (IsPrivate flags, 110-year rule)
-- [ ] Format citations (footnote/parenthetical/narrative)
-- [ ] Include media references where appropriate
-- [ ] Integration tests (test_biography_generator.py)
+- [✓] Handle length variations (short/standard/comprehensive)
+- [✓] Apply privacy rules (IsPrivate flags, 110-year rule)
+- [✓] Format citations (footnote/parenthetical/narrative)
+- [✓] Include media references where appropriate
+- [✓] Unit tests (test_biography_generator.py) - 24 tests, 85% coverage
+
+**Features:**
+- BiographyLength enum (SHORT, STANDARD, COMPREHENSIVE)
+- CitationStyle enum (FOOTNOTE, PARENTHETICAL, NARRATIVE)
+- PersonContext and EventContext dataclasses for structured data
+- Privacy rules: IsPrivate flags + 110-year living person rule
+- Template-based generation (works without AI agent)
+- AI-powered generation (uses GenealogyAgent)
+- Markdown output with render_markdown() method
+- Helper function `_get_row_value()` for sqlite3.Row access
 
 **Example API:**
 ```python
-generator = BiographyGenerator(db, agent)
+from rmtool.generators.biography import BiographyGenerator, BiographyLength, CitationStyle
+
+generator = BiographyGenerator(db="data/Iiams.rmtree", agent=agent)
 bio = generator.generate(
     person_id=1,
-    length='standard',  # 500-1500 words
-    citation_style='footnote',
-    include_sources=True
+    length=BiographyLength.STANDARD,
+    citation_style=CitationStyle.FOOTNOTE,
+    include_sources=True,
+    use_ai=False  # or True with agent
 )
+
+print(bio.render_markdown())
 ```
 
 ---
 
-### Task 3.2: Data Quality Report Generator
-**File:** `generators/quality_report.py`
+### Task 3.2: Data Quality Report Generator ✅ COMPLETE
+**File:** `rmtool/generators/quality_report.py`
 **Reference:** RM11_Data_Quality_Rules.md
+**Completed:** 2025-10-09
 
-- [ ] Run all 24 validation rules
-- [ ] Categorize issues by severity (Critical/High/Medium/Low)
-- [ ] Group by category (Required Fields, Logical Consistency, etc.)
-- [ ] Generate summary statistics
-- [ ] Format as Markdown report
-- [ ] Format as HTML report (optional)
-- [ ] Export to CSV for spreadsheet analysis
-- [ ] Integration tests (test_quality_report.py)
+- [✓] Run all 24 validation rules
+- [✓] Categorize issues by severity (Critical/High/Medium/Low)
+- [✓] Group by category (Required Fields, Logical Consistency, etc.)
+- [✓] Generate summary statistics
+- [✓] Format as Markdown report
+- [✓] Format as HTML report (optional)
+- [✓] Export to CSV for spreadsheet analysis
+- [✓] Unit tests (test_quality_report.py) - 13 tests, 95% coverage
+
+**Features:**
+- ReportFormat enum (MARKDOWN, HTML, CSV)
+- Automatic validation execution using DataQualityValidator
+- Summary statistics (total people, events, sources, citations, issues)
+- Issues grouped by severity with emoji icons (🔴 🟠 🟡 🟢)
+- Issues grouped by category (Required Fields, Logical Consistency, etc.)
+- Sample issue listings with person/source/event details
+- File output support (write directly to file)
+- Configurable sample limit
+
+**Example API:**
+```python
+from rmtool.generators.quality_report import QualityReportGenerator, ReportFormat
+
+generator = QualityReportGenerator(db="data/Iiams.rmtree")
+
+# Generate Markdown report
+markdown = generator.generate(format=ReportFormat.MARKDOWN)
+print(markdown)
+
+# Generate HTML report
+html = generator.generate(format=ReportFormat.HTML, output_path="report.html")
+
+# Generate CSV for spreadsheet analysis
+csv = generator.generate(format=ReportFormat.CSV, output_path="report.csv")
+```
 
 **Example Output:**
 ```markdown
 # Data Quality Report
-Generated: 2025-01-08
+Generated: 2025-10-09 14:30:00
 
-## Summary
-- Total Issues: 156
-- Critical: 12
-- High: 34
-- Medium: 67
-- Low: 43
+## Summary Statistics
+- **Total People:** 11,571
+- **Total Events:** 29,543
+- **Total Sources:** 337
+- **Total Citations:** 10,838
+- **Total Issues Found:** 49,057
 
-## Critical Issues
-### Death Before Birth (3 persons)
-1. Anna Francis Iams (PersonID: 123)
-   - Birth: 1896-03-02
-   - Death: 1896-00-00
-   ...
+### Issues by Severity
+- 🔴 **Critical:** 7
+- 🟠 **High:** 32,665
+- 🟡 **Medium:** 15,643
+- 🟢 **Low:** 742
+
+### Issues by Category
+- **Logical Consistency:** 123
+- **Required Fields:** 15,520
+- **Source Quality:** 32,672
+- **Date Validity:** 742
+...
 ```
 
 ---
 
-### Task 3.3: Timeline Generator
-**File:** `generators/timeline.py`
+### Task 3.3: Timeline Generator ✅ COMPLETE
+**File:** `rmtool/generators/timeline.py`
 **Reference:** RM11_Timeline_Construction.md
+**Completed:** 2025-10-09
 
-- [ ] Extract events for person (or family)
-- [ ] Parse dates to TimelineJS3 format
-- [ ] Handle date ranges (between, from, to)
-- [ ] Order events chronologically
-- [ ] Same-date event prioritization (Birth, Death, Marriage first)
-- [ ] Handle undated events (exclude or estimate)
-- [ ] Group events by life phases (Early Life, Career, Family, etc.)
-- [ ] Format places (short form: "City, State")
-- [ ] Attach media from MultimediaTable
-- [ ] Include citation credits
-- [ ] Generate TimelineJS3 JSON
-- [ ] Integration tests (test_timeline_generator.py)
+- [✓] Extract events for person (or family)
+- [✓] Parse dates to TimelineJS3 format
+- [✓] Handle date ranges (between, from, to)
+- [✓] Order events chronologically
+- [✓] Same-date event prioritization (Birth, Death, Marriage first)
+- [✓] Handle undated events (exclude if no details)
+- [✓] Group events by life phases (Early Life, Career, Family, etc.)
+- [✓] Format places (short form: "City, State")
+- [✓] Attach media from MultimediaTable
+- [✓] Include citation credits
+- [✓] Generate TimelineJS3 JSON
+- [✓] Generate standalone HTML viewer
+- [✓] Unit tests (test_timeline_generator.py) - 29 tests, 90% coverage
+
+**Features:**
+- TimelineFormat enum (JSON, HTML)
+- LifePhase enum with 8 life phases
+- Automatic event categorization by type and age
+- Phase-based color coding for visual distinction
+- Event priority sorting (Birth, Death, Marriage prioritized)
+- Media attachment from MultimediaTable
+- Citation credits ("Sources: ...")
+- Privacy filtering (exclude IsPrivate events)
+- JSON format for embedding/integration
+- Standalone HTML viewer (self-contained, double-click to view)
+- TimelineJS3 CDN integration (no local dependencies)
 
 **Example API:**
 ```python
-generator = TimelineGenerator(db)
-timeline = generator.generate(person_id=1, format='timelinejs3')
-# Outputs: timeline.json for TimelineJS viewer
+from rmtool.generators.timeline import TimelineGenerator, TimelineFormat
+
+generator = TimelineGenerator(db="data/Iiams.rmtree")
+
+# Generate JSON for embedding
+json_output = generator.generate(
+    person_id=1,
+    format=TimelineFormat.JSON,
+    group_by_phase=True
+)
+
+# Generate standalone HTML viewer
+html_output = generator.generate(
+    person_id=1,
+    format=TimelineFormat.HTML,
+    output_path="timeline.html"
+)
+
+# Open timeline.html in browser - fully interactive!
+```
+
+**Output Example:**
+```json
+{
+  "title": {
+    "text": {
+      "headline": "John Dorsey Iams",
+      "text": "(1921 - 1996)"
+    },
+    "media": {
+      "url": "photos/john.jpg",
+      "caption": "Portrait, circa 1950"
+    }
+  },
+  "events": [
+    {
+      "unique_id": "event_1872",
+      "start_date": {"year": 1921, "month": 12, "day": 30},
+      "text": {
+        "headline": "Birth",
+        "text": "<p><strong>December 30, 1921</strong> in Tulsa, Oklahoma</p>"
+      },
+      "group": "Early Life",
+      "background": {"color": "#e3f2fd"}
+    }
+  ],
+  "scale": "human"
+}
 ```
 
 ---
 
-### Task 3.4: Hugo Blog Post Exporter
-**File:** `generators/hugo_exporter.py`
+### Task 3.4: Hugo Blog Post Exporter ✅ COMPLETE
+**File:** `rmtool/generators/hugo_exporter.py`
+**Completed:** 2025-10-09
 
-- [ ] Generate Hugo-compatible Markdown
-- [ ] Front matter (YAML) with metadata
-- [ ] Embed biography content
-- [ ] Embed timeline (via shortcode or iframe)
-- [ ] Link to source images/documents
-- [ ] Generate person index page
-- [ ] Generate family tree visualization (optional)
-- [ ] Handle Hugo taxonomies (surnames, places, time periods)
-- [ ] Integration tests (test_hugo_exporter.py)
+- [✓] Generate Hugo-compatible Markdown
+- [✓] Front matter (YAML) with metadata
+- [✓] Embed biography content (from BiographyGenerator)
+- [✓] Embed timeline (shortcode reference + save timeline files)
+- [✓] Link to media files (base path + relative paths from database)
+- [✓] Generate person index page (_index.md)
+- [✓] Handle Hugo taxonomies (categories: surname, tags: places, decades)
+- [✓] Unit tests (test_hugo_exporter.py) - 24 tests, 91% coverage
+- [⊗] Generate family tree visualization (skipped - optional)
+
+**Features:**
+- HugoExporter class with single-person and batch export
+- Automatic slug generation for filenames
+- YAML front matter with metadata (title, date, categories, tags, person_id, birth_year, death_year)
+- Biography content integration (template-based)
+- Timeline shortcode reference (`{{< timeline >}}`)
+- Timeline files saved to `static/timelines/` (both JSON and HTML)
+- Media URL formatting (strips `?\` RootsMagic prefix, combines base path + relative path)
+- Configurable media base path (default: `/media/`)
+- Hugo taxonomies: categories (surname-based), tags (places, decades)
+- Person index page (`_index.md`) with sorted list of all exported people
+- Batch export with error handling (continues on failure)
+- Proper Hugo directory structure (content/people/, static/timelines/)
+
+**Example API:**
+```python
+from rmtool.generators.hugo_exporter import HugoExporter
+from rmtool.generators.biography import BiographyLength
+
+exporter = HugoExporter(
+    db="data/Iiams.rmtree",
+    media_base_path="/media/"
+)
+
+# Export single person
+result = exporter.export_person(
+    person_id=1,
+    output_dir="hugo-site/content/people",
+    bio_length=BiographyLength.STANDARD,
+    include_timeline=True
+)
+# Creates: john-dorsey-iams.md
+#          ../../static/timelines/john-dorsey-iams.json
+#          ../../static/timelines/john-dorsey-iams.html
+
+# Export multiple people
+result = exporter.export_batch(
+    person_ids=[1, 2, 3],
+    output_dir="hugo-site/content/people",
+    generate_index=True
+)
+# Creates: person-1.md, person-2.md, person-3.md, _index.md
+```
 
 **Example Output:**
 ```markdown
 ---
-title: "Biography of John William Smith"
-date: 2025-01-08
-categories: ["Biographies", "Smith Family"]
-tags: ["Maryland", "Civil War", "1800s"]
-person_id: 123
-birth_year: 1845
-death_year: 1923
+title: "John Dorsey Iams"
+date: 2025-10-09
+categories: ["Iams Family"]
+tags: ["Oklahoma", "Virginia", "1920s"]
+person_id: 1
+birth_year: 1921
+death_year: 1996
 ---
 
 ## Introduction
-John William Smith was born on March 15, 1845, in Baltimore, Maryland...
 
-{{< timeline person_id="123" >}}
+John Dorsey Iams was born on 30 Dec 1921 in Tulsa, Oklahoma.
+He was the child of William Leonard Iams and Lucy Virginia Dorsey.
 
-## Sources
-1. U.S. Census 1850, Maryland, Baltimore County...
+...
+
+## Timeline
+
+{{< timeline src="/timelines/john-dorsey-iams.json" >}}
+
+*View [interactive timeline](/timelines/john-dorsey-iams.html) in new window.*
+
+## Photos & Documents
+
+![John Dorsey Iams, circa 1950](/media/Pictures - People/Iams, John Dorsey (1921-1996) - portrait.jpg)
+*John Dorsey Iams, circa 1950*
+
+...
 ```
 
 ---
@@ -979,7 +1146,7 @@ Found 5 matches:
 - [ ] Multi-LLM support (Anthropic, OpenAI, Ollama)
 - [ ] Comprehensive test suite (>80% coverage)
 - [ ] User documentation (README, CLI help)
-- [ ] Configuration management (.env)
+- [ ] Configuration management (`config/.env`)
 
 **Test Commands:**
 ```bash
@@ -1093,7 +1260,7 @@ mypy rmlib/ agent/ generators/ cli/
 - [ ] **README.md** - Project overview, installation, quick start
 - [ ] **INSTALL.md** - Detailed installation instructions
 - [ ] **USAGE.md** - All CLI commands with examples
-- [ ] **CONFIGURATION.md** - .env settings, LLM provider setup
+- [ ] **CONFIGURATION.md** - `config/.env` settings, LLM provider setup
 - [ ] **FAQ.md** - Common questions and troubleshooting
 - [ ] **EXAMPLES.md** - Real-world usage scenarios
 
@@ -1328,7 +1495,7 @@ RM11/
 │   ├── AI_AGENT_TODO.md       # This file
 │   └── data_reference/        # Schema docs
 │
-├── .env.example               # Example configuration
+├── config/.env.example        # Example configuration
 ├── .gitignore
 ├── pyproject.toml             # Project metadata
 ├── requirements.txt           # Dependencies
@@ -1357,18 +1524,18 @@ RM11/
 - [x] 2.1: LLM Provider Abstraction
 - [x] 2.2: Configuration Management
 - [x] 2.3: Prompt Templates
-- [ ] 2.4: Agent Core
-- [ ] 2.5: LangChain Tools
+- [x] 2.4: Agent Core
+- [x] 2.5: LangChain Tools
 
-**Progress:** 3/5 tasks
+**Progress:** 5/5 tasks ✅ COMPLETE
 
 ### Phase 3: Output Generators (Working Prototype - Output)
-- [ ] 3.1: Biography Generator
-- [ ] 3.2: Data Quality Report Generator
-- [ ] 3.3: Timeline Generator
-- [ ] 3.4: Hugo Blog Post Exporter
+- [x] 3.1: Biography Generator
+- [x] 3.2: Data Quality Report Generator
+- [x] 3.3: Timeline Generator
+- [x] 3.4: Hugo Blog Post Exporter
 
-**Progress:** 0/4 tasks
+**Progress:** 4/4 tasks ✅ COMPLETE
 
 ### Phase 4: CLI Interface (Working Prototype - Complete)
 - [ ] 4.1: CLI Framework

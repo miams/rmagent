@@ -6,6 +6,7 @@ AI-powered command-line tool for analyzing RootsMagic databases, generating biog
 
 - 🔍 **Data Quality Analysis** - Run 24 validation rules to identify issues
 - 📝 **Biography Generation** - AI-generated biographical narratives with proper sourcing
+- 👪 **Family Insights** - Spouse, child, and sibling context (births, migrations, losses) injected into AI prompts
 - 💬 **Interactive Q&A** - Ask questions about people and families in your database
 - 📅 **Timeline Creation** - Generate interactive timelines (TimelineJS3 format)
 - 📤 **Hugo Blog Export** - Export biographies as Hugo-compatible blog posts
@@ -56,20 +57,26 @@ uv sync --extra dev
 1. Copy the example environment file:
 
 ```bash
-cp .env.example .env
+cp config/.env.example config/.env
 ```
 
-2. Edit `.env` and add your API keys:
+2. Edit `config/.env` and add your API keys:
 
 ```bash
 # Choose your LLM provider
 DEFAULT_LLM_PROVIDER=anthropic  # or openai, ollama
+LLM_TEMPERATURE=0.2
+LLM_MAX_TOKENS=1024
 
 # Add your API key
 ANTHROPIC_API_KEY=sk-ant-xxxxx
 
 # Set database path
 RM_DATABASE_PATH=data/Iiams.rmtree
+
+# Logging options
+LOG_LEVEL=INFO                # set DEBUG to capture JSON traces
+LLM_DEBUG_LOG_FILE=logs/llm_debug.jsonl
 ```
 
 ### Programmatic access
@@ -80,7 +87,7 @@ Use the configuration helper when building integrations:
 from rmtool.config.config import load_app_config
 
 config = load_app_config()
-provider = config.build_provider()  # Anthropic/OpenAI/Ollama based on .env
+provider = config.build_provider()  # Anthropic/OpenAI/Ollama based on config/.env
 db_path = config.database.database_path
 
 from rmtool.agent.prompts import render_prompt
@@ -113,6 +120,12 @@ agent = GenealogyAgent(
 biography = agent.generate_biography(person_id=1)
 quality_summary = agent.analyze_data_quality()
 ```
+
+### Debug logging and tracing
+
+- Set `LOG_LEVEL=DEBUG` in `config/.env` to enable verbose logs.
+- LLM prompts/responses (model, provider, tokens, latency, prompt text, completion text) are written as JSON lines to `LLM_DEBUG_LOG_FILE` (default `logs/llm_debug.jsonl`).
+- Configure `LLM_MAX_TOKENS` to raise or lower the default response limit used by providers.
 
 ## Usage
 
@@ -235,7 +248,14 @@ See `docs/AI_AGENT_TODO.md` for the complete development roadmap.
 
 **📊 Test Coverage:** 229 unit tests, 91-99% coverage across modules
 
-**⏭️ Next Phase:** Phase 2 - AI Integration (LLM providers, prompts, agent core)
+**✅ Phase 2: AI Integration - COMPLETE (5/5 tasks)**
+- ✅ LLM providers (Anthropic/OpenAI/Ollama) with retry/pricing
+- ✅ Configuration management (`config/.env`, Pydantic settings)
+- ✅ Prompt templates (biography, quality, Q&A, timeline)
+- ✅ Agent core (GenealogyAgent with context builders)
+- ✅ LangChain tools (query, events, validation, search)
+
+**⏭️ Next Phase:** Phase 3 - Output Generators (biography, quality report, timeline, Hugo export)
 
 See `docs/AI_AGENT_TODO.md` for detailed progress and roadmap.
 
