@@ -290,17 +290,17 @@ template_fields = parse_template_field_defs(blob_data)
 
 ---
 
-### Task 1.6: Place Parser
+### Task 1.6: Place Parser ✅ COMPLETE
 **File:** `rmlib/parsers/place_parser.py`
 **Reference:** RM11_Place_Format.md
 
-- [ ] Parse comma-delimited place hierarchy
-- [ ] Extract levels (City, County, State, Country)
-- [ ] Use Normalized when available
-- [ ] Handle PlaceType (0=Place, 1=Temple, 2=Detail)
-- [ ] Format for display (short, medium, full)
-- [ ] Master/Detail relationship handling
-- [ ] Unit tests (test_place_parser.py)
+- [✓] Parse comma-delimited place hierarchy
+- [✓] Extract levels (City, County, State, Country)
+- [✓] Use Normalized when available
+- [✓] Handle PlaceType (0=Place, 1=Temple, 2=Detail)
+- [✓] Format for display (short, medium, full)
+- [✓] Master/Detail relationship handling
+- [✓] Unit tests (test_place_parser.py)
 
 **Example API:**
 ```python
@@ -310,17 +310,17 @@ parsed = parse_place("Baltimore, Baltimore, Maryland, United States")
 
 ---
 
-### Task 1.7: Name Parser
+### Task 1.7: Name Parser ✅ COMPLETE
 **File:** `rmlib/parsers/name_parser.py`
 **Reference:** RM11_Name_Display_Logic.md
 
-- [ ] Select primary name (IsPrimary=1)
-- [ ] Get all alternate names
-- [ ] Context-aware name selection (maiden vs married)
-- [ ] Format full name (Prefix + Given + Surname + Suffix)
-- [ ] Handle nickname display
-- [ ] Validate: exactly one primary name per person
-- [ ] Unit tests (test_name_parser.py)
+- [✓] Select primary name (IsPrimary=1)
+- [✓] Get all alternate names
+- [✓] Context-aware name selection (maiden vs married)
+- [✓] Format full name (Prefix + Given + Surname + Suffix)
+- [✓] Handle nickname display
+- [✓] Validate: exactly one primary name per person
+- [✓] Unit tests (test_name_parser.py)
 
 **Example API:**
 ```python
@@ -331,33 +331,24 @@ full = format_full_name(name, include_nickname=True)
 
 ---
 
-### Task 1.8: Query Service
+### Task 1.8: Query Service ✅ COMPLETE
 **File:** `rmlib/queries.py`
 **Reference:** RM11_Query_Patterns.md
 
-Implement all 15 query patterns:
-- [ ] **Pattern 1:** Get person with primary name
-- [ ] **Pattern 2:** Search by name (exact + phonetic)
-- [ ] **Pattern 3:** Get person's parents
-- [ ] **Pattern 4:** Get person's children
-- [ ] **Pattern 5:** Get all events for person (timeline)
-- [ ] **Pattern 6:** Get vital events only
-- [ ] **Pattern 7:** Get person's spouses
-- [ ] **Pattern 8:** Get direct ancestors (recursive, 10 generations)
-- [ ] **Pattern 9:** Get ancestors with spouses
-- [ ] **Pattern 10:** Get all descendants (recursive)
-- [ ] **Pattern 11:** Get citations for event
-- [ ] **Pattern 12:** Get unsourced events
-- [ ] **Pattern 13:** Find places by state/county
-- [ ] **Pattern 14:** Find people with missing vital events
-- [ ] **Pattern 15:** Find logical inconsistencies
-- [ ] Unit tests (test_queries.py)
+- [✓] Implement `QueryService` façade with parameterized helpers
+- [✓] Cover Patterns 1-15 (person, family, ancestor, place, quality queries)
+- [✓] Recursive CTE helpers honor configurable generation limits
+- [✓] Optional RMNOCASE-aware search helpers (exact + metaphone)
+- [✓] Unit tests using `data/Iiams.rmtree` (`tests/unit/test_queries.py`)
+- [✓] Vital event constants shared for downstream generators
 
 **Example API:**
 ```python
-person = db.get_person(person_id)
-events = db.get_timeline(person_id)
-ancestors = db.get_ancestors(person_id, generations=5)
+with RMDatabase('data/Iiams.rmtree') as db:
+    queries = QueryService(db)
+    person = queries.get_person_with_primary_name(1)
+    timeline = queries.get_person_events(1)
+    ancestors = queries.get_direct_ancestors(1, generations=5)
 ```
 
 ---
@@ -1349,12 +1340,12 @@ RM11/
 - [ ] 1.3: Data Models
 - [ ] 1.4: Date Parser
 - [ ] 1.5: BLOB Parsers
-- [ ] 1.6: Place Parser
-- [ ] 1.7: Name Parser
-- [ ] 1.8: Query Service
+- [x] 1.6: Place Parser
+- [x] 1.7: Name Parser
+- [x] 1.8: Query Service
 - [ ] 1.9: Data Quality Validator
 
-**Progress:** 0/9 tasks
+**Progress:** 3/9 tasks
 
 ### Phase 2: AI Integration (Working Prototype - AI Layer)
 - [ ] 2.1: LLM Provider Abstraction
