@@ -482,26 +482,32 @@ print(result.text)
 
 ---
 
-### Task 2.2: Configuration Management
-**File:** `config/config.py`
+### Task 2.2: Configuration Management ✅ COMPLETE
+**File:** `rmtool/config/config.py`
 
-- [ ] Load from `.env` file
-- [ ] LLM provider settings (API keys, model names, temperature)
-- [ ] Database path configuration
-- [ ] Output directory settings
-- [ ] Logging configuration
-- [ ] User preferences (privacy rules, citation style)
-- [ ] Validation of required settings
-- [ ] Unit tests (test_config.py)
+- [✓] `.env`/environment loading with override support
+- [✓] Nested Pydantic settings (LLM, database, outputs, logging, privacy, citation)
+- [✓] Provider instantiation helper (`AppConfig.build_provider`)
+- [✓] Automatic directory creation for outputs/exports
+- [✓] Credential validation for configured provider
+- [✓] Unit tests covering env parsing and validation (`tests/unit/test_config.py`)
 
 **Example `.env`:**
 ```
-ANTHROPIC_API_KEY=sk-ant-...
+DEFAULT_LLM_PROVIDER=openai
 OPENAI_API_KEY=sk-...
-OLLAMA_BASE_URL=http://localhost:11434
-DEFAULT_LLM_PROVIDER=anthropic
-DEFAULT_MODEL=claude-3-5-sonnet-20250110
+OPENAI_MODEL=gpt-4o-mini
 RM_DATABASE_PATH=data/Iiams.rmtree
+OUTPUT_DIR=output
+EXPORT_DIR=exports
+```
+
+**Programmatic usage:**
+```python
+from rmtool.config.config import load_app_config
+
+config = load_app_config()
+provider = config.build_provider()
 ```
 
 ---

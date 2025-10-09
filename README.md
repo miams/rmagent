@@ -72,6 +72,18 @@ ANTHROPIC_API_KEY=sk-ant-xxxxx
 RM_DATABASE_PATH=data/Iiams.rmtree
 ```
 
+### Programmatic access
+
+Use the configuration helper when building integrations:
+
+```python
+from rmtool.config.config import load_app_config
+
+config = load_app_config()
+provider = config.build_provider()  # Anthropic/OpenAI/Ollama based on .env
+db_path = config.database.database_path
+```
+
 ## Usage
 
 All commands use the `uv run` prefix to run in the virtual environment:
