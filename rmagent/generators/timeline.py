@@ -13,12 +13,12 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
-from rmtool.rmlib.database import RMDatabase
-from rmtool.rmlib.models import OwnerType
-from rmtool.rmlib.parsers.date_parser import parse_rm_date, is_unknown_date, UNKNOWN_SORT_DATE
-from rmtool.rmlib.parsers.place_parser import parse_place_name
-from rmtool.rmlib.parsers.name_parser import format_full_name
-from rmtool.rmlib.queries import QueryService
+from rmagent.rmlib.database import RMDatabase
+from rmagent.rmlib.models import OwnerType
+from rmagent.rmlib.parsers.date_parser import parse_rm_date, is_unknown_date, UNKNOWN_SORT_DATE
+from rmagent.rmlib.parsers.place_parser import parse_place_name
+from rmagent.rmlib.parsers.name_parser import format_full_name
+from rmagent.rmlib.queries import QueryService
 
 
 class TimelineFormat(str, Enum):
@@ -110,7 +110,7 @@ class TimelineGenerator:
 
     Example:
         ```python
-        from rmtool.generators.timeline import TimelineGenerator, TimelineFormat
+        from rmagent.generators.timeline import TimelineGenerator, TimelineFormat
 
         generator = TimelineGenerator(db="data/Iiams.rmtree")
 

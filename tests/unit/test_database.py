@@ -13,7 +13,7 @@ import sqlite3
 from pathlib import Path
 from unittest.mock import Mock, patch, MagicMock
 
-from rmtool.rmlib.database import (
+from rmagent.rmlib.database import (
     RMDatabase,
     DatabaseError,
     DatabaseNotFoundError,

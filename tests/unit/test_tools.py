@@ -1,5 +1,5 @@
 """
-Tests for rmtool.agent.tools.
+Tests for rmagent.agent.tools.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ import sys
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from rmtool.agent.tools import (
+from rmagent.agent.tools import (
     FindRelationshipTool,
     GetAncestorsTool,
     GetEventsTool,
@@ -24,7 +24,7 @@ from rmtool.agent.tools import (
     ToolExecutionError,
     ValidateDataTool,
 )
-from rmtool.rmlib.quality import QualityReport, QualitySeverity
+from rmagent.rmlib.quality import QualityReport, QualitySeverity
 
 
 class StubQueryService:

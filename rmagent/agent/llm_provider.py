@@ -135,7 +135,7 @@ class LLMProvider(ABC):
         """Concrete providers implement this call."""
 
     def _log_debug(self, prompt: str, result: LLMResult, elapsed: float, kwargs: Dict[str, Any]) -> None:
-        debug_logger = logging.getLogger("rmtool.llm_debug")
+        debug_logger = logging.getLogger("rmagent.llm_debug")
         if not debug_logger.isEnabledFor(logging.DEBUG):
             return
         log_entry = {

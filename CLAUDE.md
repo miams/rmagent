@@ -17,7 +17,7 @@ This repository powers RMAgent: documentation plus a Python tooling stack for Ro
 
 ```
 rmagent/
-├── rmtool/                    # Main Python package (AI agent implementation)
+├── rmagent/                    # Main Python package (AI agent implementation)
 │   ├── __init__.py
 │   ├── agent/                # AI agent (LLM integration helpers)
 │   │   ├── genealogy_agent.py # High-level agent orchestration
@@ -46,7 +46,7 @@ rmagent/
 │   │       ├── blob_parser.py
 │   │       ├── place_parser.py
 │   │       └── name_parser.py
-│   └── cli/                  # CLI entry point (not yet wired; scaffolding only)
+│   └── cli/                  # CLI entry point (Task 4.1 complete: main.py + 7 command modules)
 │
 ├── config/                   # Runtime configuration files (outside package)
 │   ├── .env.example          # Template for `config/.env`
@@ -92,7 +92,7 @@ rmagent/
 │   └── python_example.py    # Working Python examples
 │
 ├── templates/                # Output templates (Jinja2)
-├── logs/                     # Runtime logs (rmtool.log, llm_debug.jsonl)
+├── logs/                     # Runtime logs (rmagent.log, llm_debug.jsonl)
 │
 ├── archive/                  # Source files (archived)
 │   ├── RM11_schema.txt
@@ -402,13 +402,13 @@ The schema includes extensive indexes for:
 2. **Patterns**: See "Common Query Patterns" section in `RM11_Schema_Reference.md`
 3. **Validation**: Use `RM11_schema.json` for type checking
 
-## AI Agent Implementation (rmtool/)
+## AI Agent Implementation (rmagent/)
 
 **Status:** ✅ Working prototype with multi-provider LLM adapter and enriched biography contexts (Phase 2 complete)
 
 ### Project Setup
 
-The `rmtool/` package uses **[uv](https://github.com/astral-sh/uv)** for fast Python package management. Runtime settings live in `config/.env`:
+The `rmagent/` package uses **[uv](https://github.com/astral-sh/uv)** for fast Python package management. Runtime settings live in `config/.env`:
 
 ```bash
 # Copy environment template on first checkout
@@ -421,7 +421,7 @@ uv sync
 uv sync --extra dev
 
 # Run ad-hoc Python inside the managed environment
-uv run python -m rmtool.rmlib.prototype --help   # Legacy CLI prototype
+uv run python -m rmagent.rmlib.prototype --help   # Legacy CLI prototype
 ```
 
 ### Development Workflow
@@ -434,7 +434,7 @@ uv run black .
 uv run ruff check .
 
 # Type check (namespace package)
-uv run mypy rmtool/
+uv run mypy rmagent/
 
 # Run the full test suite (pytest auto-discovers tests/unit)
 uv run pytest
@@ -443,16 +443,16 @@ uv run pytest
 uv run pytest tests/unit/test_agent.py
 
 # Optional: coverage
-uv run pytest --cov=rmtool --cov-report=html
+uv run pytest --cov=rmagent --cov-report=html
 ```
 
 ### Recent Enhancements (2025-10)
 
-- **Family-aware biographies:** `rmtool/agent/genealogy_agent.py` now injects spouses, children, siblings, parental ages, migrations, and in-lifetime family deaths into the `biography` prompt context.
-- **Structured LLM logging:** `rmtool/agent/llm_provider.py` streams JSONL debug entries (prompt, response, provider, model, tokens, latency) to `logs/llm_debug.jsonl` whenever `LOG_LEVEL=DEBUG` in `config/.env`.
-- **Provider configuration:** `rmtool/config/config.py` centralizes defaults (LLM/database/output/privacy/logging) and exposes `load_app_config()` / `AppConfig.build_provider()` helpers for scripts and LangChain tooling.
-- **Enriched SQL accessors:** `rmtool/rmlib/queries.py` exposes marriage, spouse, child, and sibling detail (dates/places) to support the new biography context and LangChain tools.
-- **LangChain adapters:** `rmtool/agent/tools.py` bundles query + validation tools for drop-in use inside chains/agents.
+- **Family-aware biographies:** `rmagent/agent/genealogy_agent.py` now injects spouses, children, siblings, parental ages, migrations, and in-lifetime family deaths into the `biography` prompt context.
+- **Structured LLM logging:** `rmagent/agent/llm_provider.py` streams JSONL debug entries (prompt, response, provider, model, tokens, latency) to `logs/llm_debug.jsonl` whenever `LOG_LEVEL=DEBUG` in `config/.env`.
+- **Provider configuration:** `rmagent/config/config.py` centralizes defaults (LLM/database/output/privacy/logging) and exposes `load_app_config()` / `AppConfig.build_provider()` helpers for scripts and LangChain tooling.
+- **Enriched SQL accessors:** `rmagent/rmlib/queries.py` exposes marriage, spouse, child, and sibling detail (dates/places) to support the new biography context and LangChain tools.
+- **LangChain adapters:** `rmagent/agent/tools.py` bundles query + validation tools for drop-in use inside chains/agents.
 
 ### Implementation Roadmap
 
@@ -470,14 +470,15 @@ See `docs/AI_AGENT_TODO.md` for complete task list (38 tasks across 7 phases):
 - ✅ Agent core (GenealogyAgent with context builders)
 - ✅ LangChain tools (query, events, validation, search)
 
-**Phase 3: Output Generators** (Tasks 3.1-3.4)
-- Biography generation (9-section structure)
-- Data quality reports
-- Timeline generation (TimelineJS3)
-- Hugo blog post export
+**Phase 3: Output Generators** (Tasks 3.1-3.4) ✅ COMPLETE
+- ✅ Biography generation (9-section structure)
+- ✅ Data quality reports (Markdown/HTML/CSV)
+- ✅ Timeline generation (TimelineJS3 JSON/HTML)
+- ✅ Hugo blog post export
 
-**Phase 4: CLI Interface** (Tasks 4.1-4.8)
-- 8 CLI commands: person, bio, quality, ask, timeline, export, search
+**Phase 4: CLI Interface** (Tasks 4.1-4.8) - In Progress (1/8 tasks)
+- ✅ Task 4.1: CLI Framework (Click, Rich, global options, 7 command modules, 23 tests)
+- ⏭️ Tasks 4.2-4.8: Command implementations (person, bio, quality, ask, timeline, export, search)
 
 **Milestones:**
 - ✅ **Milestone 1: Working Prototype** - COMPLETE (2025-10-09)
@@ -506,15 +507,26 @@ See `docs/AI_AGENT_TODO.md` for complete task list (38 tasks across 7 phases):
 - ✅ Task 2.4: Agent Core (GenealogyAgent with context builders)
 - ✅ Task 2.5: LangChain Tools (query, events, validation, search)
 
+**✅ Phase 3: Output Generators - COMPLETE (4/4 tasks)**
+- ✅ Task 3.1: Biography Generator (9-section structure, 24 tests, 85% coverage)
+- ✅ Task 3.2: Quality Report Generator (Markdown/HTML/CSV, 13 tests, 95% coverage)
+- ✅ Task 3.3: Timeline Generator (TimelineJS3 JSON/HTML, 29 tests, 90% coverage)
+- ✅ Task 3.4: Hugo Exporter (single/batch export, 24 tests, 91% coverage)
+
+**📍 Phase 4: CLI Interface - IN PROGRESS (1/8 tasks)**
+- ✅ Task 4.1: CLI Framework (Click + Rich, 7 command modules, 23 tests, 100% pass)
+- ⏭️ Tasks 4.2-4.8: Command implementations (person, bio, quality, ask, timeline, export, search)
+
 **📊 Test Coverage / Test Hints:**
-- `uv run pytest` executes the full unit suite (17 modules under `tests/unit`).
+- `uv run pytest` executes the full unit suite (18 modules under `tests/unit`).
 - Parser suites: `test_date_parser.py`, `test_place_parser.py`, `test_name_parser.py`, `test_blob_parser.py`.
 - Agent/config suites: `test_agent.py`, `test_tools.py`, `test_config.py`, `test_llm_provider.py`.
 - Generator suites: `test_biography_generator.py`, `test_quality_report.py`, `test_timeline_generator.py`, `test_hugo_exporter.py`.
-- Use `uv run pytest --cov=rmtool --cov-report=html` for optional coverage reports (output in `htmlcov/`).
+- CLI suite: `test_cli.py` (23 tests covering all commands and global options).
+- Use `uv run pytest --cov=rmagent --cov-report=html` for optional coverage reports (output in `htmlcov/`).
 
-**⏭️ Next Phase:**
-- Phase 3: Output Generators (biography, quality report, timeline, Hugo export)
+**⏭️ Next Tasks:**
+- Phase 4: Complete CLI command implementations (Tasks 4.2-4.8)
 
 **Completed Documentation (as of 2025-01-08):**
 
@@ -728,8 +740,8 @@ Use conventional commit format:
 See `docs/AI_AGENT_TODO.md` for implementation roadmap:
 - **Phase 1:** Foundation (Tasks 1.1-1.9) ✅ COMPLETE
 - **Phase 2:** AI Integration (Tasks 2.1-2.5) ✅ COMPLETE
-- **Phase 3:** Output Generators (Tasks 3.1-3.4) ⏭️ NEXT
-- **Phase 4:** CLI Interface (Tasks 4.1-4.8)
+- **Phase 3:** Output Generators (Tasks 3.1-3.4) ✅ COMPLETE
+- **Phase 4:** CLI Interface (Tasks 4.1-4.8) - 📍 IN PROGRESS (1/8 tasks complete)
 - **Phase 5:** Testing & Quality (Tasks 5.1-5.4)
 - **Phase 6:** Documentation (Tasks 6.1-6.3)
 - **Phase 7:** Production Polish (Tasks 7.1-7.5)

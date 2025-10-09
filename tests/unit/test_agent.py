@@ -1,5 +1,5 @@
 """
-Tests for rmtool.agent.genealogy_agent.
+Tests for rmagent.agent.genealogy_agent.
 """
 
 from __future__ import annotations
@@ -15,9 +15,9 @@ import sys
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from rmtool.agent.genealogy_agent import GenealogyAgent
-from rmtool.agent.llm_provider import LLMProvider, LLMResult, RetryConfig, TokenUsage
-from rmtool.rmlib.quality import QualityIssue, QualityReport, QualitySeverity
+from rmagent.agent.genealogy_agent import GenealogyAgent
+from rmagent.agent.llm_provider import LLMProvider, LLMResult, RetryConfig, TokenUsage
+from rmagent.rmlib.quality import QualityIssue, QualityReport, QualitySeverity
 
 
 class StubLLMProvider(LLMProvider):

@@ -14,12 +14,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
-from rmtool.agent.llm_provider import LLMProvider, LLMResult
-from rmtool.agent.prompts import render_prompt
-from rmtool.rmlib.database import RMDatabase
-from rmtool.rmlib.queries import QueryService
-from rmtool.rmlib.quality import DataQualityValidator, QualityReport
-from rmtool.rmlib.parsers.date_parser import parse_rm_date
+from rmagent.agent.llm_provider import LLMProvider, LLMResult
+from rmagent.agent.prompts import render_prompt
+from rmagent.rmlib.database import RMDatabase
+from rmagent.rmlib.queries import QueryService
+from rmagent.rmlib.quality import DataQualityValidator, QualityReport
+from rmagent.rmlib.parsers.date_parser import parse_rm_date
 
 
 QueryServiceFactory = Callable[[RMDatabase], QueryService]

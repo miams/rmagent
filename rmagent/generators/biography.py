@@ -14,13 +14,13 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from rmtool.agent.genealogy_agent import GenealogyAgent
-from rmtool.rmlib.database import RMDatabase
-from rmtool.rmlib.models import OwnerType
-from rmtool.rmlib.parsers.date_parser import parse_rm_date, is_unknown_date
-from rmtool.rmlib.parsers.name_parser import format_full_name
-from rmtool.rmlib.parsers.place_parser import format_place_medium, format_place_short
-from rmtool.rmlib.queries import QueryService
+from rmagent.agent.genealogy_agent import GenealogyAgent
+from rmagent.rmlib.database import RMDatabase
+from rmagent.rmlib.models import OwnerType
+from rmagent.rmlib.parsers.date_parser import parse_rm_date, is_unknown_date
+from rmagent.rmlib.parsers.name_parser import format_full_name
+from rmagent.rmlib.parsers.place_parser import format_place_medium, format_place_short
+from rmagent.rmlib.queries import QueryService
 
 
 class BiographyLength(str, Enum):
@@ -220,8 +220,8 @@ class BiographyGenerator:
 
     Example:
         ```python
-        from rmtool.generators.biography import BiographyGenerator
-        from rmtool.agent.genealogy_agent import GenealogyAgent
+        from rmagent.generators.biography import BiographyGenerator
+        from rmagent.agent.genealogy_agent import GenealogyAgent
 
         agent = GenealogyAgent(llm_provider=provider, db_path="data/Iiams.rmtree")
         generator = BiographyGenerator(db_path="data/Iiams.rmtree", agent=agent)

@@ -19,8 +19,8 @@ import sys
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from rmtool.rmlib.database import RMDatabase
-from rmtool.rmlib.quality import DataQualityValidator, QualitySeverity
+from rmagent.rmlib.database import RMDatabase
+from rmagent.rmlib.quality import DataQualityValidator, QualitySeverity
 
 
 DATA_PATH = Path("data/Iiams.rmtree")

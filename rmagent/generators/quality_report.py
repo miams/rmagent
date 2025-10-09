@@ -14,8 +14,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from rmtool.rmlib.database import RMDatabase
-from rmtool.rmlib.quality import (
+from rmagent.rmlib.database import RMDatabase
+from rmagent.rmlib.quality import (
     DataQualityValidator,
     QualityIssue,
     QualityReport,
@@ -46,7 +46,7 @@ class QualityReportGenerator:
 
     Example:
         ```python
-        from rmtool.generators.quality_report import QualityReportGenerator
+        from rmagent.generators.quality_report import QualityReportGenerator
 
         generator = QualityReportGenerator(db="data/Iiams.rmtree")
         report = generator.generate(format=ReportFormat.MARKDOWN)

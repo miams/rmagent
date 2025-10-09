@@ -84,13 +84,13 @@ LLM_DEBUG_LOG_FILE=logs/llm_debug.jsonl
 Use the configuration helper when building integrations:
 
 ```python
-from rmtool.config.config import load_app_config
+from rmagent.config.config import load_app_config
 
 config = load_app_config()
 provider = config.build_provider()  # Anthropic/OpenAI/Ollama based on config/.env
 db_path = config.database.database_path
 
-from rmtool.agent.prompts import render_prompt
+from rmagent.agent.prompts import render_prompt
 biography_prompt = render_prompt(
     "biography",
     {
@@ -101,11 +101,11 @@ biography_prompt = render_prompt(
     },
 )
 
-from rmtool.agent.genealogy_agent import GenealogyAgent
-from rmtool.agent.tools import default_langchain_tools
-from rmtool.rmlib.database import RMDatabase
-from rmtool.rmlib.queries import QueryService
-from rmtool.rmlib.quality import DataQualityValidator
+from rmagent.agent.genealogy_agent import GenealogyAgent
+from rmagent.agent.tools import default_langchain_tools
+from rmagent.rmlib.database import RMDatabase
+from rmagent.rmlib.queries import QueryService
+from rmagent.rmlib.quality import DataQualityValidator
 
 with RMDatabase(db_path, extension_path=config.database.sqlite_extension_path) as db:
     query_service = QueryService(db)
@@ -134,44 +134,44 @@ All commands use the `uv run` prefix to run in the virtual environment:
 ### Query a Person
 
 ```bash
-uv run rmtool person 1 --events
+uv run rmagent person 1 --events
 ```
 
 ### Generate a Biography
 
 ```bash
-uv run rmtool bio 1 --length standard --output bio.md
+uv run rmagent bio 1 --length standard --output bio.md
 ```
 
 ### Run Data Quality Checks
 
 ```bash
-uv run rmtool quality --severity critical
+uv run rmagent quality --severity critical
 ```
 
 ### Ask Questions
 
 ```bash
-uv run rmtool ask "Who were John Smith's parents?"
+uv run rmagent ask "Who were John Smith's parents?"
 ```
 
 ### Create Timeline
 
 ```bash
-uv run rmtool timeline 1 --output timeline.json
+uv run rmagent timeline 1 --output timeline.json
 ```
 
 ### Export to Hugo
 
 ```bash
-uv run rmtool export hugo 1 --output-dir content/people
+uv run rmagent export hugo 1 --output-dir content/people
 ```
 
 ## Project Structure
 
 ```
 RM11/
-├── rmtool/              # Main package
+├── rmagent/              # Main package
 │   ├── rmlib/          # Core library (database, parsers, queries)
 │   ├── agent/          # AI agent (LLM providers, prompts)
 │   ├── generators/     # Output generators (bio, timeline, hugo)
@@ -201,13 +201,13 @@ uv run black .
 uv run ruff check .
 
 # Type checking
-uv run mypy rmtool/
+uv run mypy rmagent/
 ```
 
 ### Run with Coverage
 
 ```bash
-uv run pytest --cov=rmtool --cov-report=html
+uv run pytest --cov=rmagent --cov-report=html
 ```
 
 ## Documentation
@@ -244,7 +244,7 @@ See `docs/AI_AGENT_TODO.md` for the complete development roadmap.
 - ✅ Display sources with formatted bibliographies (italics support)
 - ✅ Generate basic biography (text-based, no AI yet)
 - ✅ Run all 24 data quality validation rules
-- ✅ Prototype script: `uv run python -m rmtool.rmlib.prototype --person-id 1 --check-quality`
+- ✅ Prototype script: `uv run python -m rmagent.rmlib.prototype --person-id 1 --check-quality`
 
 **📊 Test Coverage:** 229 unit tests, 91-99% coverage across modules
 
@@ -255,7 +255,17 @@ See `docs/AI_AGENT_TODO.md` for the complete development roadmap.
 - ✅ Agent core (GenealogyAgent with context builders)
 - ✅ LangChain tools (query, events, validation, search)
 
-**⏭️ Next Phase:** Phase 3 - Output Generators (biography, quality report, timeline, Hugo export)
+**✅ Phase 3: Output Generators - COMPLETE (4/4 tasks)**
+- ✅ Biography generator (9-section structure, AI-powered, 24 tests)
+- ✅ Quality report generator (Markdown/HTML/CSV formats, 13 tests)
+- ✅ Timeline generator (TimelineJS3 JSON/HTML, 29 tests)
+- ✅ Hugo blog exporter (single/batch export, 24 tests)
+
+**📍 Phase 4: CLI Interface - IN PROGRESS (1/8 tasks)**
+- ✅ CLI Framework (Click + Rich, global options, 7 command modules, 23 tests)
+- ⏭️ Command implementations (person, bio, quality, ask, timeline, export, search)
+
+**⏭️ Next Tasks:** Complete Phase 4 CLI command implementations (Tasks 4.2-4.8)
 
 See `docs/AI_AGENT_TODO.md` for detailed progress and roadmap.
 

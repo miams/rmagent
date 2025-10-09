@@ -11,8 +11,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Callable, Dict, Optional
 
-from rmtool.rmlib.queries import QueryService
-from rmtool.rmlib.quality import DataQualityValidator
+from rmagent.rmlib.queries import QueryService
+from rmagent.rmlib.quality import DataQualityValidator
 
 
 class ToolExecutionError(RuntimeError):

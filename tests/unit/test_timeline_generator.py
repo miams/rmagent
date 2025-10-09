@@ -5,7 +5,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from rmtool.generators.timeline import (
+from rmagent.generators.timeline import (
     LifePhase,
     TimelineFormat,
     TimelineGenerator,

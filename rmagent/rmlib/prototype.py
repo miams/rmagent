@@ -10,8 +10,8 @@ Demonstrates:
 5. Basic biography generation (no AI yet)
 
 Usage:
-    python -m rmtool.rmlib.prototype --person-id 1 --check-quality
-    python -m rmtool.rmlib.prototype --person-id 1541 --check-quality
+    python -m rmagent.rmlib.prototype --person-id 1 --check-quality
+    python -m rmagent.rmlib.prototype --person-id 1541 --check-quality
 """
 
 from __future__ import annotations
@@ -26,13 +26,13 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from rmtool.rmlib.database import RMDatabase
-from rmtool.rmlib.queries import QueryService
-from rmtool.rmlib.quality import DataQualityValidator
-from rmtool.rmlib.parsers.date_parser import parse_rm_date
-from rmtool.rmlib.parsers.place_parser import parse_place_name, format_place_short, format_place_medium
-from rmtool.rmlib.parsers.name_parser import format_full_name
-from rmtool.rmlib.parsers.blob_parser import parse_source_fields, parse_citation_fields
+from rmagent.rmlib.database import RMDatabase
+from rmagent.rmlib.queries import QueryService
+from rmagent.rmlib.quality import DataQualityValidator
+from rmagent.rmlib.parsers.date_parser import parse_rm_date
+from rmagent.rmlib.parsers.place_parser import parse_place_name, format_place_short, format_place_medium
+from rmagent.rmlib.parsers.name_parser import format_full_name
+from rmagent.rmlib.parsers.blob_parser import parse_source_fields, parse_citation_fields
 
 
 def get_row_value(row, key: str, default=None):

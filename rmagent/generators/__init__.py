@@ -1,6 +1,6 @@
 """RMAgent output generators."""
 
-from rmtool.generators.biography import (
+from rmagent.generators.biography import (
     Biography,
     BiographyGenerator,
     BiographyLength,
@@ -8,14 +8,14 @@ from rmtool.generators.biography import (
     EventContext,
     PersonContext,
 )
-from rmtool.generators.hugo_exporter import (
+from rmagent.generators.hugo_exporter import (
     HugoExporter,
 )
-from rmtool.generators.quality_report import (
+from rmagent.generators.quality_report import (
     QualityReportGenerator,
     ReportFormat,
 )
-from rmtool.generators.timeline import (
+from rmagent.generators.timeline import (
     LifePhase,
     TimelineFormat,
     TimelineGenerator,

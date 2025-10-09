@@ -13,7 +13,7 @@ import pytest
 import sqlite3
 from pathlib import Path
 
-from rmtool.rmlib.parsers.name_parser import (
+from rmagent.rmlib.parsers.name_parser import (
     get_primary_name,
     get_all_names,
     get_name_at_date,

@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, MagicMock
 
-from rmtool.generators.biography import (
+from rmagent.generators.biography import (
     BiographyGenerator,
     BiographyLength,
     CitationStyle,
@@ -12,8 +12,8 @@ from rmtool.generators.biography import (
     EventContext,
     Biography,
 )
-from rmtool.agent.genealogy_agent import GenealogyAgent
-from rmtool.agent.llm_provider import LLMResult
+from rmagent.agent.genealogy_agent import GenealogyAgent
+from rmagent.agent.llm_provider import LLMResult
 
 
 class TestBiographyLength:
@@ -565,7 +565,7 @@ Michael became a genealogist and researcher.
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
 
-        from rmtool.rmlib.database import RMDatabase
+        from rmagent.rmlib.database import RMDatabase
 
         generator = BiographyGenerator(db=real_db_path, extension_path=extension_path)
 

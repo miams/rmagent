@@ -4,11 +4,11 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from rmtool.generators.quality_report import (
+from rmagent.generators.quality_report import (
     QualityReportGenerator,
     ReportFormat,
 )
-from rmtool.rmlib.quality import (
+from rmagent.rmlib.quality import (
     QualityIssue,
     QualityReport,
     QualitySeverity,

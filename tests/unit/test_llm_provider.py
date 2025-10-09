@@ -1,5 +1,5 @@
 """
-Tests for rmtool.agent.llm_provider.
+Tests for rmagent.agent.llm_provider.
 
 Uses dummy providers to avoid calling external APIs.
 """
@@ -17,7 +17,7 @@ import sys
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from rmtool.agent.llm_provider import (
+from rmagent.agent.llm_provider import (
     LLMError,
     LLMProvider,
     LLMResult,

@@ -12,7 +12,7 @@ Tests Pydantic data models for:
 import pytest
 from pydantic import ValidationError
 
-from rmtool.rmlib.models import (
+from rmagent.rmlib.models import (
     Person,
     Name,
     Event,

@@ -9,7 +9,7 @@ Tests BLOB parsing for:
 
 import pytest
 
-from rmtool.rmlib.parsers.blob_parser import (
+from rmagent.rmlib.parsers.blob_parser import (
     parse_source_fields,
     parse_citation_fields,
     parse_template_field_defs,

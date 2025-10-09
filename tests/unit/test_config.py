@@ -1,5 +1,5 @@
 """
-Tests for rmtool.config.config module.
+Tests for rmagent.config.config module.
 """
 
 from __future__ import annotations
@@ -15,8 +15,8 @@ import sys
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from rmtool.agent.llm_provider import LLMError
-from rmtool.config.config import load_app_config
+from rmagent.agent.llm_provider import LLMError
+from rmagent.config.config import load_app_config
 
 
 def test_load_app_config_from_env_file(tmp_path, monkeypatch):

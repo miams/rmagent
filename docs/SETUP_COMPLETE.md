@@ -11,7 +11,7 @@
 
 ```
 RM11/
-├── rmtool/                    # Main package
+├── rmagent/                    # Main package
 │   ├── __init__.py
 │   ├── rmlib/                 # Core library
 │   │   ├── __init__.py
@@ -117,7 +117,7 @@ RM11/
 
 ### Project Layout
 
-- **Standard Package Structure**: `rmtool/` as main package
+- **Standard Package Structure**: `rmagent/` as main package
 - **Modular Design**: Separate modules for lib, agent, generators, CLI
 - **Test Suite Ready**: Unit and integration test directories
 - **Type Hints**: mypy configured for type checking
@@ -150,8 +150,8 @@ uv sync --extra dev
 # Run any Python command in the virtual environment
 uv run python script.py
 
-# Run rmtool CLI
-uv run rmtool --help
+# Run rmagent CLI
+uv run rmagent --help
 
 # Run tests
 uv run pytest
@@ -160,7 +160,7 @@ uv run pytest
 uv run black .
 
 # Type check
-uv run mypy rmtool/
+uv run mypy rmagent/
 ```
 
 ### Add New Dependencies
@@ -225,18 +225,18 @@ uv pip list          # List packages
 ### Development Workflow
 
 ```bash
-# 1. Write code in rmtool/
+# 1. Write code in rmagent/
 
 # 2. Format and check
 uv run black .
 uv run ruff check .
-uv run mypy rmtool/
+uv run mypy rmagent/
 
 # 3. Test
 uv run pytest
 
 # 4. Run
-uv run rmtool <command>
+uv run rmagent <command>
 ```
 
 ---

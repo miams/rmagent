@@ -3,7 +3,7 @@ Centralized configuration loading for RMAgent.
 
 Loads settings from environment variables (with optional .env support),
 validates required values, and exposes helper utilities to instantiate
-LLM providers declared in `rmtool.agent.llm_provider`.
+LLM providers declared in `rmagent.agent.llm_provider`.
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ except ImportError:  # pragma: no cover - compatibility for Pydantic v1
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
 
-from rmtool.agent.llm_provider import (
+from rmagent.agent.llm_provider import (
     LLMError,
     LLMProvider,
     get_provider,
@@ -163,7 +163,7 @@ class LoggingSettings(BaseModel):
     """Logging configuration."""
 
     level: str = Field(default="INFO")
-    log_file: Path = Field(default=Path("rmtool.log"))
+    log_file: Path = Field(default=Path("rmagent.log"))
     json_log_file: Path = Field(default=Path("logs/llm_debug.jsonl"))
 
     @field_validator("level")
@@ -237,7 +237,7 @@ def configure_logging(settings: LoggingSettings) -> None:
     console_handler.setFormatter(formatter)
     root_logger.addHandler(console_handler)
 
-    debug_logger = logging.getLogger("rmtool.llm_debug")
+    debug_logger = logging.getLogger("rmagent.llm_debug")
     debug_logger.setLevel(logging.DEBUG)
     json_handler = logging.FileHandler(settings.json_log_file, mode="a")
     json_handler.setLevel(logging.DEBUG)
@@ -299,7 +299,7 @@ def load_app_config(
 
         logging_settings = LoggingSettings(
             level=_env("LOG_LEVEL", "INFO"),
-            log_file=Path(_env("LOG_FILE", "rmtool.log")),
+            log_file=Path(_env("LOG_FILE", "rmagent.log")),
             json_log_file=Path(_env("LLM_DEBUG_LOG_FILE", "logs/llm_debug.jsonl")),
         )
 

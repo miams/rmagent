@@ -1,5 +1,5 @@
 [project]
-name = "rmtool"
+name = "rmagent"
 version = "0.1.0"
 description = "AI-powered genealogy agent for RootsMagic databases - data quality analysis, biography generation, and research assistance"
 readme = "README.md"
@@ -54,7 +54,7 @@ dev = [
 ]
 
 [project.scripts]
-rmtool = "rmtool.cli.main:cli"
+rmagent = "rmagent.cli.main:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -80,4 +80,4 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --cov=rmtool --cov-report=html --cov-report=term"
+addopts = "-v --cov=rmagent --cov-report=html --cov-report=term"

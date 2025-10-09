@@ -113,7 +113,7 @@ mypy
 ---
 
 ### Task 1.2: Database Connection Module ✅ COMPLETE
-**File:** `rmtool/rmlib/database.py`
+**File:** `rmagent/rmlib/database.py`
 **Reference:** sqlite-extension/python_example.py, RM11_Query_Patterns.md
 **Completed:** 2025-10-09
 
@@ -145,7 +145,7 @@ with RMDatabase('data/Iiams.rmtree') as db:
 ---
 
 ### Task 1.3: Data Models ✅ COMPLETE
-**File:** `rmtool/rmlib/models.py`
+**File:** `rmagent/rmlib/models.py`
 **Reference:** RM11_Schema_Reference.md, RM11_DataDef.yaml
 **Completed:** 2025-10-09
 
@@ -184,7 +184,7 @@ with RMDatabase('data/Iiams.rmtree') as db:
 ---
 
 ### Task 1.4: Date Parser ✅ COMPLETE
-**File:** `rmtool/rmlib/parsers/date_parser.py`
+**File:** `rmagent/rmlib/parsers/date_parser.py`
 **Reference:** RM11_Date_Format.md
 **Completed:** 2025-10-09
 
@@ -237,7 +237,7 @@ date.to_datetime()     # datetime(1896, 3, 2)
 ---
 
 ### Task 1.5: BLOB Parsers ✅ COMPLETE
-**File:** `rmtool/rmlib/parsers/blob_parser.py`
+**File:** `rmagent/rmlib/parsers/blob_parser.py`
 **Reference:** RM11_BLOB_SourceFields.md, RM11_BLOB_CitationFields.md, RM11_BLOB_SourceTemplateFieldDefs.md
 **Completed:** 2025-10-09
 
@@ -428,7 +428,7 @@ report = validator.run_all_checks()
 **Test Command:**
 ```bash
 # Working prototype script
-uv run python -m rmtool.rmlib.prototype --person-id 1 --check-quality
+uv run python -m rmagent.rmlib.prototype --person-id 1 --check-quality
 ```
 
 **Acceptance Criteria:**
@@ -473,7 +473,7 @@ uv run python -m rmtool.rmlib.prototype --person-id 1 --check-quality
 
 **Example API:**
 ```python
-from rmtool.agent.llm_provider import get_provider
+from rmagent.agent.llm_provider import get_provider
 
 provider = get_provider("anthropic", api_key="sk-ant-...", model="claude-3-5-sonnet")
 result = provider.generate("Summarize the Iams family history.")
@@ -483,7 +483,7 @@ print(result.text)
 ---
 
 ### Task 2.2: Configuration Management ✅ COMPLETE
-**File:** `rmtool/config/config.py`
+**File:** `rmagent/config/config.py`
 
 - [✓] `config/.env` environment loading with override support
 - [✓] Nested Pydantic settings (LLM, database, outputs, logging, privacy, citation)
@@ -504,7 +504,7 @@ EXPORT_DIR=exports
 
 **Programmatic usage:**
 ```python
-from rmtool.config.config import load_app_config
+from rmagent.config.config import load_app_config
 
 config = load_app_config()
 provider = config.build_provider()
@@ -513,7 +513,7 @@ provider = config.build_provider()
 ---
 
 ### Task 2.3: Prompt Templates
-**File:** `rmtool/agent/prompts.py`
+**File:** `rmagent/agent/prompts.py`
 **Reference:** RM11_Biography_Best_Practices.md, RM11_Data_Quality_Rules.md, RM11_Timeline_Construction.md
 
 - [✓] Prompt registry with versioned templates
@@ -524,7 +524,7 @@ provider = config.build_provider()
 
 **Example Usage:**
 ```python
-from rmtool.agent.prompts import render_prompt
+from rmagent.agent.prompts import render_prompt
 
 prompt_text = render_prompt(
     "quality",
@@ -541,7 +541,7 @@ prompt_text = render_prompt(
 ---
 
 ### Task 2.4: Agent Core ✅ COMPLETE
-**File:** `rmtool/agent/genealogy_agent.py`
+**File:** `rmagent/agent/genealogy_agent.py`
 
 - [✓] `GenealogyAgent` orchestrating biography, QA, quality, and timeline flows
 - [✓] Context builders using QueryService + prompt registry
@@ -559,7 +559,7 @@ answer = agent.ask("Tell me about John Smith's occupation")
 ---
 
 ### Task 2.5: LangChain Tools ✅ COMPLETE
-**File:** `rmtool/agent/tools.py`
+**File:** `rmagent/agent/tools.py`
 
 - [✓] Query, events, ancestor, relationship, validation, and search tools
 - [✓] Tool descriptions compatible with LangChain
@@ -583,7 +583,7 @@ agent = create_langchain_agent(llm, tools)
 **Goal:** Generate formatted output in various formats
 
 ### Task 3.1: Biography Generator ✅ COMPLETE
-**File:** `rmtool/generators/biography.py`
+**File:** `rmagent/generators/biography.py`
 **Reference:** RM11_Biography_Best_Practices.md
 **Completed:** 2025-10-09
 
@@ -617,7 +617,7 @@ agent = create_langchain_agent(llm, tools)
 
 **Example API:**
 ```python
-from rmtool.generators.biography import BiographyGenerator, BiographyLength, CitationStyle
+from rmagent.generators.biography import BiographyGenerator, BiographyLength, CitationStyle
 
 generator = BiographyGenerator(db="data/Iiams.rmtree", agent=agent)
 bio = generator.generate(
@@ -634,7 +634,7 @@ print(bio.render_markdown())
 ---
 
 ### Task 3.2: Data Quality Report Generator ✅ COMPLETE
-**File:** `rmtool/generators/quality_report.py`
+**File:** `rmagent/generators/quality_report.py`
 **Reference:** RM11_Data_Quality_Rules.md
 **Completed:** 2025-10-09
 
@@ -659,7 +659,7 @@ print(bio.render_markdown())
 
 **Example API:**
 ```python
-from rmtool.generators.quality_report import QualityReportGenerator, ReportFormat
+from rmagent.generators.quality_report import QualityReportGenerator, ReportFormat
 
 generator = QualityReportGenerator(db="data/Iiams.rmtree")
 
@@ -703,7 +703,7 @@ Generated: 2025-10-09 14:30:00
 ---
 
 ### Task 3.3: Timeline Generator ✅ COMPLETE
-**File:** `rmtool/generators/timeline.py`
+**File:** `rmagent/generators/timeline.py`
 **Reference:** RM11_Timeline_Construction.md
 **Completed:** 2025-10-09
 
@@ -736,7 +736,7 @@ Generated: 2025-10-09 14:30:00
 
 **Example API:**
 ```python
-from rmtool.generators.timeline import TimelineGenerator, TimelineFormat
+from rmagent.generators.timeline import TimelineGenerator, TimelineFormat
 
 generator = TimelineGenerator(db="data/Iiams.rmtree")
 
@@ -789,7 +789,7 @@ html_output = generator.generate(
 ---
 
 ### Task 3.4: Hugo Blog Post Exporter ✅ COMPLETE
-**File:** `rmtool/generators/hugo_exporter.py`
+**File:** `rmagent/generators/hugo_exporter.py`
 **Completed:** 2025-10-09
 
 - [✓] Generate Hugo-compatible Markdown
@@ -818,8 +818,8 @@ html_output = generator.generate(
 
 **Example API:**
 ```python
-from rmtool.generators.hugo_exporter import HugoExporter
-from rmtool.generators.biography import BiographyLength
+from rmagent.generators.hugo_exporter import HugoExporter
+from rmagent.generators.biography import BiographyLength
 
 exporter = HugoExporter(
     db="data/Iiams.rmtree",
@@ -885,20 +885,21 @@ He was the child of William Leonard Iams and Lucy Virginia Dorsey.
 
 **Goal:** Command-line interface for all features
 
-### Task 4.1: CLI Framework
-**File:** `cli/main.py`
+### Task 4.1: CLI Framework ✅ COMPLETE
+**File:** `rmagent/cli/main.py`
+**Completed:** 2025-10-09
 
-- [ ] Use `click` for command structure
-- [ ] Use `rich` for formatted output
-- [ ] Global options: `--database`, `--verbose`, `--llm-provider`
-- [ ] Progress indicators for long operations
-- [ ] Error handling and user-friendly messages
-- [ ] Help text for all commands
-- [ ] Integration tests (test_cli.py)
+- [✓] Use `click` for command structure
+- [✓] Use `rich` for formatted output
+- [✓] Global options: `--database`, `--verbose`, `--llm-provider`
+- [✓] Progress indicators for long operations
+- [✓] Error handling and user-friendly messages
+- [✓] Help text for all commands
+- [✓] Integration tests (test_cli.py) - 23 tests, 100% pass rate
 
 **Command Structure:**
 ```bash
-rmtool [OPTIONS] COMMAND [ARGS]
+rmagent [OPTIONS] COMMAND [ARGS]
 
 Options:
   --database PATH      Path to RootsMagic database
@@ -921,17 +922,17 @@ Commands:
 ### Task 4.2: Person Command
 **File:** `cli/commands/person.py`
 
-- [ ] `rmtool person <id>` - Show person details
-- [ ] `rmtool person <id> --events` - Show all events
-- [ ] `rmtool person <id> --ancestors` - Show ancestor tree
-- [ ] `rmtool person <id> --descendants` - Show descendant tree
-- [ ] `rmtool person <id> --family` - Show immediate family
+- [ ] `rmagent person <id>` - Show person details
+- [ ] `rmagent person <id> --events` - Show all events
+- [ ] `rmagent person <id> --ancestors` - Show ancestor tree
+- [ ] `rmagent person <id> --descendants` - Show descendant tree
+- [ ] `rmagent person <id> --family` - Show immediate family
 - [ ] Rich table formatting
 - [ ] Integration tests
 
 **Example:**
 ```bash
-$ rmtool person 1 --events
+$ rmagent person 1 --events
 
 📋 Person: Michael Dorsey Iams (1968-)
 ─────────────────────────────────────
@@ -951,7 +952,7 @@ Events:
 ### Task 4.3: Biography Command
 **File:** `cli/commands/bio.py`
 
-- [ ] `rmtool bio <id>` - Generate biography
+- [ ] `rmagent bio <id>` - Generate biography
 - [ ] `--length` option (short/standard/comprehensive)
 - [ ] `--style` option (narrative/academic/casual)
 - [ ] `--output` option (stdout/file)
@@ -962,7 +963,7 @@ Events:
 
 **Example:**
 ```bash
-$ rmtool bio 1 --length standard --output bio.md
+$ rmagent bio 1 --length standard --output bio.md
 
 ⏳ Generating biography for Michael Dorsey Iams...
 ✓ Querying database (12 events found)
@@ -979,8 +980,8 @@ $ rmtool bio 1 --length standard --output bio.md
 ### Task 4.4: Quality Command
 **File:** `cli/commands/quality.py`
 
-- [ ] `rmtool quality` - Run all checks on entire database
-- [ ] `rmtool quality --person <id>` - Check specific person
+- [ ] `rmagent quality` - Run all checks on entire database
+- [ ] `rmagent quality --person <id>` - Check specific person
 - [ ] `--category` filter (required/logical/integrity/sources/dates/values)
 - [ ] `--severity` filter (critical/high/medium/low)
 - [ ] `--output` option (stdout/file)
@@ -990,7 +991,7 @@ $ rmtool bio 1 --length standard --output bio.md
 
 **Example:**
 ```bash
-$ rmtool quality --severity critical
+$ rmagent quality --severity critical
 
 🔍 Running data quality checks...
 
@@ -1021,8 +1022,8 @@ Death Before Birth (3)
 ### Task 4.5: Ask Command (Q&A)
 **File:** `cli/commands/ask.py`
 
-- [ ] `rmtool ask "question"` - Interactive Q&A
-- [ ] `rmtool ask --interactive` - Conversation mode
+- [ ] `rmagent ask "question"` - Interactive Q&A
+- [ ] `rmagent ask --interactive` - Conversation mode
 - [ ] Context preservation across questions
 - [ ] Source attribution in answers
 - [ ] Rich markdown formatting
@@ -1030,7 +1031,7 @@ Death Before Birth (3)
 
 **Example:**
 ```bash
-$ rmtool ask "Who were Michael Iams' parents?"
+$ rmagent ask "Who were Michael Iams' parents?"
 
 🤔 Searching database...
 
@@ -1052,7 +1053,7 @@ Source: FamilyTable (FamilyID: 42), PersonTable
 ### Task 4.6: Timeline Command
 **File:** `cli/commands/timeline.py`
 
-- [ ] `rmtool timeline <id>` - Generate timeline JSON
+- [ ] `rmagent timeline <id>` - Generate timeline JSON
 - [ ] `--format` option (timelinejs3/json/markdown)
 - [ ] `--output` option (stdout/file)
 - [ ] `--group-by` option (phase/year/decade)
@@ -1061,7 +1062,7 @@ Source: FamilyTable (FamilyID: 42), PersonTable
 
 **Example:**
 ```bash
-$ rmtool timeline 1 --output timeline.json
+$ rmagent timeline 1 --output timeline.json
 
 ⏳ Generating timeline for Michael Dorsey Iams...
 ✓ Extracted 12 events
@@ -1078,8 +1079,8 @@ $ rmtool timeline 1 --output timeline.json
 ### Task 4.7: Export Command (Hugo)
 **File:** `cli/commands/export.py`
 
-- [ ] `rmtool export hugo <id>` - Export person to Hugo post
-- [ ] `rmtool export hugo --all` - Export all persons
+- [ ] `rmagent export hugo <id>` - Export person to Hugo post
+- [ ] `rmagent export hugo --all` - Export all persons
 - [ ] `--output-dir` option
 - [ ] `--template` option (custom Hugo template)
 - [ ] `--include-timeline` flag
@@ -1089,7 +1090,7 @@ $ rmtool timeline 1 --output timeline.json
 
 **Example:**
 ```bash
-$ rmtool export hugo 1 --output-dir content/people
+$ rmagent export hugo 1 --output-dir content/people
 
 ⏳ Exporting Michael Dorsey Iams to Hugo...
 ✓ Generated biography
@@ -1105,9 +1106,9 @@ $ rmtool export hugo 1 --output-dir content/people
 ### Task 4.8: Search Command
 **File:** `cli/commands/search.py`
 
-- [ ] `rmtool search --name "John Smith"` - Search by name
-- [ ] `rmtool search --place "Maryland"` - Search by place
-- [ ] `rmtool search --date "1850"` - Search by date
+- [ ] `rmagent search --name "John Smith"` - Search by name
+- [ ] `rmagent search --place "Maryland"` - Search by place
+- [ ] `rmagent search --date "1850"` - Search by date
 - [ ] `--limit` option
 - [ ] Phonetic search support (Metaphone)
 - [ ] Rich table formatting
@@ -1115,7 +1116,7 @@ $ rmtool export hugo 1 --output-dir content/people
 
 **Example:**
 ```bash
-$ rmtool search --name "Smith" --limit 5
+$ rmagent search --name "Smith" --limit 5
 
 🔍 Searching for: Smith
 
@@ -1151,13 +1152,13 @@ Found 5 matches:
 **Test Commands:**
 ```bash
 # All should work at MVP
-rmtool person 1
-rmtool bio 1 --length standard
-rmtool quality --severity critical
-rmtool ask "Tell me about the Smith family"
-rmtool timeline 1
-rmtool export hugo 1
-rmtool search --name "Smith"
+rmagent person 1
+rmagent bio 1 --length standard
+rmagent quality --severity critical
+rmagent ask "Tell me about the Smith family"
+rmagent timeline 1
+rmagent export hugo 1
+rmagent search --name "Smith"
 ```
 
 **Acceptance Criteria:**
@@ -1538,7 +1539,7 @@ RM11/
 **Progress:** 4/4 tasks ✅ COMPLETE
 
 ### Phase 4: CLI Interface (Working Prototype - Complete)
-- [ ] 4.1: CLI Framework
+- [x] 4.1: CLI Framework
 - [ ] 4.2: Person Command
 - [ ] 4.3: Biography Command
 - [ ] 4.4: Quality Command
@@ -1547,7 +1548,7 @@ RM11/
 - [ ] 4.7: Export Command (Hugo)
 - [ ] 4.8: Search Command
 
-**Progress:** 0/8 tasks
+**Progress:** 1/8 tasks
 
 ### 🎯 Milestone 1: Working Prototype
 **Status:** ✅ Complete (Checkpoint verified 2025-10-09)

@@ -3,8 +3,8 @@
 import pytest
 from pathlib import Path
 
-from rmtool.generators.hugo_exporter import HugoExporter, _slugify
-from rmtool.generators.biography import BiographyLength
+from rmagent.generators.hugo_exporter import HugoExporter, _slugify
+from rmagent.generators.biography import BiographyLength
 
 
 class TestSlugify:

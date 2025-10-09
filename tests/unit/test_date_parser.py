@@ -14,7 +14,7 @@ Tests the RootsMagic 24-character date format parser for:
 import pytest
 from datetime import datetime
 
-from rmtool.rmlib.parsers.date_parser import (
+from rmagent.rmlib.parsers.date_parser import (
     parse_rm_date,
     is_unknown_date,
     RMDate,

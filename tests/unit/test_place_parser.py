@@ -11,7 +11,7 @@ Tests place name parsing for:
 
 import pytest
 
-from rmtool.rmlib.parsers.place_parser import (
+from rmagent.rmlib.parsers.place_parser import (
     parse_place_name,
     get_place_level,
     get_place_short,

@@ -49,9 +49,12 @@ htmlcov/
 # Environment variables
 .env
 .env.local
+config/.env
+config/.env.local
 
 # Logs
 *.log
+logs/
 
 # Database files (don't commit personal data)
 *.rmtree

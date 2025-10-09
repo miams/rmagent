@@ -13,12 +13,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Union
 
-from rmtool.generators.biography import BiographyGenerator, BiographyLength, CitationStyle
-from rmtool.generators.timeline import TimelineGenerator, TimelineFormat
-from rmtool.rmlib.database import RMDatabase
-from rmtool.rmlib.models import OwnerType
-from rmtool.rmlib.parsers.name_parser import format_full_name
-from rmtool.rmlib.queries import QueryService
+from rmagent.generators.biography import BiographyGenerator, BiographyLength, CitationStyle
+from rmagent.generators.timeline import TimelineGenerator, TimelineFormat
+from rmagent.rmlib.database import RMDatabase
+from rmagent.rmlib.models import OwnerType
+from rmagent.rmlib.parsers.name_parser import format_full_name
+from rmagent.rmlib.queries import QueryService
 
 
 def _get_row_value(row, key: str, default=None):
@@ -58,7 +58,7 @@ class HugoExporter:
 
     Example:
         ```python
-        from rmtool.generators.hugo_exporter import HugoExporter
+        from rmagent.generators.hugo_exporter import HugoExporter
 
         exporter = HugoExporter(db="data/Iiams.rmtree")
 

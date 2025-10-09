@@ -1,5 +1,5 @@
 """
-Tests for rmtool.agent.prompts module.
+Tests for rmagent.agent.prompts module.
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ import sys
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from rmtool.agent import prompts
+from rmagent.agent import prompts
 
 
 def test_list_prompts_contains_expected_keys():

@@ -1,5 +1,5 @@
 """
-Integration-style unit tests for rmtool.rmlib.queries.QueryService.
+Integration-style unit tests for rmagent.rmlib.queries.QueryService.
 
 These tests exercise canonical query patterns against the sanitized
 RootsMagic sample database (data/Iiams.rmtree). The ICU extension is
@@ -13,15 +13,15 @@ from typing import Iterable
 
 import pytest
 
-# Ensure repository root is importable for rmtool package
+# Ensure repository root is importable for rmagent package
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 import sys
 
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from rmtool.rmlib.database import RMDatabase
-from rmtool.rmlib.queries import QueryService, VITAL_EVENT_TYPES
+from rmagent.rmlib.database import RMDatabase
+from rmagent.rmlib.queries import QueryService, VITAL_EVENT_TYPES
 
 DATA_PATH = Path("data/Iiams.rmtree")
 ICU_EXTENSION_PATH = Path("sqlite-extension/icu.dylib")
