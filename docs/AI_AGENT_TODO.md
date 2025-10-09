@@ -540,16 +540,13 @@ prompt_text = render_prompt(
 
 ---
 
-### Task 2.4: Agent Core
-**File:** `agent/genealogy_agent.py`
+### Task 2.4: Agent Core ✅ COMPLETE
+**File:** `rmtool/agent/genealogy_agent.py`
 
-- [ ] Main `GenealogyAgent` class
-- [ ] Context building from database queries
-- [ ] Prompt construction with person/event data
-- [ ] LLM invocation with retry logic
-- [ ] Response parsing and validation
-- [ ] Conversation memory (for Q&A)
-- [ ] Integration tests (test_agent.py)
+- [✓] `GenealogyAgent` orchestrating biography, QA, quality, and timeline flows
+- [✓] Context builders using QueryService + prompt registry
+- [✓] LLM invocation with memory tracking
+- [✓] Unit tests (`tests/unit/test_agent.py`)
 
 **Example API:**
 ```python
@@ -561,17 +558,13 @@ answer = agent.ask("Tell me about John Smith's occupation")
 
 ---
 
-### Task 2.5: LangChain Tools
-**File:** `agent/tools.py`
+### Task 2.5: LangChain Tools ✅ COMPLETE
+**File:** `rmtool/agent/tools.py`
 
-- [ ] `QueryPersonTool` - Get person information
-- [ ] `GetEventsTool` - Get events for person
-- [ ] `GetAncestorsTool` - Get ancestor tree
-- [ ] `FindRelationshipTool` - Calculate relationship between two persons
-- [ ] `ValidateDataTool` - Run quality checks
-- [ ] `SearchDatabaseTool` - Search by name/place/date
-- [ ] Tool descriptions for LangChain agent
-- [ ] Unit tests (test_tools.py)
+- [✓] Query, events, ancestor, relationship, validation, and search tools
+- [✓] Tool descriptions compatible with LangChain
+- [✓] Helper `default_langchain_tools`
+- [✓] Unit tests (`tests/unit/test_tools.py`)
 
 **Example:**
 ```python

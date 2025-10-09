@@ -93,6 +93,25 @@ biography_prompt = render_prompt(
         "source_notes": "...",
     },
 )
+
+from rmtool.agent.genealogy_agent import GenealogyAgent
+from rmtool.agent.tools import default_langchain_tools
+from rmtool.rmlib.database import RMDatabase
+from rmtool.rmlib.queries import QueryService
+from rmtool.rmlib.quality import DataQualityValidator
+
+with RMDatabase(db_path, extension_path=config.database.sqlite_extension_path) as db:
+    query_service = QueryService(db)
+    validator = DataQualityValidator(db)
+    tools = default_langchain_tools(query_service, validator)
+
+agent = GenealogyAgent(
+    llm_provider=provider,
+    db_path=db_path,
+    extension_path=config.database.sqlite_extension_path,
+)
+biography = agent.generate_biography(person_id=1)
+quality_summary = agent.analyze_data_quality()
 ```
 
 ## Usage
