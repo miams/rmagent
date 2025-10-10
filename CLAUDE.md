@@ -708,6 +708,17 @@ ssh-add ~/.ssh/miams-github
 ssh -T git@github.com
 ```
 
+### ⚠️ IMPORTANT: Database File Policy
+
+**DO NOT track database files in git!**
+
+- The `.gitignore` file excludes `*.rmtree` files to prevent committing personal genealogical data
+- **NEVER add exceptions** like `!data/Iiams.rmtree` to `.gitignore`
+- Database files contain sensitive personal information and should NOT be committed to version control
+- Database files are large binary files that don't belong in git repositories
+- Users should maintain their own local database files in the `data/` directory
+- Sample database structure can be documented without committing the actual database file
+
 ### Branch Strategy
 
 - **main** - Stable, production-ready code

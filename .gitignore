@@ -58,7 +58,6 @@ logs/
 
 # Database files (don't commit personal data)
 *.rmtree
-!data/Iiams.rmtree
 
 # Output
 output/

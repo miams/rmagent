@@ -29,6 +29,17 @@ Adopt Conventional Commit prefixes (`docs:`, `data:`, `refactor:`) followed by c
 ## Data Handling & Security Tips
 Only commit sanitized genealogical data; scrub personal details before adding fixtures. Reference sensitive upstream files from `archive/` rather than copying content into editable areas. When ingesting new datasets, note provenance, anonymization steps, and storage location so downstream agents can audit compliance.
 
+### ⚠️ CRITICAL: Database File Policy
+
+**NEVER commit database files to git!**
+
+- `.gitignore` correctly excludes `*.rmtree` files - DO NOT override this
+- **NEVER add exceptions** like `!data/Iiams.rmtree` to `.gitignore`
+- Database files contain sensitive personal information (names, dates, relationships)
+- Database files are large binary files unsuitable for version control
+- Users maintain their own local database files in `data/` directory
+- Document database structure in markdown/SQL, not by committing the actual database
+
 ## Observability
 - Set `LOG_LEVEL=DEBUG` in `config/.env` to stream verbose logs.
 - LLM prompt/response JSON traces (prompt text, completion, provider, model, token totals, latency) write to `LLM_DEBUG_LOG_FILE` (default `logs/llm_debug.jsonl`) for reproducible debugging.
