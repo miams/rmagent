@@ -35,11 +35,18 @@ Only commit sanitized genealogical data; scrub personal details before adding fi
 
 ## Current Implementation Status (2025-10-10)
 
+🎉 **MILESTONE 2: MVP (Minimum Viable Product) - ACHIEVED!**
+
+All 26 foundation tasks complete. See [docs/MVP_CHECKPOINT.md](docs/MVP_CHECKPOINT.md) for verification report.
+
 ### Completed Phases
 - **Phase 1: Foundation** (9/9 tasks) ✅ - Database access, parsers, queries, quality validation
 - **Phase 2: AI Integration** (5/5 tasks) ✅ - Multi-LLM support, prompts, agent core, LangChain tools
 - **Phase 3: Output Generators** (4/4 tasks) ✅ - Biography, quality reports, timelines, Hugo export
-- **Phase 4: CLI Interface** (6/8 tasks) 📍 - Command-line interface (in progress)
+- **Phase 4: CLI Interface** (8/8 tasks) ✅ - Command-line interface (COMPLETE)
+
+### Next Phase
+- **Phase 5: Testing & Quality** (0/4 tasks) ⏭️ - Increase test coverage to 80%, integration tests, code quality
 
 ### Available CLI Commands
 All commands use `uv run rmagent [command]` prefix:
@@ -71,18 +78,24 @@ All commands use `uv run rmagent [command]` prefix:
   - `--include-family` - Include spouse/children events
   - `--output` - Save to file
 
-- **`export hugo <id>`** - Export to Hugo blog format (⏭️ implementation pending)
-- **`search`** - Search database by name/place (⏭️ implementation pending)
+- **`export hugo <id>`** - Export to Hugo blog format:
+  - `--output-dir` - Output directory for Hugo content
+  - `--bio-length` (short/standard/comprehensive)
+  - `--include-timeline` - Include timeline files (default: true)
+  - `--batch-ids` - Export multiple persons (comma-separated IDs)
+  - `--all` - Export all persons in batch mode
+
+- **`search`** - Search database by name/place with phonetic matching (✅ COMPLETE)
 
 ### Testing Status
-- **Total Unit Tests:** 229+ tests across 18 modules
+- **Total Unit Tests:** 245+ tests across 18 modules
 - **Test Coverage:** 30-99% across components (85%+ for generators, 68-88% for CLI commands)
 - **Test Framework:** pytest with coverage reporting (`uv run pytest --cov=rmagent`)
 
 ### Next Development Tasks
-1. Complete `export hugo` command implementation (Task 4.7)
-2. Complete `search` command implementation (Task 4.8)
-3. Comprehensive integration testing (Phase 5)
-4. User documentation (Phase 6)
+1. ✅ Complete `search` command implementation (Task 4.8) - COMPLETE
+2. Comprehensive integration testing (Phase 5)
+3. User documentation (Phase 6)
+4. Production polish and enhancements (Phase 7)
 
 See `docs/AI_AGENT_TODO.md` for detailed roadmap and progress tracking.

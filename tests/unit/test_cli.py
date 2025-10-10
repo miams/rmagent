@@ -378,6 +378,99 @@ class TestExportCommand:
         assert '--bio-length' in result.output
         assert '--all' in result.output
 
+    def test_hugo_single_person_export(self, runner, test_db_path, tmp_path):
+        """Test exporting a single person to Hugo format."""
+        output_dir = tmp_path / "content" / "people"
+        result = runner.invoke(cli, [
+            '--database', test_db_path,
+            'export', 'hugo', '1',
+            '--output-dir', str(output_dir)
+        ])
+        assert result.exit_code == 0
+        assert 'Exported to:' in result.output
+
+        # Verify markdown file was created
+        markdown_files = list(output_dir.glob('*.md'))
+        assert len(markdown_files) >= 1
+
+        # Verify markdown content structure
+        markdown_content = markdown_files[0].read_text()
+        assert '---' in markdown_content  # YAML front matter
+        assert 'title:' in markdown_content
+        assert 'person_id:' in markdown_content
+
+    def test_hugo_batch_export(self, runner, test_db_path, tmp_path):
+        """Test exporting multiple persons with --batch-ids."""
+        output_dir = tmp_path / "content" / "people"
+        result = runner.invoke(cli, [
+            '--database', test_db_path,
+            'export', 'hugo',
+            '--batch-ids', '1,2,3',
+            '--output-dir', str(output_dir)
+        ])
+        assert result.exit_code == 0
+        assert 'Exported' in result.output
+
+        # Verify markdown files were created
+        markdown_files = list(output_dir.glob('*.md'))
+        # Should have at least 2 files (may have fewer if some persons don't exist)
+        # Plus potentially an _index.md file
+        assert len(markdown_files) >= 2
+
+    def test_hugo_with_timeline(self, runner, test_db_path, tmp_path):
+        """Test Hugo export with timeline included."""
+        output_dir = tmp_path / "content" / "people"
+        result = runner.invoke(cli, [
+            '--database', test_db_path,
+            'export', 'hugo', '1',
+            '--output-dir', str(output_dir),
+            '--include-timeline'
+        ])
+        assert result.exit_code == 0
+        assert 'Timeline JSON:' in result.output
+        assert 'Timeline HTML:' in result.output
+
+        # Verify timeline files were created
+        timelines_dir = tmp_path / "static" / "timelines"
+        if timelines_dir.exists():
+            json_files = list(timelines_dir.glob('*.json'))
+            html_files = list(timelines_dir.glob('*.html'))
+            assert len(json_files) >= 1
+            assert len(html_files) >= 1
+
+    def test_hugo_bio_length_variations(self, runner, test_db_path, tmp_path):
+        """Test Hugo export with different biography lengths."""
+        for length in ['short', 'standard', 'comprehensive']:
+            output_dir = tmp_path / f"content_{length}"
+            result = runner.invoke(cli, [
+                '--database', test_db_path,
+                'export', 'hugo', '1',
+                '--output-dir', str(output_dir),
+                '--bio-length', length
+            ])
+            assert result.exit_code == 0
+
+            # Verify file was created
+            markdown_files = list(output_dir.glob('*.md'))
+            assert len(markdown_files) >= 1
+
+    def test_hugo_without_person_id(self, runner):
+        """Test Hugo export without person ID or batch options."""
+        result = runner.invoke(cli, ['export', 'hugo'])
+        assert result.exit_code != 0
+        assert 'Error' in result.output
+
+    def test_hugo_invalid_bio_length(self, runner, test_db_path, tmp_path):
+        """Test Hugo export with invalid bio-length option."""
+        output_dir = tmp_path / "content"
+        result = runner.invoke(cli, [
+            '--database', test_db_path,
+            'export', 'hugo', '1',
+            '--output-dir', str(output_dir),
+            '--bio-length', 'invalid'
+        ])
+        assert result.exit_code != 0
+
 
 class TestSearchCommand:
     """Test search command."""
@@ -389,13 +482,76 @@ class TestSearchCommand:
         assert 'Search' in result.output
         assert '--name' in result.output
         assert '--place' in result.output
-        assert '--phonetic' in result.output
+        assert '--exact' in result.output
 
     def test_search_without_criteria(self, runner):
         """Test search without name or place."""
         result = runner.invoke(cli, ['search'])
         # Should show error about missing criteria
         assert result.exit_code != 0 or 'Error' in result.output
+
+    def test_search_by_name(self, runner, test_db_path):
+        """Test search by name."""
+        result = runner.invoke(cli, [
+            '--database', test_db_path,
+            'search',
+            '--name', 'Iams'
+        ])
+        # Should succeed if database has matching names
+        assert result.exit_code == 0
+        # Output should show search results or "No persons found"
+        assert 'Found' in result.output or 'No persons' in result.output
+
+    def test_search_by_full_name(self, runner, test_db_path):
+        """Test search by full name (given and surname)."""
+        result = runner.invoke(cli, [
+            '--database', test_db_path,
+            'search',
+            '--name', 'Michael Iams'
+        ])
+        assert result.exit_code == 0
+
+    def test_search_by_place(self, runner, test_db_path):
+        """Test search by place."""
+        result = runner.invoke(cli, [
+            '--database', test_db_path,
+            'search',
+            '--place', 'Maryland'
+        ])
+        assert result.exit_code == 0
+        # Should show place results or "No places found"
+        assert 'Found' in result.output or 'No places' in result.output
+
+    def test_search_with_limit(self, runner, test_db_path):
+        """Test search with custom limit."""
+        result = runner.invoke(cli, [
+            '--database', test_db_path,
+            'search',
+            '--name', 'Smith',
+            '--limit', '10'
+        ])
+        assert result.exit_code == 0
+
+    def test_search_exact_mode(self, runner, test_db_path):
+        """Test search with --exact flag (no phonetic matching)."""
+        result = runner.invoke(cli, [
+            '--database', test_db_path,
+            'search',
+            '--name', 'Iams',
+            '--exact'
+        ])
+        assert result.exit_code == 0
+
+    def test_search_name_and_place(self, runner, test_db_path):
+        """Test search with both name and place criteria."""
+        result = runner.invoke(cli, [
+            '--database', test_db_path,
+            'search',
+            '--name', 'Iams',
+            '--place', 'Maryland'
+        ])
+        # Should show results for both searches
+        assert result.exit_code == 0
 
 
 class TestGlobalOptions:

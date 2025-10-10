@@ -228,24 +228,36 @@ uv run rmagent timeline 1 --include-family
 # Export single person to Hugo blog format
 uv run rmagent export hugo 1 --output-dir content/people
 
-# Export with timeline included
+# Export with timeline included (default)
 uv run rmagent export hugo 1 --output-dir content/people --include-timeline
 
-# Export multiple people
-uv run rmagent export hugo 1 2 3 --output-dir content/people
+# Export with different biography lengths
+uv run rmagent export hugo 1 --output-dir content/people --bio-length comprehensive
+
+# Export multiple people with batch IDs
+uv run rmagent export hugo --batch-ids 1,2,3 --output-dir content/people
+
+# Export all persons (large database warning)
+uv run rmagent export hugo --all --output-dir content/people
 ```
 
 ### Search Database
 
 ```bash
-# Search by name
+# Search by name (with phonetic matching)
 uv run rmagent search --name "Smith"
+
+# Search by full name
+uv run rmagent search --name "John Smith"
 
 # Search by place
 uv run rmagent search --place "Maryland"
 
 # Limit results
 uv run rmagent search --name "Smith" --limit 10
+
+# Exact match only (no phonetic matching)
+uv run rmagent search --name "Smith" --exact
 ```
 
 ## Project Structure
@@ -293,7 +305,15 @@ uv run pytest --cov=rmagent --cov-report=html
 
 ## Documentation
 
-Comprehensive documentation is available in the `data_reference/` directory:
+### User Documentation
+
+- **[User Guide (PDF)](docs/RMAgent_User_Guide.pdf)** - Complete user guide with configuration, usage examples, and prompt customization
+- **[User Guide (Markdown)](docs/USER_GUIDE.md)** - Same content in Markdown format
+- **[MVP Checkpoint](docs/MVP_CHECKPOINT.md)** - Milestone 2 verification report
+
+### Technical Documentation
+
+Comprehensive technical documentation is available in the `data_reference/` directory:
 
 - **RM11_Schema_Reference.md** - Complete database schema
 - **RM11_Query_Patterns.md** - Optimized SQL query patterns
@@ -301,9 +321,21 @@ Comprehensive documentation is available in the `data_reference/` directory:
 - **RM11_Data_Quality_Rules.md** - All 24 validation rules
 - **RM11_Documentation_Index.md** - Master index of all 18 docs
 
-See `docs/AI_AGENT_TODO.md` for the complete development roadmap.
+### Development Documentation
+
+- **[AI Agent TODO](docs/AI_AGENT_TODO.md)** - Complete development roadmap and progress tracking
 
 ## Status
+
+🎉 **Milestone 2: MVP (Minimum Viable Product) - ACHIEVED!**
+
+**Date:** 2025-10-10
+**Completion:** All 26 foundation tasks complete (Phases 1-4)
+**Next Focus:** Testing & Quality improvements (Phase 5)
+
+See [docs/MVP_CHECKPOINT.md](docs/MVP_CHECKPOINT.md) for complete verification report.
+
+---
 
 🎯 **Milestone 1: Working Prototype - COMPLETE!**
 
@@ -342,17 +374,17 @@ See `docs/AI_AGENT_TODO.md` for the complete development roadmap.
 - ✅ Timeline generator (TimelineJS3 JSON/HTML, 29 tests)
 - ✅ Hugo blog exporter (single/batch export, 24 tests)
 
-**📍 Phase 4: CLI Interface - IN PROGRESS (6/8 tasks)**
+**✅ Phase 4: CLI Interface - COMPLETE (8/8 tasks)**
 - ✅ CLI Framework (Click + Rich, global options, 7 command modules)
 - ✅ Person Command (query person with --events, --family, --ancestors, --descendants)
 - ✅ Biography Command (all length/citation options, --no-ai mode, 8 tests, 88% coverage)
 - ✅ Quality Command (category/severity filters, Rich tables, 8 tests)
 - ✅ Ask Command (Q&A with conversation memory, 3 tests, 68% coverage, requires LLM)
 - ✅ Timeline Command (JSON/HTML formats, --include-family, 7 tests, 78% coverage)
-- ⏭️ Export Command (Hugo blog export)
-- ⏭️ Search Command (name/place search with phonetic matching)
+- ✅ Export Command (Hugo blog export with batch support, 8 tests, 74% coverage)
+- ✅ Search Command (name/place search with phonetic matching, 8 tests, 88% coverage)
 
-**⏭️ Next Tasks:** Complete remaining CLI commands (export, search)
+**⏭️ Next Tasks:** Phase 5 - Testing & Quality (comprehensive integration testing)
 
 See `docs/AI_AGENT_TODO.md` for detailed progress and roadmap.
 

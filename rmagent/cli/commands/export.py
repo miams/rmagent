@@ -99,9 +99,10 @@ def hugo(
             # Export all persons
             console.print("[yellow]Warning:[/yellow] Exporting all persons may take a while...")
             # Get all person IDs
+            from rmagent.rmlib.database import RMDatabase
             from rmagent.rmlib.queries import QueryService
-            with exporter._get_db() as db:
-                queries = QueryService(db)
+
+            with RMDatabase(config.database.database_path, extension_path=config.database.sqlite_extension_path) as db:
                 all_persons = db.query("SELECT PersonID FROM PersonTable")
                 person_ids = [p['PersonID'] for p in all_persons]
 
@@ -126,9 +127,11 @@ def hugo(
 
                 progress.update(task, completed=len(person_ids))
 
-            console.print(f"\n[green]✓[/green] Exported {result['success_count']} persons to: {output_dir}")
-            if result['error_count'] > 0:
-                console.print(f"[yellow]⚠[/yellow] {result['error_count']} persons failed")
+            success_count = len(result['markdown_files'])
+            error_count = len(person_ids) - success_count
+            console.print(f"\n[green]✓[/green] Exported {success_count} persons to: {output_dir}")
+            if error_count > 0:
+                console.print(f"[yellow]⚠[/yellow] {error_count} persons failed")
 
         elif batch_ids:
             # Export specific list of persons
@@ -154,9 +157,11 @@ def hugo(
 
                 progress.update(task, completed=len(person_ids))
 
-            console.print(f"\n[green]✓[/green] Exported {result['success_count']} persons to: {output_dir}")
-            if result['error_count'] > 0:
-                console.print(f"[yellow]⚠[/yellow] {result['error_count']} persons failed")
+            success_count = len(result['markdown_files'])
+            error_count = len(person_ids) - success_count
+            console.print(f"\n[green]✓[/green] Exported {success_count} persons to: {output_dir}")
+            if error_count > 0:
+                console.print(f"[yellow]⚠[/yellow] {error_count} persons failed")
 
         elif person_id:
             # Export single person
@@ -175,10 +180,10 @@ def hugo(
 
                 progress.update(task, completed=True)
 
-            console.print(f"\n[green]✓[/green] Exported to: {result['markdown_path']}")
-            if include_timeline and result.get('timeline_json_path'):
-                console.print(f"  Timeline JSON: {result['timeline_json_path']}")
-                console.print(f"  Timeline HTML: {result['timeline_html_path']}")
+            console.print(f"\n[green]✓[/green] Exported to: {result['markdown']}")
+            if include_timeline and result.get('timeline_json'):
+                console.print(f"  Timeline JSON: {result['timeline_json']}")
+                console.print(f"  Timeline HTML: {result['timeline_html']}")
 
         else:
             console.print("[red]Error:[/red] Please specify a person ID, --batch-ids, or --all")
