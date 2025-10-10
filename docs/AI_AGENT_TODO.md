@@ -1235,31 +1235,78 @@ rmagent search --name "Smith"
 
 **Goal:** Comprehensive test coverage and code quality
 
-### Task 5.1: Unit Tests
+### Task 5.1: Unit Tests ⚠️ IN PROGRESS
 **Target:** >80% code coverage
+**Status:** Test suite exists (400 tests, 18 modules), coverage analysis in progress
+**Completed:** 2025-10-10 (analysis)
 
-- [ ] test_database.py (connection, RMNOCASE)
-- [ ] test_models.py (Pydantic validation)
-- [ ] test_date_parser.py (all date formats)
-- [ ] test_blob_parser.py (all BLOB types)
-- [ ] test_place_parser.py (hierarchy parsing)
-- [ ] test_name_parser.py (name selection logic)
-- [ ] test_queries.py (all 15 patterns)
-- [ ] test_quality.py (all 24 rules)
-- [ ] test_llm_provider.py (all 3 providers)
-- [ ] test_prompts.py (template rendering)
-- [ ] test_agent.py (biography/Q&A generation)
-- [ ] test_tools.py (LangChain tools)
-- [ ] test_biography_generator.py
-- [ ] test_quality_report.py
-- [ ] test_timeline_generator.py
-- [ ] test_hugo_exporter.py
-- [ ] All CLI command tests
+**Test Files (All Exist):**
+- [✓] test_database.py (17 tests, 97% coverage documented)
+- [✓] test_models.py (34 tests, 95% coverage documented)
+- [✓] test_date_parser.py (44 tests, 93% coverage documented)
+- [✓] test_blob_parser.py (24 tests, 91% coverage documented)
+- [✓] test_place_parser.py (55 tests, 99% coverage documented)
+- [✓] test_name_parser.py (34 tests, 96% coverage documented)
+- [✓] test_queries.py (16 tests, 91% coverage documented)
+- [✓] test_quality.py (5 tests, integration-focused, slow)
+- [✓] test_llm_provider.py (3 tests, minimal coverage)
+- [✓] test_prompts.py (minimal tests)
+- [✓] test_agent.py (4 tests, minimal coverage)
+- [✓] test_tools.py (minimal tests)
+- [✓] test_biography_generator.py (24 tests, 85% coverage)
+- [✓] test_quality_report.py (13 tests, 95% coverage)
+- [✓] test_timeline_generator.py (29 tests, 90% coverage)
+- [✓] test_hugo_exporter.py (24 tests, 91% coverage)
+- [✓] test_cli.py (23 tests, CLI commands 68-100% coverage)
+- [✓] test_config.py (2 tests, minimal coverage)
 
-**Run with:**
+**Current Status:**
+- **Total Tests:** 400 tests across 18 modules
+- **Baseline Coverage:** 8% (only parser tests - 85 tests completed)
+- **Estimated Full Coverage:** 60-70% (based on documented coverage per module)
+- **Target:** >80% overall coverage
+
+**Coverage by Module (Baseline Run):**
+- rmlib/database.py: 97% ✅
+- rmlib/parsers/date_parser.py: 93% ✅
+- rmlib/parsers/blob_parser.py: 91% ✅
+- Other modules: 0% (tests timeout before running)
+
+**Issues Identified:**
+1. **Test Execution Timeout:** Full test suite times out after 2-4 minutes
+   - `test_quality.py` runs full database validation (very slow)
+   - Combined test runs exceed timeout threshold
+   - Individual test modules run quickly (<1 second)
+
+2. **Modules Needing More Tests:**
+   - agent/genealogy_agent.py (467 statements, minimal tests)
+   - agent/llm_provider.py (143 statements, minimal tests)
+   - agent/prompts.py (37 statements, minimal tests)
+   - agent/tools.py (82 statements, minimal tests)
+   - config/config.py (174 statements, minimal tests)
+   - rmlib/models.py (232 statements, needs verification)
+
+**Action Plan:**
+1. ✅ Analyze test suite structure
+2. ⏭️ Run tests module-by-module to avoid timeouts
+3. ⏭️ Generate combined coverage report
+4. ⏭️ Identify specific gaps vs 80% target
+5. ⏭️ Write additional tests for low-coverage modules
+6. ⏭️ Verify 80%+ coverage achieved
+
+**Run with (module-by-module):**
 ```bash
-pytest tests/ --cov=rmlib --cov=agent --cov=generators --cov=cli --cov-report=html
+# Fast approach - run each module separately
+for test in tests/unit/test_*.py; do
+    uv run pytest "$test" --cov=rmagent --cov-append -q
+done
+uv run coverage report
+
+# Or mark slow tests and skip them
+uv run pytest tests/unit/ -m "not slow" --cov=rmagent --cov-report=html
 ```
+
+**See:** `/tmp/task_5_1_coverage_report.md` for detailed analysis
 
 ---
 
