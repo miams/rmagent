@@ -14,6 +14,7 @@ model_recommendations:
 # Required template variables
 required_variables:
   - person_summary
+  - person_notes
   - timeline_overview
   - early_life_overview
   - family_overview
@@ -31,7 +32,10 @@ template: |
   Person Summary:
   {person_summary}
 
-  Timeline Highlights:
+  Person Notes (General):
+  {person_notes}
+
+  Timeline Highlights (includes event notes with full article transcriptions):
   {timeline_overview}
 
   Early Life Insights:
@@ -52,6 +56,10 @@ template: |
   Notable Sources:
   {source_notes}
 
+  IMPORTANT: Pay special attention to event notes (marked "NOTE:" in Timeline Highlights) as they often contain
+  full transcriptions of obituaries, news articles, and other primary source documents that provide rich detail.
+  Integrate this information naturally into the biography narrative.
+
   If data is missing, acknowledge gaps and suggest next research steps.
 
 # Provider-specific variants (optional)
@@ -70,11 +78,15 @@ provider_overrides:
       4. Include historical context (migration patterns, economic conditions, family dynamics)
       5. Flag uncertainties explicitly (e.g., "Marriage date uncertain based on conflicting census records")
       6. Acknowledge data gaps and suggest specific next research steps
+      7. CRITICAL: Leverage event notes (marked "NOTE:") which often contain full obituary/news article transcriptions
 
       Person Summary:
       {person_summary}
 
-      Timeline Highlights:
+      Person Notes (General):
+      {person_notes}
+
+      Timeline Highlights (includes event notes - full article transcriptions):
       {timeline_overview}
 
       Early Life Insights:
@@ -96,7 +108,8 @@ provider_overrides:
       {source_notes}
 
       Generate a comprehensive biographical narrative that integrates all available information into a coherent,
-      well-cited historical account.
+      well-cited historical account. Pay special attention to event notes - they often contain rich primary source
+      material (obituaries, news articles, etc.) that should be woven naturally into the narrative.
 
   ollama:
     # Local models benefit from simpler, more direct prompts
@@ -110,11 +123,15 @@ provider_overrides:
       6. Legacy & Descendants
 
       Use the information below. Cite sources when available.
+      Look for "NOTE:" entries in Timeline - these contain full obituaries and articles.
 
       Person Summary:
       {person_summary}
 
-      Timeline:
+      Person Notes:
+      {person_notes}
+
+      Timeline (includes notes with full articles):
       {timeline_overview}
 
       Early Life:
@@ -135,7 +152,7 @@ provider_overrides:
       Sources:
       {source_notes}
 
-      Write in clear, direct language. If information is missing, note what additional research is needed.
+      Write in clear, direct language. Use event notes for rich detail. If information is missing, note what additional research is needed.
 
 # Few-shot examples
 few_shots:

@@ -1,5 +1,6 @@
 """Biography command - Generate AI-powered biographies."""
 
+import re
 from pathlib import Path
 
 import click
@@ -10,6 +11,9 @@ from rmagent.agent.genealogy_agent import GenealogyAgent
 from rmagent.generators.biography import BiographyGenerator, BiographyLength, CitationStyle
 
 console = Console()
+
+# Default biography output directory
+DEFAULT_BIO_DIR = Path("./reports/biographies")
 
 
 @click.command()
@@ -30,7 +34,7 @@ console = Console()
     "--output",
     "-o",
     type=click.Path(path_type=Path),
-    help="Output file (default: stdout)",
+    help="Output file (default: ./reports/biographies/Surname, Given (birth-death)-length-cite.md)",
 )
 @click.option(
     "--no-ai",
@@ -115,18 +119,75 @@ def bio(
         # Render as markdown
         markdown_output = bio_result.render_markdown()
 
-        # Output to file or stdout
+        # Determine output path
         if output:
-            output.parent.mkdir(parents=True, exist_ok=True)
-            output.write_text(markdown_output, encoding="utf-8")
-            console.print(f"\n[green]✓[/green] Biography written to: {output}")
-            console.print(f"  Length: {len(markdown_output.split())} words")
+            output_path = output
         else:
-            console.print()
-            console.print(markdown_output)
+            # Generate default filename
+            output_path = _generate_biography_filename(
+                bio_result.full_name,
+                bio_result.length,
+                bio_result.citation_style,
+                generator,
+                person_id,
+            )
+
+        # Write to file
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(markdown_output, encoding="utf-8")
+        console.print(f"\n[green]✓[/green] Biography written to: {output_path}")
+        console.print(f"  Length: {len(markdown_output.split())} words")
 
     except Exception as e:
         console.print(f"\n[red]Error:[/red] {e}")
         if ctx.verbose:
             console.print_exception()
         raise click.Abort()
+
+
+def _generate_biography_filename(
+    full_name: str,
+    length: BiographyLength,
+    citation_style: CitationStyle,
+    generator: BiographyGenerator,
+    person_id: int,
+) -> Path:
+    """
+    Generate filename for biography following pattern:
+    Surname, Given (bbbb-dddd)-length-cite.md
+
+    Handles collisions with sequential numbering (_1, _2, etc.)
+    """
+    # Extract birth/death years from context
+    try:
+        context = generator._extract_person_context(person_id, include_media=False)
+        birth_year = str(context.birth_year) if context.birth_year else "????"
+        death_year = str(context.death_year) if context.death_year else "????"
+        surname = context.surname or "Unknown"
+        given = context.given_name or "Unknown"
+    except Exception:
+        # Fallback if extraction fails
+        birth_year = "????"
+        death_year = "????"
+        surname = "Unknown"
+        given = "Unknown"
+
+    # Sanitize name components for filesystem
+    surname_safe = re.sub(r'[<>:"/\\|?*]', "", surname)
+    given_safe = re.sub(r'[<>:"/\\|?*]', "", given)
+
+    # Build base filename
+    base_name = f"{surname_safe}, {given_safe} ({birth_year}-{death_year})-{length.value}-{citation_style.value}"
+
+    # Check for collisions and add sequential number if needed
+    output_path = DEFAULT_BIO_DIR / f"{base_name}.md"
+
+    if output_path.exists():
+        counter = 1
+        while True:
+            output_path = DEFAULT_BIO_DIR / f"{base_name}_{counter}.md"
+            if not output_path.exists():
+                break
+            counter += 1
+
+    return output_path

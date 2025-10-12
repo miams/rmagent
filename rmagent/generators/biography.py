@@ -47,6 +47,7 @@ class EventContext:
     date: str  # Formatted display date
     place: str
     details: str
+    note: str  # Event note (EventTable.Note) - often contains full transcriptions
     is_private: bool
     proof: int
     citations: list[dict]  # CitationID, SourceID, Page, etc.
@@ -76,6 +77,9 @@ class PersonContext:
     sex: int  # 0=Male, 1=Female, 2=Unknown
     is_private: bool
     is_living: bool  # Calculated based on 110-year rule
+
+    # Person-level notes (PersonTable.Note)
+    person_notes: str | None = None
 
     # Relationships
     father_id: int | None = None
@@ -387,6 +391,9 @@ class BiographyGenerator:
             # Get all citations
             all_citations = self._get_all_citations_for_person(db, person_id)
 
+            # Extract person-level notes
+            person_notes = _get_row_value(person, "Note")
+
             return PersonContext(
                 person_id=person_id,
                 full_name=full_name,
@@ -404,6 +411,7 @@ class BiographyGenerator:
                 sex=_get_row_value(person, "Sex", 2),
                 is_private=bool(_get_row_value(person, "IsPrivate", 0)),
                 is_living=is_living,
+                person_notes=person_notes,
                 father_id=father_id,
                 father_name=father_name,
                 mother_id=mother_id,
@@ -527,6 +535,7 @@ class BiographyGenerator:
             date=formatted_date,
             place=formatted_place,
             details=_get_row_value(event, "Details", ""),
+            note=_get_row_value(event, "Note", ""),
             is_private=bool(_get_row_value(event, "IsPrivate", 0)),
             proof=_get_row_value(event, "Proof", 0),
             citations=citations,
@@ -825,21 +834,66 @@ class BiographyGenerator:
 
         lines = []
         for i, citation in enumerate(context.all_citations, 1):
-            source_name = _get_row_value(citation, "SourceName", "Unknown Source")
+            source_name_raw = _get_row_value(citation, "SourceName", "Unknown Source")
             citation_name = _get_row_value(citation, "CitationName", "")
 
+            # Remove source type prefixes like "Book: " or "Newspapers: "
+            source_name = self._strip_source_type_prefix(source_name_raw)
+
             if citation_style == CitationStyle.FOOTNOTE:
-                lines.append(f"{i}. {source_name}")
+                lines.append(f"{i}. *{source_name}*")
                 if citation_name:
                     lines.append(f"   {citation_name}")
             elif citation_style == CitationStyle.PARENTHETICAL:
-                lines.append(f"- {source_name}")
+                lines.append(f"- *{source_name}*")
                 if citation_name:
                     lines.append(f"  ({citation_name})")
             else:  # NARRATIVE
-                lines.append(f"- {source_name}: {citation_name}")
+                if citation_name:
+                    lines.append(f"- *{source_name}*: {citation_name}")
+                else:
+                    lines.append(f"- *{source_name}*")
 
         return "\n".join(lines)
+
+    @staticmethod
+    def _strip_source_type_prefix(source_name: str) -> str:
+        """
+        Remove source type prefixes like 'Book: ', 'Newspapers: ', etc.
+
+        Examples:
+            "Book: Smith Family History" -> "Smith Family History"
+            "Newspapers: Baltimore Sun" -> "Baltimore Sun"
+            "US Census Records" -> "US Census Records" (no change)
+        """
+        # Common source type prefixes in RootsMagic
+        prefixes = [
+            "Book: ",
+            "Books: ",
+            "Newspaper: ",
+            "Newspapers: ",
+            "Cemetery: ",
+            "Cemeteries: ",
+            "Census: ",
+            "Church Records: ",
+            "Court Records: ",
+            "Military Records: ",
+            "Vital Records: ",
+            "Website: ",
+            "Websites: ",
+            "Document: ",
+            "Documents: ",
+            "Letter: ",
+            "Letters: ",
+            "Photo: ",
+            "Photos: ",
+        ]
+
+        for prefix in prefixes:
+            if source_name.startswith(prefix):
+                return source_name[len(prefix):]
+
+        return source_name
 
     def _parse_ai_response(self, response_text: str) -> dict[str, str]:
         """Parse AI-generated biography into sections."""

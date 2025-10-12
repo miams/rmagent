@@ -136,8 +136,15 @@ class GenealogyAgent:
                 "\n".join(sibling_lines) if sibling_lines else "No sibling records available."
             )
 
+            # Extract person-level notes
+            person_notes = person.get("Note") or ""
+            person_notes_formatted = (
+                person_notes if person_notes else "No person-level notes available."
+            )
+
             return {
                 "person_summary": person_summary,
+                "person_notes": person_notes_formatted,
                 "timeline_overview": timeline_overview,
                 "relationship_notes": relationship_notes,
                 "family_overview": family_overview,
@@ -241,7 +248,20 @@ class GenealogyAgent:
             date = event.get("Date") or ""
             place = event.get("Place") or ""
             details = event.get("Details") or ""
-            lines.append(f"- {event_type}: {date} {place} {details}".strip())
+            note = event.get("Note") or ""
+
+            # Format main event line
+            event_line = f"- {event_type}: {date} {place} {details}".strip()
+            lines.append(event_line)
+
+            # Add note if present (often contains full article transcriptions)
+            if note:
+                # Indent note content for readability
+                note_lines = note.split('\n')
+                for note_line in note_lines:
+                    if note_line.strip():
+                        lines.append(f"    NOTE: {note_line.strip()}")
+
         return "\n".join(lines) if lines else "No events available."
 
     @staticmethod

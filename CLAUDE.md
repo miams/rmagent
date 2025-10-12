@@ -119,21 +119,29 @@ RM_DATABASE_PATH=data/Iiams.rmtree
 LOG_LEVEL=DEBUG                      # Enable LLM logging to logs/llm_debug.jsonl
 ```
 
-## Project Status (2025-10-10)
+## Project Status (2025-10-12)
 
-🎉 **Milestone 2: MVP ACHIEVED** - All 26 foundation tasks complete
+🎉 **Milestone 2: MVP ACHIEVED** - All foundation phases complete (33/33 tasks)
 
 **Completed Phases:**
 - ✅ Phase 1: Foundation (9/9) - Database, parsers, queries, validation
 - ✅ Phase 2: AI Integration (5/5) - Multi-LLM, prompts, agent, tools
 - ✅ Phase 3: Generators (4/4) - Biography, timeline, quality reports, Hugo export
-- ✅ Phase 4: CLI (8/8) - person, bio, quality, ask, timeline, export, search commands
+- ✅ Phase 4: CLI (8/8) - All commands working (person, bio, quality, ask, timeline, export, search)
+- ✅ Phase 5: Testing & Quality (4/4) - 418 tests, 82% coverage, optimized performance
+- ✅ Phase 6: Documentation (2/3) - User & developer docs complete
 
-**Test Coverage:** 245+ tests, 68-99% coverage across modules
+**Recent Enhancements:**
+- Biography notes integration (PersonTable.Note + EventTable.Note in AI context)
+- Structured biography file output (`./reports/biographies/Surname, Given (bbbb-dddd).md`)
+- Source formatting improvements (italic rendering, type prefix removal)
+- Biography collision handling with sequential numbering
 
-**Next Phase:** Phase 5 - Testing & Quality (integration tests, 80%+ coverage)
+**Test Coverage:** 418 tests, 82% overall coverage (97% database, 96% parsers, 91% quality)
 
-See `docs/AI_AGENT_TODO.md` for complete roadmap (38 tasks across 7 phases).
+**Next Phase:** Phase 7 - Production Polish (performance optimization, advanced features)
+
+See `docs/AI_AGENT_TODO.md` for complete roadmap.
 
 ## CLI Commands
 
@@ -157,207 +165,27 @@ All commands use `uv run rmagent [command]`:
 - Users maintain local database files in `data/` directory
 - Document structure in markdown/SQL, not by committing the database
 
-## LangChain v1.0 Integration Patterns
+## LangChain v1.0 Integration (Future)
 
-**IMPORTANT:** When building new features that use LangChain, follow v1.0 patterns exclusively.
+**Current Status:** RMAgent uses custom LLM provider abstraction (no active LangChain imports). LangChain v1.0 integration planned for Phase 7 (advanced agentic workflows). See `docs/RM11_LangChain_Upgrade.md` for complete migration plan.
 
-### Current Status (2025-10-12)
-- RMAgent has **ZERO active LangChain imports** - custom tool wrappers are standalone
-- LangChain v1.0 upgrade planned after Phase 5 (Testing) & Phase 6 (Documentation)
-- See `docs/RM11_LangChain_Upgrade.md` for complete migration plan
+**v1.0 Breaking Changes (When Implementing):**
+- Agent creation: `create_agent()` (not `create_react_agent()`)
+- Prompts: `system_prompt="string"` (not `ChatPromptTemplate`)
+- State: Use `TypedDict` only (not Pydantic models)
+- Reference: https://docs.langchain.com/oss/python/migrate/langchain-v1
 
-### v1.0 Breaking Changes Reference
-
-All new LangChain code MUST use v1.0 patterns:
-
-| **Feature** | **❌ 0.3.x (Don't Use)** | **✅ v1.0 (Required)** |
-|------------|------------------------|---------------------|
-| Agent creation | `create_react_agent()` | `create_agent()` |
-| Agent prompts | `prompt=ChatPromptTemplate(...)` | `system_prompt="string"` |
-| Pre-bound tools | `llm.bind_tools(tools)` | Pass tools to agent directly |
-| Hooks | `pre_model_hook`, `post_model_hook` | Use middleware/callbacks |
-| State schema | Any dict-like or Pydantic | **Only `TypedDict`** |
-| Context passing | `config["configurable"]` | `context=` parameter |
-
-**Reference:** https://docs.langchain.com/oss/python/migrate/langchain-v1
-
-### Tool Implementation Pattern (v1.0)
-
-Place new LangChain tools in `rmagent/agent/lc/tools.py`:
-
-```python
-from langchain_core.tools import tool
-from pydantic import BaseModel, Field
-
-# Simple decorator-based tool
-@tool
-def query_person(person_id: int) -> dict:
-    """Return person details from RootsMagic database.
-
-    Args:
-        person_id: PersonID from RootsMagic database
-    """
-    query_service = get_query_service()
-    return query_service.get_person_with_primary_name(person_id)
-
-# Class-based tool with structured I/O
-class QueryPersonInput(BaseModel):
-    person_id: int = Field(description="PersonID from RootsMagic")
-
-class QueryPersonTool(BaseTool):
-    name: str = "query_person"
-    description: str = "Return person details"
-    args_schema: type[BaseModel] = QueryPersonInput
-    query_service: QueryService
-
-    def _run(self, person_id: int) -> dict:
-        return self.query_service.get_person_with_primary_name(person_id)
-```
-
-### Agent Creation Pattern (v1.0)
-
-Place new agents in `rmagent/agent/lc/agents.py`:
-
-```python
-from langchain import create_agent  # v1.0 API
-from langchain.agents import AgentExecutor
-from langchain_anthropic import ChatAnthropic
-
-def create_research_agent(model: str = "claude-3-5-sonnet-20241022"):
-    """Create genealogy research agent with v1.0 patterns."""
-
-    llm = ChatAnthropic(model=model)
-    tools = [query_person, get_events, search_database]
-
-    # v1.0: String system prompt (not ChatPromptTemplate)
-    system_prompt = """You are a professional genealogist.
-
-    Guidelines:
-    - Always cite sources (PersonID, EventID)
-    - Flag uncertainties and conflicts
-    - Suggest follow-up research when needed
-    """
-
-    agent = create_agent(
-        model=llm,
-        tools=tools,
-        system_prompt=system_prompt  # v1.0 pattern
-    )
-
-    return AgentExecutor(agent=agent, tools=tools, verbose=True)
-```
-
-### LCEL Chain Pattern (v1.0)
-
-Place chains in `rmagent/agent/lc/chains.py`:
-
-```python
-from langchain_core.runnables import RunnablePassthrough
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import PydanticOutputParser
-from langchain_anthropic import ChatAnthropic
-
-# Chain composition
-census_extraction_chain = (
-    {
-        "ocr_text": RunnablePassthrough(),
-        "person_context": lambda x: get_person_context(x["person_id"]),
-    }
-    | census_prompt
-    | ChatAnthropic(model="claude-3-5-sonnet-20241022")
-    | PydanticOutputParser(pydantic_object=CensusRecord)
-)
-
-# Usage
-result = census_extraction_chain.invoke({
-    "ocr_text": "John Smith 45 Pennsylvania...",
-    "person_id": 123
-})
-```
-
-### State Management Pattern (v1.0)
-
-**Critical:** State MUST be `TypedDict`, not Pydantic models:
-
-```python
-from typing import TypedDict, Sequence
-from langchain_core.messages import BaseMessage
-from langgraph.graph import StateGraph
-
-# ✅ Correct: TypedDict state
-class ResearchState(TypedDict):
-    messages: Sequence[BaseMessage]
-    person_id: int
-    research_notes: str
-    census_records: list[dict]
-
-# ❌ Wrong: Pydantic model (deprecated in v1.0)
-class ResearchState(BaseModel):  # DON'T USE THIS
-    messages: list[BaseMessage]
-    person_id: int
-
-# Define workflow
-workflow = StateGraph(ResearchState)
-```
-
-### Observability Pattern (v1.0)
-
-Place callbacks in `rmagent/agent/lc/callbacks.py`:
-
-```python
-from langchain_core.callbacks import BaseCallbackHandler
-import json
-from pathlib import Path
-
-class RMAgentCallbackHandler(BaseCallbackHandler):
-    """Log LLM interactions to llm_debug.jsonl."""
-
-    def __init__(self, log_path: Path = Path("logs/llm_debug.jsonl")):
-        self.log_path = log_path
-
-    def on_llm_start(self, serialized, prompts, **kwargs):
-        self._log({"event": "llm_start", "prompts": prompts})
-
-    def on_llm_end(self, response, **kwargs):
-        self._log({"event": "llm_end", "response": response.text})
-
-    def _log(self, data: dict):
-        with self.log_path.open("a") as f:
-            json.dump(data, f)
-            f.write("\n")
-
-# Usage
-agent = create_research_agent()
-result = agent.invoke(
-    {"input": "Find census records..."},
-    callbacks=[RMAgentCallbackHandler()]
-)
-```
-
-### Architecture Guidelines
-
-**Directory Structure:**
+**Planned Directory Structure:**
 ```
 rmagent/agent/
-├── llm_provider.py      # Keep - used by non-LangChain features
-├── genealogy_agent.py   # Keep - used by existing CLI
-├── legacy_tools.py      # Renamed from tools.py (non-breaking)
-├── prompts.py           # Keep - used by both approaches
-└── lc/                  # NEW: LangChain v1.0 integration
+├── llm_provider.py      # Current: Multi-provider abstraction
+├── genealogy_agent.py   # Current: Simple agent for CLI
+├── prompts.py           # Current: YAML-based prompts
+└── lc/                  # Future: LangChain v1.0 integration
     ├── tools.py         # v1.0 BaseTool implementations
-    ├── chains.py        # LCEL Runnable chains
-    ├── agents.py        # v1.0 agent configurations
-    └── callbacks.py     # Custom observability
+    ├── chains.py        # LCEL chains for census extraction
+    └── agents.py        # v1.0 agentic workflows
 ```
-
-**When to Use LangChain vs Legacy:**
-- **Use legacy code:** Existing CLI commands, simple workflows, non-agentic tasks
-- **Use LangChain v1.0:** Census extraction, multi-step research, RAG, agentic workflows
-
-**Testing Requirements:**
-- All LangChain tools must have unit tests in `tests/unit/test_lc_*.py`
-- Integration tests for agents in `tests/integration/test_lc_agents.py`
-- Maintain 80%+ coverage for all new LangChain code
 
 ## Git Workflow
 

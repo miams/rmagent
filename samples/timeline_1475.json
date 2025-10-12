@@ -1,0 +1,244 @@
+{
+  "title": {
+    "text": {
+      "headline": "Thomas Iams",
+      "text": "(1822 - 1881)"
+    }
+  },
+  "events": [
+    {
+      "unique_id": "event_2612",
+      "text": {
+        "headline": "Event Birth",
+        "text": "<p><strong>1822</strong> in Morris Township, Pennsylvania</p>"
+      },
+      "start_date": {
+        "year": 1822
+      },
+      "group": "Early Life",
+      "background": {
+        "color": "#e3f2fd"
+      }
+    },
+    {
+      "unique_id": "event_16652",
+      "text": {
+        "headline": "Event Census",
+        "text": "<p><strong>1850</strong> in Washington Township, Pennsylvania</p>"
+      },
+      "start_date": {
+        "year": 1850
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_21005",
+      "text": {
+        "headline": "Event Property",
+        "text": "<p><strong>1850</strong></p><p>$4,500</p>"
+      },
+      "start_date": {
+        "year": 1850
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_21006",
+      "text": {
+        "headline": "Event Occupation",
+        "text": "<p><strong>1850</strong></p><p>farmer</p>"
+      },
+      "start_date": {
+        "year": 1850
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_16651",
+      "text": {
+        "headline": "Event Census",
+        "text": "<p><strong>1860</strong> in Morris Township, Pennsylvania</p>"
+      },
+      "start_date": {
+        "year": 1860
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_16656",
+      "text": {
+        "headline": "Event Census",
+        "text": "<p><strong>1870</strong> in Morris Township, Pennsylvania</p>"
+      },
+      "start_date": {
+        "year": 1870
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_28300",
+      "text": {
+        "headline": "Event Land Transaction",
+        "text": "<p><strong>3 May 1871</strong> in Morris Township, Pennsylvania</p><p>warranted</p>"
+      },
+      "start_date": {
+        "year": 1871,
+        "month": 5,
+        "day": 3
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_28301",
+      "text": {
+        "headline": "Event Land Transaction",
+        "text": "<p><strong>17 Aug 1871</strong> in Morris Township, Pennsylvania</p><p>surveyed</p>"
+      },
+      "start_date": {
+        "year": 1871,
+        "month": 8,
+        "day": 17
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_28303",
+      "text": {
+        "headline": "Event Land Transaction",
+        "text": "<p><strong>2 Oct 1871</strong> in Morris Township, Pennsylvania</p><p>patented</p>"
+      },
+      "start_date": {
+        "year": 1871,
+        "month": 10,
+        "day": 2
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_16650",
+      "text": {
+        "headline": "Event Census",
+        "text": "<p><strong>1880</strong> in Morris Township, Pennsylvania</p>"
+      },
+      "start_date": {
+        "year": 1880
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_2617",
+      "text": {
+        "headline": "Event Death",
+        "text": "<p><strong>19 Feb 1881</strong> in Morris Township, Pennsylvania</p><p>bladder and prostrate gland infection</p>"
+      },
+      "start_date": {
+        "year": 1881,
+        "month": 2,
+        "day": 19
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_23347",
+      "text": {
+        "headline": "Event Probate",
+        "text": "<p><strong>24 Feb 1881</strong> in Greene, United States</p>"
+      },
+      "start_date": {
+        "year": 1881,
+        "month": 2,
+        "day": 24
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_2613",
+      "text": {
+        "headline": "Event Title (Nobility)",
+        "text": "<p><strong>Date Unknown</strong></p><p>Hon.</p>"
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_2614",
+      "text": {
+        "headline": "Event Occupation",
+        "text": "<p><strong>Date Unknown</strong></p><p>Farmer, Politician, Judge</p>"
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_2615",
+      "text": {
+        "headline": "Event Religion",
+        "text": "<p><strong>Date Unknown</strong></p><p>Methodist Episcopal</p>"
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_2616",
+      "text": {
+        "headline": "Event Obituary",
+        "text": "<p><strong>Date Unknown</strong></p><p>Transcribed by Laura Nelle Poland Mallett on  March 16, 2006</p>"
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    },
+    {
+      "unique_id": "event_28302",
+      "text": {
+        "headline": "Event Land Transaction",
+        "text": "<p><strong>Date Unknown</strong></p>"
+      },
+      "group": "Life Events",
+      "background": {
+        "color": "#fafafa"
+      }
+    }
+  ],
+  "scale": "human"
+}

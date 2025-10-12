@@ -607,6 +607,31 @@ class TestSearchCommand:
         # Should show results for both searches
         assert result.exit_code == 0
 
+    def test_search_with_surname_variation(self, runner, test_db_path):
+        """Test search with surname variation syntax [variant]."""
+        result = runner.invoke(
+            cli, ["--database", test_db_path, "search", "--name", "John Iiams [Ijams]"]
+        )
+        assert result.exit_code == 0
+        # Should show that it's searching multiple variations
+        assert "Searching 2 name variations" in result.output or "Found" in result.output
+
+    def test_search_with_multiple_variations(self, runner, test_db_path):
+        """Test search with multiple surname variations."""
+        result = runner.invoke(
+            cli, ["--database", test_db_path, "search", "--name", "John Iams [Ijams] [Imes]"]
+        )
+        assert result.exit_code == 0
+        # Should search 3 variations (base + 2 variants)
+        assert "Searching 3 name variations" in result.output or "Found" in result.output
+
+    def test_search_with_all_keyword(self, runner, test_db_path):
+        """Test search with [ALL] keyword for configured variants."""
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "John [ALL]"])
+        assert result.exit_code == 0
+        # Should search all 8 configured variants
+        assert "Searching 8 name variations" in result.output or "Found" in result.output
+
 
 class TestGlobalOptions:
     """Test global CLI options."""

@@ -171,6 +171,31 @@ class CitationSettings(BaseModel):
         return style_lower
 
 
+class SearchSettings(BaseModel):
+    """Search configuration settings."""
+
+    surname_variants_all: list[str] = Field(
+        default_factory=lambda: [
+            "Iams",
+            "Iames",
+            "Iiams",
+            "Iiames",
+            "Ijams",
+            "Ijames",
+            "Imes",
+            "Eimes",
+        ]
+    )
+
+    @field_validator("surname_variants_all", mode="before")
+    @classmethod
+    def parse_variants(cls, value: str | list[str]) -> list[str]:
+        """Parse comma-separated string into list."""
+        if isinstance(value, str):
+            return [v.strip() for v in value.split(",") if v.strip()]
+        return value
+
+
 class LoggingSettings(BaseModel):
     """Logging configuration."""
 
@@ -202,6 +227,7 @@ class AppConfig(BaseModel):
     output: OutputSettings
     privacy: PrivacySettings
     citation: CitationSettings
+    search: SearchSettings
     logging: LoggingSettings
 
     if isinstance(ConfigDict, dict):  # pragma: no cover - legacy pydantic v1
@@ -313,6 +339,12 @@ def load_app_config(
             default_style=_env("DEFAULT_CITATION_STYLE", "footnote"),
         )
 
+        search_settings = SearchSettings(
+            surname_variants_all=_env(
+                "SURNAME_VARIANTS_ALL", "Iams,Iames,Iiams,Iiames,Ijams,Ijames,Imes,Eimes"
+            ),
+        )
+
         logging_settings = LoggingSettings(
             level=_env("LOG_LEVEL", "INFO"),
             log_file=Path(_env("LOG_FILE", "rmagent.log")),
@@ -325,6 +357,7 @@ def load_app_config(
             output=output_settings,
             privacy=privacy_settings,
             citation=citation_settings,
+            search=search_settings,
             logging=logging_settings,
         )
     except ValidationError as exc:

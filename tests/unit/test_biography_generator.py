@@ -48,6 +48,7 @@ class TestEventContext:
             date="30 Apr 1968",
             place="Palo Alto, California",
             details="",
+            note="",
             is_private=False,
             proof=1,
             citations=[],
@@ -254,6 +255,7 @@ class TestBiographyGenerator:
                     date="1870",
                     place="Maryland",
                     details="Farmer",
+                    note="",
                     is_private=True,
                     proof=0,
                     citations=[],
@@ -298,6 +300,7 @@ class TestBiographyGenerator:
                     date="2010",
                     place="California",
                     details="Engineer",
+                    note="",
                     is_private=False,
                     proof=0,
                     citations=[],
@@ -311,6 +314,7 @@ class TestBiographyGenerator:
                     date="2020",
                     place="San Francisco",
                     details="",
+                    note="",
                     is_private=False,
                     proof=0,
                     citations=[],
@@ -420,8 +424,8 @@ class TestBiographyGenerator:
 
         sources = generator._format_sources_section(context, CitationStyle.FOOTNOTE)
 
-        assert "1. U.S. Census 1850" in sources
-        assert "2. Birth Certificate" in sources
+        assert "1. *U.S. Census 1850*" in sources
+        assert "2. *Birth Certificate*" in sources
         assert "Page 123" in sources
         assert "Certificate No. 456" in sources
 
@@ -453,7 +457,7 @@ class TestBiographyGenerator:
 
         sources = generator._format_sources_section(context, CitationStyle.PARENTHETICAL)
 
-        assert "- U.S. Census 1850" in sources
+        assert "- *U.S. Census 1850*" in sources
         assert "(Page 123)" in sources
 
     def test_parse_ai_response(self):

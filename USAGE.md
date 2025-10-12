@@ -23,7 +23,11 @@ Complete command-line interface reference for RMAgent.
 RMAgent provides 7 main commands for interacting with your RootsMagic database:
 
 ```bash
+# Using uv (default project workflow)
 uv run rmagent [GLOBAL OPTIONS] COMMAND [COMMAND OPTIONS]
+
+# Using a local Python interpreter (no uv)
+python -m rmagent.cli.main [GLOBAL OPTIONS] COMMAND [COMMAND OPTIONS]
 ```
 
 | Command | Purpose | Requires LLM |
@@ -73,7 +77,32 @@ uv run rmagent --verbose quality
 
 # Show version
 uv run rmagent --version
+
+# Same commands without uv (activate .venv first)
+python -m rmagent.cli.main --version
 ```
+
+### Shell autocompletion
+
+The CLI ships with a `completion` helper that prints shell-specific completion scripts. Install it once per machine:
+
+```bash
+# Bash
+python -m rmagent.cli.main completion bash > ~/.config/bash_completion/rmagent.bash
+source ~/.config/bash_completion/rmagent.bash
+
+# Zsh
+python -m rmagent.cli.main completion zsh > "${ZDOTDIR:-$HOME}/.zfunc/_rmagent"
+autoload -U compinit && compinit
+
+# Fish
+python -m rmagent.cli.main completion fish > ~/.config/fish/completions/rmagent.fish
+
+# PowerShell
+python -m rmagent.cli.main completion powershell | Out-String | Invoke-Expression
+```
+
+Once installed, press `Tab` to complete command names, options, and subcommands.
 
 ---
 
@@ -648,14 +677,30 @@ uv run rmagent search [OPTIONS]
 |--------|-------------|---------|
 | `--name TEXT` | Search by name (surname or full name) | - |
 | `--place TEXT` | Search by place name | - |
-| `--limit N` | Maximum results to return | 50 |
+| `--limit N` | Maximum results to return | 10000 |
 | `--exact` | Disable phonetic matching | False |
+| `--married-name` | Include married surnames for women | False |
 
 ### Search Types
 
-- **Name Search:** Searches primary names with phonetic (Metaphone) matching
+- **Name Search:** Searches primary and alternate names with phonetic (Metaphone) matching
+- **Surname Variations:** Use bracket syntax `[variant]` or `[ALL]` for multiple variations
+- **Married Names:** Use `--married-name` to find women by spouse surnames
 - **Place Search:** Searches all place names with LIKE pattern matching
 - **Exact Match:** Uses exact string matching (no phonetics)
+
+### Surname Variation Syntax
+
+Use bracket syntax to search multiple surname spellings:
+
+- **Single variation:** `"John Iiams [Ijams]"` → searches "John Iiams" and "John Ijams"
+- **Multiple variations:** `"John Iams [Ijams] [Imes]"` → searches "John Iams", "John Ijams", "John Imes"
+- **[ALL] keyword:** `"John [ALL]"` → searches all configured variants
+
+**Configure variants** in `config/.env`:
+```bash
+SURNAME_VARIANTS_ALL=Iams,Iames,Iiams,Iiames,Ijams,Ijames,Imes,Eimes
+```
 
 ### Examples
 
@@ -686,6 +731,44 @@ uv run rmagent search --name "John Smith"
 ```
 
 Searches for people with given name "John" and surname "Smith".
+
+#### Search with Surname Variations
+
+```bash
+# Search two surname spellings
+uv run rmagent search --name "John Iiams [Ijams]"
+```
+
+**Output:**
+```
+Searching 2 name variations...
+
+🔍 Found 82 person(s) matching 'John Iiams [Ijams]':
+────────────────────────────────────────────────────────────
+┏━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━┓
+┃ ID       ┃ Name               ┃ Birth      ┃ Death      ┃
+┡━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━┩
+│ 85       │ John Iiams         │ 1816       │ 1878       │
+│ 106      │ John Iiams         │ 1782       │ 1827       │
+│ 501      │ John Iiams         │ 1747       │ 1785       │
+│ 3916     │ John Ijams         │ 1825       │ 1890       │
+│ ...      │ ...                │ ...        │ ...        │
+└──────────┴────────────────────┴────────────┴────────────┘
+```
+
+```bash
+# Search multiple variations
+uv run rmagent search --name "John Iams [Ijams] [Imes]"
+```
+
+Searches for "John Iams", "John Ijams", and "John Imes".
+
+```bash
+# Search ALL configured variants
+uv run rmagent search --name "John [ALL]"
+```
+
+Searches for all 8 configured surname variants (Iams, Iames, Iiams, Iiames, Ijams, Ijames, Imes, Eimes).
 
 #### Search by Place
 

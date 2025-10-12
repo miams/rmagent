@@ -1749,8 +1749,62 @@ RM11/
 
 ---
 
+## Recent Enhancements (Post-MVP)
+
+### Biography Notes Integration (2025-10-12)
+**Goal:** Enhance AI-powered biography generation with rich contextual information from Notes fields
+
+**Changes Implemented:**
+1. **Database Queries Enhanced** (`rmagent/rmlib/queries.py`)
+   - Added `EventTable.Note` extraction to `_GET_PERSON_EVENTS_SQL`
+   - Added `EventTable.Note` extraction to `_GET_VITAL_EVENTS_SQL`
+   - Notes often contain full obituary and news article transcriptions
+
+2. **Data Models Updated** (`rmagent/generators/biography.py`)
+   - Added `note: str` field to `EventContext` dataclass
+   - Added `person_notes: str | None` field to `PersonContext` dataclass
+   - Updated `_build_event_context()` to extract event notes
+   - Updated `_extract_person_context()` to extract person notes
+
+3. **AI Context Enhanced** (`rmagent/agent/genealogy_agent.py`)
+   - Updated `_format_events()` to include notes with "NOTE:" prefix
+   - Updated `_build_biography_context()` to include person_notes variable
+   - Notes are indented for readability in AI prompt
+
+4. **LLM Prompts Updated** (`config/prompts/biography.yaml`)
+   - Added `person_notes` to required variables
+   - Added "Person Notes (General):" section to all prompt variants
+   - Added critical instructions to leverage note transcriptions
+   - Emphasized notes in Timeline Highlights section
+
+5. **Biography File Management** (`rmagent/cli/commands/bio.py`)
+   - Default output directory: `./reports/biographies/`
+   - Structured filename: `Surname, Given (bbbb-dddd)-length-cite.md`
+   - Automatic collision handling with sequential numbering (_1, _2, etc.)
+   - Extracts birth/death years from PersonContext
+   - Filesystem-safe name sanitization (removes invalid characters)
+
+6. **Source Formatting Improvements** (`rmagent/generators/biography.py`)
+   - Source names wrapped in `*italics*` for Markdown rendering
+   - Source type prefixes removed (Book:, Newspapers:, etc.)
+   - Applied across all citation styles (footnote, parenthetical, narrative)
+   - Created `_strip_source_type_prefix()` helper method
+
+**Test Results:**
+- All 418 tests passing
+- Biography generator: 14 tests, 87% coverage
+- Overall project coverage: 82%
+
+**Impact:**
+- AI biographies now include rich contextual information from notes
+- Full obituary and news article transcriptions integrated naturally
+- Organized file output with descriptive, collision-safe filenames
+- Professional source formatting with proper italics
+
+---
+
 **Last Updated:** 2025-10-12
-**Status:** 🎉 **Milestone 2: MVP COMPLETE** - All 28 foundation tasks complete (Phases 1-6)
+**Status:** 🎉 **Milestone 2: MVP COMPLETE** - All 33 foundation tasks complete (Phases 1-6)
 **Next Step:** Phase 7 - Production Polish (performance optimization, advanced features, remaining docs)
 
 See `docs/MVP_CHECKPOINT.md` for complete verification report and `docs/RMAgent_User_Guide.pdf` for user documentation.

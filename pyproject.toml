@@ -46,6 +46,7 @@ dev = [
     "pytest-cov>=4.0",
     "pytest-mock>=3.0",
     "pytest-asyncio>=0.21.0",
+    "pytest-html>=4.1.1",
 
     # Code quality
     "black>=23.0",
@@ -83,7 +84,7 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "-v --cov=rmagent --cov-report=html --cov-report=term -m 'not real_api'"
+addopts = "-v --cov=rmagent --cov-report=html --cov-report=term --html=reports/pytest.html --self-contained-html -m 'not real_api'"
 markers = [
     "real_api: tests that make real API calls (skipped by default)",
     "anthropic_api: tests that require Anthropic API key",

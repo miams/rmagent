@@ -129,7 +129,19 @@ quality_summary = agent.analyze_data_quality()
 
 ## Usage
 
-All commands use the `uv run rmagent` prefix to run in the virtual environment.
+### CLI Setup Options
+
+**Option 1: Direct Access (Recommended)**
+Run `./setup_cli.sh` to enable direct CLI access and tab completion. See [docs/CLI_SETUP.md](docs/CLI_SETUP.md) for details.
+
+After setup, use commands directly:
+```bash
+rmagent person 1          # Direct access
+rmagent <TAB>             # Tab completion works!
+```
+
+**Option 2: Using uv run**
+All commands can use the `uv run rmagent` prefix:
 
 ### Query a Person
 
@@ -243,21 +255,51 @@ uv run rmagent export hugo --all --output-dir content/people
 
 ### Search Database
 
+The search command uses intelligent multi-strategy matching with support for:
+- **Alternate names** (automatically included)
+- **Married names** (with `--married-name` flag for women)
+- **Surname variations** (with `[variant]` bracket syntax)
+- **Multi-word searches** across name fields
+- **Phonetic matching** fallback
+
 ```bash
-# Search by name (with phonetic matching)
+# Search by surname (finds all matches)
 uv run rmagent search --name "Smith"
 
-# Search by full name
+# Search by full name (e.g., "John Smith" or "Lucy Virginia Dorsey")
+# Automatically matches across surname and given name fields
 uv run rmagent search --name "John Smith"
+uv run rmagent search --name "Lucy Virginia Dorsey"
+
+# Search with surname variations (bracket syntax)
+uv run rmagent search --name "John Iiams [Ijams]"         # Searches "John Iiams" and "John Ijams"
+uv run rmagent search --name "John Iams [Ijams] [Imes]"   # Searches 3 variations
+uv run rmagent search --name "John [ALL]"                 # Searches all configured variants
+
+# Search by first and middle name
+uv run rmagent search --name "Lucy Virginia"
+
+# Search by alternate name (e.g., "Janet Bross" finds person with primary name "Janet Casey")
+uv run rmagent search --name "Janet Bross"
+
+# Search by married name (e.g., "Janet Iiams" finds women who married someone named Iiams)
+uv run rmagent search --name "Janet Iiams" --married-name
 
 # Search by place
-uv run rmagent search --place "Maryland"
+uv run rmagent search --name "Maryland"
 
 # Limit results
 uv run rmagent search --name "Smith" --limit 10
 
 # Exact match only (no phonetic matching)
 uv run rmagent search --name "Smith" --exact
+```
+
+**Surname Variations:**
+The `[ALL]` keyword expands to configured variants (default: Iams, Iames, Iiams, Iiames, Ijams, Ijames, Imes, Eimes).
+Configure custom variants in `config/.env`:
+```bash
+SURNAME_VARIANTS_ALL=Iams,Iames,Iiams,Iiames,Ijams,Ijames,Imes,Eimes
 ```
 
 ## Project Structure
