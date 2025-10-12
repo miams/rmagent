@@ -29,7 +29,7 @@ env/
 
 # uv
 .uv/
-uv.lock
+# uv.lock should be tracked for reproducible builds
 
 # Testing
 .pytest_cache/
