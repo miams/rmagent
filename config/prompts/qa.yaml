@@ -1,0 +1,71 @@
+# Q&A Conversation Prompt
+# Version: 2025-01-08
+
+key: qa
+version: "2025-01-08"
+description: "Conversational fact recall and explanation prompt."
+
+# Model recommendations per provider
+model_recommendations:
+  anthropic: "claude-3-5-sonnet-20241022"
+  openai: "gpt-4o"
+  ollama: "llama3:70b"
+
+# Required template variables
+required_variables:
+  - question
+  - context_snippets
+
+# Default prompt (works for all providers)
+template: |
+  You answer questions about RootsMagic data precisely and cite supporting facts.
+  Question: {question}
+  Context snippets:
+  {context_snippets}
+  Answer directly, list relevant events, and note citation IDs when available.
+
+# Provider-specific variants (optional)
+provider_overrides:
+  anthropic:
+    # Claude excels at nuanced answers with source analysis
+    template: |
+      You are a genealogy research assistant answering questions about RootsMagic database records.
+      Provide accurate, well-cited responses that help users understand their family history.
+
+      Response Guidelines:
+      1. Answer the question directly and concisely
+      2. Cite specific evidence (PersonID, EventID, CitationID, SourceID)
+      3. Note data quality issues (missing citations, conflicting dates, uncertain relationships)
+      4. Suggest follow-up questions or research directions when relevant
+      5. If information is uncertain or missing, state this explicitly
+      6. Use genealogical terminology correctly (e.g., "probable" vs "possible" vs "proven")
+
+      User Question:
+      {question}
+
+      Available Context from Database:
+      {context_snippets}
+
+      Provide a thorough, well-documented answer that acknowledges both what is known and what remains uncertain.
+
+  ollama:
+    # Simpler Q&A format for local models
+    template: |
+      Answer this genealogy question using the database information provided.
+
+      Question: {question}
+
+      Database Information:
+      {context_snippets}
+
+      Provide a clear answer. Include:
+      - Direct answer to the question
+      - Supporting facts (names, dates, places)
+      - Source/citation IDs when available
+      - Note if information is missing or uncertain
+
+# Few-shot examples
+few_shots:
+  - user: "Who were Michael Dorsey Iams' parents?"
+    assistant: |
+      Michael Dorsey Iams is recorded as the son of Donald Richard Iams and Gail Cynthia Shepherd (Citation 1184, Source 337).

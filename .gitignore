@@ -52,6 +52,9 @@ htmlcov/
 config/.env
 config/.env.local
 
+# Custom prompts (user-specific, don't commit)
+config/prompts/custom/
+
 # Logs
 *.log
 logs/

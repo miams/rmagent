@@ -1,0 +1,108 @@
+# Data Quality Analysis Prompt
+# Version: 2025-01-08
+
+key: quality
+version: "2025-01-08"
+description: "Analyze RootsMagic quality issues using RM11_Data_Quality_Rules.md."
+
+# Model recommendations per provider
+model_recommendations:
+  anthropic: "claude-3-5-sonnet-20241022"
+  openai: "gpt-4o"
+  ollama: "llama3:70b"
+
+# Required template variables
+required_variables:
+  - quality_summary
+  - critical_issues
+  - high_issues
+  - medium_issues
+  - low_issues
+
+# Default prompt (works for all providers)
+template: |
+  You are validating RootsMagic quality issues.
+  Dataset summary:
+  {quality_summary}
+
+  Critical items:
+  {critical_issues}
+
+  High severity items:
+  {high_issues}
+
+  Medium severity items:
+  {medium_issues}
+
+  Low severity items:
+  {low_issues}
+
+  Explain the top issues, reference relevant rules, and recommend remediation steps.
+
+# Provider-specific variants (optional)
+provider_overrides:
+  anthropic:
+    # Claude excels at detailed analysis and prioritization
+    template: |
+      You are a genealogical data quality analyst reviewing RootsMagic database validation results.
+      Your task is to analyze the quality issues, prioritize remediation efforts, and provide actionable recommendations.
+
+      Analysis Requirements:
+      1. Identify the most critical data quality issues that could impact research reliability
+      2. Reference specific validation rules from RM11_Data_Quality_Rules.md
+      3. Explain the genealogical significance of each issue type
+      4. Prioritize remediation steps (what to fix first and why)
+      5. Suggest research strategies to resolve uncertain cases
+      6. Estimate effort required for different remediation approaches
+
+      Dataset Summary:
+      {quality_summary}
+
+      Critical Issues (immediate attention required):
+      {critical_issues}
+
+      High Severity Issues (important but not blocking):
+      {high_issues}
+
+      Medium Severity Issues (should address):
+      {medium_issues}
+
+      Low Severity Issues (cosmetic/optional):
+      {low_issues}
+
+      Provide a prioritized remediation plan with specific next steps for each issue category.
+
+  ollama:
+    # Simpler, more direct analysis for local models
+    template: |
+      Analyze these RootsMagic data quality issues and recommend fixes.
+
+      Database Summary:
+      {quality_summary}
+
+      Critical Issues (fix first):
+      {critical_issues}
+
+      High Priority:
+      {high_issues}
+
+      Medium Priority:
+      {medium_issues}
+
+      Low Priority:
+      {low_issues}
+
+      For each issue type:
+      1. Explain what's wrong
+      2. Why it matters
+      3. How to fix it
+
+      List the top 5 issues to fix first.
+
+# Few-shot examples
+few_shots:
+  - user: "Explain the most urgent quality fixes for the Iiams database."
+    assistant: |
+      - Rule 2.1 (Death before birth): 3 people require immediate verification.
+      - Rule 4.1 (Unsourced vital events): 18,403 events lack citations.
+      Recommend prioritizing death-before-birth conflicts before adding citations.

@@ -1,0 +1,72 @@
+# Timeline Generation Prompt
+# Version: 2025-01-08
+
+key: timeline
+version: "2025-01-08"
+description: "Timeline synthesis instructions aligned with RM11_Timeline_Construction.md."
+
+# Model recommendations per provider
+model_recommendations:
+  anthropic: "claude-3-5-sonnet-20241022"
+  openai: "gpt-4o"
+  ollama: "llama3:70b"
+
+# Required template variables
+required_variables:
+  - person_name
+  - events_json
+
+# Default prompt (works for all providers)
+template: |
+  Create an annotated event timeline for TimelineJS3 export.
+  Subject: {person_name}
+  Events JSON:
+  {events_json}
+  Apply ordering rules (SortDate, event priority) and flag data gaps.
+
+# Provider-specific variants (optional)
+provider_overrides:
+  anthropic:
+    # Claude excels at timeline synthesis and gap analysis
+    template: |
+      You are creating an annotated chronological timeline for TimelineJS3 export.
+      Your task is to synthesize raw event data into a coherent, well-documented timeline with historical context.
+
+      Timeline Requirements:
+      1. Order events chronologically using SortDate values
+      2. Apply event priority rules (birth/death > marriage > residence > misc)
+      3. Identify and flag data gaps (missing dates, unclear locations, unsourced events)
+      4. Add historical context where appropriate (migration patterns, family dynamics)
+      5. Note conflicting information explicitly
+      6. Suggest follow-up research for uncertain events
+      7. Use proper date formatting for TimelineJS3 (ISO 8601 or display format)
+
+      Timeline Subject: {person_name}
+
+      Raw Events Data (JSON format):
+      {events_json}
+
+      Generate a TimelineJS3-compatible timeline with rich annotations that help users understand
+      the person's life story and identify research opportunities.
+
+  ollama:
+    # Simpler timeline generation for local models
+    template: |
+      Create a timeline for {person_name} using these events:
+
+      Events:
+      {events_json}
+
+      For each event:
+      1. Extract date, place, type
+      2. Sort chronologically
+      3. Note missing information
+      4. Format for TimelineJS3
+
+      Flag any data quality issues (missing dates, unclear locations, no sources).
+
+# Few-shot examples
+few_shots:
+  - user: "Draft a timeline summary for Donna Lynn Jones using supplied events."
+    assistant: |
+      1964-06-12 marriage in Maricopa County, Arizona (Marriage FactType 300). Annotate missing citations for the 1970 relocation event.

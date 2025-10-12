@@ -12,6 +12,7 @@ Complete configuration reference for customizing RMAgent behavior.
 - [Privacy Settings](#privacy-settings)
 - [Logging Configuration](#logging-configuration)
 - [Advanced Configuration](#advanced-configuration)
+- [Prompt Customization](#prompt-customization)
 - [Configuration Examples](#configuration-examples)
 
 ---
@@ -456,6 +457,355 @@ uv run rmagent --llm-provider openai bio 1
 # Enable verbose logging
 uv run rmagent --verbose quality
 ```
+
+---
+
+## Prompt Customization
+
+RMAgent allows you to customize AI prompts for different workflows without modifying code. Prompts are stored as YAML files with support for provider-specific variants.
+
+### Prompt System Overview
+
+**Default Prompts:** `config/prompts/`
+- `biography.yaml` - Biography generation
+- `quality.yaml` - Data quality analysis
+- `qa.yaml` - Q&A conversations
+- `timeline.yaml` - Timeline synthesis
+
+**Custom Prompts:** `config/prompts/custom/` (optional, not tracked in git)
+- Override any default prompt
+- Takes precedence over defaults
+- Same YAML format
+
+### Provider-Specific Variants
+
+Each prompt file can include provider-specific variants optimized for different LLM capabilities:
+
+- **Anthropic Claude:** Detailed instructions, academic tone, complex reasoning
+- **OpenAI GPT:** Direct instructions, efficient phrasing
+- **Ollama (local):** Simpler prompts, concrete examples
+
+**Example Structure:**
+
+```yaml
+# config/prompts/biography.yaml
+
+key: biography
+version: "2025-01-08"
+description: "Structured biography generation"
+
+# Default prompt (works for all providers)
+template: |
+  You are a professional genealogist creating a narrative biography.
+  Follow the standard ten-section outline...
+
+  Person Summary: {person_summary}
+  Timeline: {timeline_overview}
+  ...
+
+# Provider-specific variants (optional)
+provider_overrides:
+  anthropic:
+    template: |
+      You are a professional genealogist with expertise in academic writing...
+      [More detailed instructions for Claude]
+
+  ollama:
+    template: |
+      Create a biography following this structure...
+      [Simpler instructions for local models]
+
+# Few-shot examples
+few_shots:
+  - user: "Generate biography for John Smith..."
+    assistant: "## Introduction\nJohn Smith was born..."
+```
+
+### Creating Custom Prompts
+
+**Step 1: Create custom directory**
+
+```bash
+mkdir -p config/prompts/custom
+```
+
+**Step 2: Copy and modify default prompt**
+
+```bash
+# Copy default biography prompt
+cp config/prompts/biography.yaml config/prompts/custom/biography.yaml
+
+# Edit with your preferred text editor
+nano config/prompts/custom/biography.yaml
+```
+
+**Step 3: Customize prompt text**
+
+Edit the `template:` section to match your style:
+
+```yaml
+# config/prompts/custom/biography.yaml
+
+key: biography
+version: "2025-01-08"
+description: "Custom biography generation"
+
+# Your custom prompt
+template: |
+  Write a genealogical biography in a narrative storytelling style.
+  Focus on family relationships and historical context.
+
+  Person Information:
+  {person_summary}
+
+  Life Events:
+  {timeline_overview}
+
+  [Your additional instructions here]
+```
+
+**Step 4: Test custom prompt**
+
+```bash
+# Generate biography (uses your custom prompt)
+uv run rmagent bio 1 --output test.md
+```
+
+### Prompt Customization Examples
+
+#### Example 1: Formal Academic Style
+
+```yaml
+# config/prompts/custom/biography.yaml
+
+template: |
+  Compose a scholarly biographical essay following academic conventions.
+
+  Requirements:
+  - Formal, third-person narrative voice
+  - Chronological organization by life phase
+  - Source citations in Chicago Manual of Style format
+  - Analysis of social and historical context
+  - Critical evaluation of conflicting evidence
+
+  Subject Information:
+  {person_summary}
+
+  Chronological Evidence:
+  {timeline_overview}
+
+  Family Context:
+  {family_overview}
+
+  Source Documentation:
+  {source_notes}
+```
+
+#### Example 2: Creative Storytelling Style
+
+```yaml
+# config/prompts/custom/biography.yaml
+
+template: |
+  Write an engaging narrative biography that brings history to life.
+
+  Style Guidelines:
+  - Use vivid, descriptive language
+  - Begin with a compelling scene or anecdote
+  - Weave family stories throughout
+  - Connect personal events to historical context
+  - End with legacy and descendants
+
+  Available Information:
+  {person_summary}
+  {timeline_overview}
+  {relationship_notes}
+  {source_notes}
+```
+
+#### Example 3: Concise Summary Style
+
+```yaml
+# config/prompts/custom/biography.yaml
+
+template: |
+  Create a concise biographical summary (200-300 words).
+
+  Include:
+  - Birth (date, place, parents)
+  - Key life events (marriage, children, occupation, migration)
+  - Death (date, place, age)
+  - Legacy (2-3 sentences)
+
+  Data:
+  {person_summary}
+  {timeline_overview}
+```
+
+#### Example 4: Provider-Specific Optimization
+
+```yaml
+# config/prompts/custom/quality.yaml
+
+# Default for all providers
+template: |
+  Analyze RootsMagic data quality issues.
+  Dataset: {quality_summary}
+  Critical Issues: {critical_issues}
+  ...
+
+provider_overrides:
+  # Anthropic: Detailed analysis with research suggestions
+  anthropic:
+    template: |
+      You are a genealogical data quality expert.
+      Provide comprehensive analysis with:
+      1. Issue categorization by severity
+      2. Genealogical impact assessment
+      3. Specific remediation steps
+      4. Research strategies for resolution
+      5. Estimated effort for each fix
+
+      Dataset: {quality_summary}
+      ...
+
+  # Ollama: Simplified analysis
+  ollama:
+    template: |
+      List data quality issues and fixes.
+      For each issue: what's wrong, why it matters, how to fix it.
+
+      Database: {quality_summary}
+      Critical: {critical_issues}
+      ...
+```
+
+### Prompt Template Variables
+
+Each prompt type expects specific variables:
+
+**Biography Prompt:**
+- `{person_summary}` - Name, dates, parents
+- `{timeline_overview}` - Life events chronology
+- `{early_life_overview}` - Birth/childhood context
+- `{family_overview}` - Spouse, children
+- `{sibling_summary}` - Birth order, relationships
+- `{relationship_notes}` - Key relationships
+- `{family_loss_notes}` - Deaths in family
+- `{source_notes}` - Citation information
+
+**Quality Prompt:**
+- `{quality_summary}` - Database statistics
+- `{critical_issues}` - Critical severity issues
+- `{high_issues}` - High severity issues
+- `{medium_issues}` - Medium severity issues
+- `{low_issues}` - Low severity issues
+
+**Q&A Prompt:**
+- `{question}` - User's question
+- `{context_snippets}` - Relevant database records
+
+**Timeline Prompt:**
+- `{person_name}` - Subject name
+- `{events_json}` - Life events (JSON format)
+
+### Testing Custom Prompts
+
+**Compare default vs custom:**
+
+```bash
+# Use default prompt
+uv run rmagent bio 1 --output default.md
+
+# Copy and edit to custom
+cp config/prompts/biography.yaml config/prompts/custom/biography.yaml
+nano config/prompts/custom/biography.yaml
+
+# Use custom prompt
+uv run rmagent bio 1 --output custom.md
+
+# Compare outputs
+diff default.md custom.md
+```
+
+**Test with different providers:**
+
+```bash
+# Test Anthropic
+DEFAULT_LLM_PROVIDER=anthropic uv run rmagent bio 1 --output anthropic.md
+
+# Test OpenAI
+DEFAULT_LLM_PROVIDER=openai uv run rmagent bio 1 --output openai.md
+
+# Test Ollama
+DEFAULT_LLM_PROVIDER=ollama uv run rmagent bio 1 --output ollama.md
+```
+
+### Prompt Version Control
+
+**Best Practices:**
+
+1. **Don't commit custom prompts:** `config/prompts/custom/` is in `.gitignore`
+2. **Document your customizations:** Keep notes on why you changed prompts
+3. **Test thoroughly:** Verify output quality before relying on custom prompts
+4. **Share carefully:** Custom prompts may contain personal style preferences
+
+**Sharing Custom Prompts:**
+
+```bash
+# Export your custom prompt
+cp config/prompts/custom/biography.yaml ~/my-custom-bio-prompt.yaml
+
+# Share with collaborators
+# They can import it as:
+cp ~/my-custom-bio-prompt.yaml config/prompts/custom/biography.yaml
+```
+
+### Troubleshooting Prompts
+
+**Problem:** Custom prompt not loading
+
+```bash
+# Check file location
+ls -la config/prompts/custom/biography.yaml
+
+# Verify YAML syntax
+python3 -c "import yaml; yaml.safe_load(open('config/prompts/custom/biography.yaml'))"
+```
+
+**Problem:** Provider-specific variant not working
+
+Check that provider name matches exactly:
+- ✅ `anthropic` (lowercase)
+- ❌ `Anthropic` (incorrect)
+- ✅ `openai`
+- ❌ `OpenAI` (incorrect)
+- ✅ `ollama`
+- ❌ `Ollama` (incorrect)
+
+**Problem:** Missing template variables
+
+Ensure all required variables are in your custom prompt:
+
+```yaml
+# Biography requires all 8 variables:
+template: |
+  {person_summary}
+  {timeline_overview}
+  {early_life_overview}
+  {family_overview}
+  {sibling_summary}
+  {relationship_notes}
+  {family_loss_notes}
+  {source_notes}
+```
+
+**Problem:** LLM output quality degraded
+
+- Try reverting to default prompt
+- Compare outputs side-by-side
+- Simplify custom prompt incrementally
+- Test with different providers
 
 ---
 

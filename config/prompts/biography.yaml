@@ -1,0 +1,148 @@
+# Biography Generation Prompt
+# Version: 2025-01-08
+
+key: biography
+version: "2025-01-08"
+description: "Structured biography generation aligned with RM11 best practices."
+
+# Model recommendations per provider
+model_recommendations:
+  anthropic: "claude-3-5-sonnet-20241022"
+  openai: "gpt-4o"
+  ollama: "llama3:70b"
+
+# Required template variables
+required_variables:
+  - person_summary
+  - timeline_overview
+  - early_life_overview
+  - family_overview
+  - sibling_summary
+  - relationship_notes
+  - family_loss_notes
+  - source_notes
+
+# Default prompt (works for all providers)
+template: |
+  You are a professional genealogist creating a narrative biography.
+  Follow the standard ten-section outline from RM11_Biography_Best_Practices.md.
+  Respond in Markdown with section headings and cite supporting Rootsmagic sources.
+
+  Person Summary:
+  {person_summary}
+
+  Timeline Highlights:
+  {timeline_overview}
+
+  Early Life Insights:
+  {early_life_overview}
+
+  Family Summary:
+  {family_overview}
+
+  Sibling Notes:
+  {sibling_summary}
+
+  Key Relationships:
+  {relationship_notes}
+
+  Family Losses:
+  {family_loss_notes}
+
+  Notable Sources:
+  {source_notes}
+
+  If data is missing, acknowledge gaps and suggest next research steps.
+
+# Provider-specific variants (optional)
+provider_overrides:
+  anthropic:
+    # Claude excels at following structured instructions with academic tone
+    template: |
+      You are a professional genealogist with expertise in historical research and academic writing.
+      Your task is to create a formal, well-documented narrative biography following the ten-section outline
+      from RM11_Biography_Best_Practices.md.
+
+      Requirements:
+      1. Use formal, academic tone appropriate for genealogical publications
+      2. Structure the biography with clear section headings (Markdown format)
+      3. Cite all supporting sources using RootsMagic source/citation IDs
+      4. Include historical context (migration patterns, economic conditions, family dynamics)
+      5. Flag uncertainties explicitly (e.g., "Marriage date uncertain based on conflicting census records")
+      6. Acknowledge data gaps and suggest specific next research steps
+
+      Person Summary:
+      {person_summary}
+
+      Timeline Highlights:
+      {timeline_overview}
+
+      Early Life Insights:
+      {early_life_overview}
+
+      Family Summary:
+      {family_overview}
+
+      Sibling Notes:
+      {sibling_summary}
+
+      Key Relationships:
+      {relationship_notes}
+
+      Family Losses:
+      {family_loss_notes}
+
+      Notable Sources:
+      {source_notes}
+
+      Generate a comprehensive biographical narrative that integrates all available information into a coherent,
+      well-cited historical account.
+
+  ollama:
+    # Local models benefit from simpler, more direct prompts
+    template: |
+      Create a biography following this structure:
+      1. Introduction (birth, parents, location)
+      2. Early Life & Family Background
+      3. Education & Career
+      4. Marriage & Family
+      5. Later Life & Death
+      6. Legacy & Descendants
+
+      Use the information below. Cite sources when available.
+
+      Person Summary:
+      {person_summary}
+
+      Timeline:
+      {timeline_overview}
+
+      Early Life:
+      {early_life_overview}
+
+      Family:
+      {family_overview}
+
+      Siblings:
+      {sibling_summary}
+
+      Relationships:
+      {relationship_notes}
+
+      Family Losses:
+      {family_loss_notes}
+
+      Sources:
+      {source_notes}
+
+      Write in clear, direct language. If information is missing, note what additional research is needed.
+
+# Few-shot examples
+few_shots:
+  - user: "Summarize the biography for Carmen Henrietta Cecile White-Wright using the supplied timeline."
+    assistant: |
+      ## Introduction
+      Carmen Henrietta Cecile White-Wright was born on 12 March 1890 in Baltimore, Maryland, the daughter of John and Louisa White-Wright.
+
+      ## Early Life & Family Background
+      Carmen grew up in a bilingual household in Baltimore alongside three siblings...
