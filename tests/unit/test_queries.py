@@ -8,8 +8,8 @@ required so the RMNOCASE collation is available.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 import pytest
 
@@ -21,7 +21,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from rmagent.rmlib.database import RMDatabase
-from rmagent.rmlib.queries import QueryService, VITAL_EVENT_TYPES
+from rmagent.rmlib.queries import VITAL_EVENT_TYPES, QueryService
 
 DATA_PATH = Path("data/Iiams.rmtree")
 ICU_EXTENSION_PATH = Path("sqlite-extension/icu.dylib")

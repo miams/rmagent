@@ -19,7 +19,7 @@ import sqlite3
 import sys
 
 
-def connect_rmtree(db_path, extension_path='./sqlite-extension/icu.dylib'):
+def connect_rmtree(db_path, extension_path="./sqlite-extension/icu.dylib"):
     """
     Connect to RootsMagic database with RMNOCASE collation support.
 
@@ -64,7 +64,7 @@ def example_queries():
     """Demonstrate various queries using RMNOCASE collation."""
 
     # Connect to database with RMNOCASE support
-    conn = connect_rmtree('data/Iiams.rmtree')
+    conn = connect_rmtree("data/Iiams.rmtree")
     cursor = conn.cursor()
 
     print("=" * 80)
@@ -79,19 +79,22 @@ def example_queries():
 
     # Example 2: Order by text field with RMNOCASE
     print("\n2. Get surnames ordered case-insensitively:")
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT DISTINCT Surname
         FROM NameTable
         WHERE Surname IS NOT NULL AND Surname != ''
         ORDER BY Surname COLLATE RMNOCASE
         LIMIT 10
-    """)
+    """
+    )
     for row in cursor.fetchall():
         print(f"   - {row[0]}")
 
     # Example 3: Join tables with RMNOCASE fields
     print("\n3. Template usage statistics:")
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             st.TemplateID,
             st.Name,
@@ -103,7 +106,8 @@ def example_queries():
         HAVING COUNT(s.SourceID) > 0
         ORDER BY SourceCount DESC
         LIMIT 5
-    """)
+    """
+    )
     print(f"   {'Template ID':<12} {'Source Count':<12} Template Name")
     print(f"   {'-'*12} {'-'*12} {'-'*40}")
     for tmpl_id, name, count in cursor.fetchall():
@@ -111,19 +115,22 @@ def example_queries():
 
     # Example 4: Search with case-insensitive LIKE
     print("\n4. Find people with surname containing 'iams' (case-insensitive):")
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT DISTINCT Surname, Given
         FROM NameTable
         WHERE Surname LIKE '%iams%' COLLATE RMNOCASE
         AND IsPrimary = 1
         LIMIT 5
-    """)
+    """
+    )
     for surname, given in cursor.fetchall():
         print(f"   - {given} {surname}")
 
     # Example 5: Complex query with multiple joins
     print("\n5. Citations by template type:")
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             st.Name as TemplateName,
             COUNT(c.CitationID) as CitationCount
@@ -134,7 +141,8 @@ def example_queries():
         GROUP BY st.TemplateID, st.Name
         ORDER BY CitationCount DESC
         LIMIT 5
-    """)
+    """
+    )
     print(f"   {'Citations':<12} Template Name")
     print(f"   {'-'*12} {'-'*40}")
     for name, count in cursor.fetchall():
@@ -162,5 +170,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

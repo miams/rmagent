@@ -1,10 +1,11 @@
 """Unit tests for Hugo blog post exporter."""
 
-import pytest
 from pathlib import Path
 
-from rmagent.generators.hugo_exporter import HugoExporter, _slugify
+import pytest
+
 from rmagent.generators.biography import BiographyLength
+from rmagent.generators.hugo_exporter import HugoExporter, _slugify
 
 
 class TestSlugify:
@@ -73,8 +74,8 @@ class TestHugoExporter:
         exporter = HugoExporter(media_base_path="/media/")
 
         media = {
-            'media_path': '?\\Pictures - People',
-            'media_file': 'john-smith.jpg',
+            "media_path": "?\\Pictures - People",
+            "media_file": "john-smith.jpg",
         }
 
         url = exporter._format_media_url(media)
@@ -85,8 +86,8 @@ class TestHugoExporter:
         exporter = HugoExporter(media_base_path="/media/")
 
         media = {
-            'media_path': 'Photos',
-            'media_file': 'portrait.jpg',
+            "media_path": "Photos",
+            "media_file": "portrait.jpg",
         }
 
         url = exporter._format_media_url(media)
@@ -97,8 +98,8 @@ class TestHugoExporter:
         exporter = HugoExporter(media_base_path="/media/")
 
         media = {
-            'media_path': '',
-            'media_file': 'document.pdf',
+            "media_path": "",
+            "media_file": "document.pdf",
         }
 
         url = exporter._format_media_url(media)
@@ -123,9 +124,7 @@ class TestHugoExporter:
         with pytest.raises(ValueError, match="Person 999999 not found"):
             exporter.export_person(person_id=999999, output_dir=tmp_path)
 
-    def test_export_person_creates_markdown_file(
-        self, tmp_path, real_db_path, extension_path
-    ):
+    def test_export_person_creates_markdown_file(self, tmp_path, real_db_path, extension_path):
         """Test that export_person creates markdown file."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -139,19 +138,17 @@ class TestHugoExporter:
         )
 
         # Verify markdown file was created
-        assert 'markdown' in result
-        assert result['markdown'].exists()
-        assert result['markdown'].suffix == '.md'
+        assert "markdown" in result
+        assert result["markdown"].exists()
+        assert result["markdown"].suffix == ".md"
 
         # Verify content
-        content = result['markdown'].read_text()
-        assert '---' in content  # YAML front matter
-        assert 'title:' in content
-        assert 'person_id:' in content
+        content = result["markdown"].read_text()
+        assert "---" in content  # YAML front matter
+        assert "title:" in content
+        assert "person_id:" in content
 
-    def test_export_person_with_timeline(
-        self, tmp_path, real_db_path, extension_path
-    ):
+    def test_export_person_with_timeline(self, tmp_path, real_db_path, extension_path):
         """Test that export_person creates timeline files."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -165,22 +162,20 @@ class TestHugoExporter:
         )
 
         # Verify markdown file
-        assert 'markdown' in result
-        assert result['markdown'].exists()
+        assert "markdown" in result
+        assert result["markdown"].exists()
 
         # Verify timeline files
-        assert 'timeline_json' in result
-        assert 'timeline_html' in result
-        assert result['timeline_json'].exists()
-        assert result['timeline_html'].exists()
+        assert "timeline_json" in result
+        assert "timeline_html" in result
+        assert result["timeline_json"].exists()
+        assert result["timeline_html"].exists()
 
         # Verify timeline shortcode in markdown
-        content = result['markdown'].read_text()
-        assert '{{< timeline' in content
+        content = result["markdown"].read_text()
+        assert "{{< timeline" in content
 
-    def test_export_person_front_matter_structure(
-        self, tmp_path, real_db_path, extension_path
-    ):
+    def test_export_person_front_matter_structure(self, tmp_path, real_db_path, extension_path):
         """Test YAML front matter structure."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -193,28 +188,26 @@ class TestHugoExporter:
             include_timeline=False,
         )
 
-        content = result['markdown'].read_text()
+        content = result["markdown"].read_text()
 
         # Verify front matter exists
-        assert content.startswith('---')
-        assert content.count('---') >= 2
+        assert content.startswith("---")
+        assert content.count("---") >= 2
 
         # Verify required fields
-        assert 'title:' in content
-        assert 'date:' in content
-        assert 'categories:' in content
-        assert 'person_id:' in content
+        assert "title:" in content
+        assert "date:" in content
+        assert "categories:" in content
+        assert "person_id:" in content
 
         # Verify structure
-        lines = content.split('\n')
-        assert lines[0] == '---'
+        lines = content.split("\n")
+        assert lines[0] == "---"
         # Find closing ---
-        closing_idx = lines[1:].index('---') + 1
+        closing_idx = lines[1:].index("---") + 1
         assert closing_idx > 0
 
-    def test_export_person_hugo_taxonomies(
-        self, tmp_path, real_db_path, extension_path
-    ):
+    def test_export_person_hugo_taxonomies(self, tmp_path, real_db_path, extension_path):
         """Test Hugo taxonomies (categories, tags) generation."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -227,18 +220,16 @@ class TestHugoExporter:
             include_timeline=False,
         )
 
-        content = result['markdown'].read_text()
+        content = result["markdown"].read_text()
 
         # Should have categories (surname-based)
-        assert 'categories:' in content
-        assert 'Family' in content
+        assert "categories:" in content
+        assert "Family" in content
 
         # May have tags (places, decades)
         # Can't assert specific tags without knowing the test data
 
-    def test_export_batch_creates_multiple_files(
-        self, tmp_path, real_db_path, extension_path
-    ):
+    def test_export_batch_creates_multiple_files(self, tmp_path, real_db_path, extension_path):
         """Test batch export creates multiple markdown files."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -253,17 +244,15 @@ class TestHugoExporter:
         )
 
         # Verify multiple markdown files created
-        assert 'markdown_files' in result
-        assert len(result['markdown_files']) >= 1  # At least one should succeed
+        assert "markdown_files" in result
+        assert len(result["markdown_files"]) >= 1  # At least one should succeed
 
         # Verify all are markdown files
-        for md_file in result['markdown_files']:
+        for md_file in result["markdown_files"]:
             assert md_file.exists()
-            assert md_file.suffix == '.md'
+            assert md_file.suffix == ".md"
 
-    def test_export_batch_with_index(
-        self, tmp_path, real_db_path, extension_path
-    ):
+    def test_export_batch_with_index(self, tmp_path, real_db_path, extension_path):
         """Test batch export generates index page."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -278,14 +267,14 @@ class TestHugoExporter:
         )
 
         # Verify index file created
-        assert 'index_file' in result
-        assert result['index_file'].exists()
-        assert result['index_file'].name == '_index.md'
+        assert "index_file" in result
+        assert result["index_file"].exists()
+        assert result["index_file"].name == "_index.md"
 
         # Verify index content
-        content = result['index_file'].read_text()
-        assert 'Family Biographies' in content
-        assert '---' in content  # Has front matter
+        content = result["index_file"].read_text()
+        assert "Family Biographies" in content
+        assert "---" in content  # Has front matter
 
     def test_export_batch_handles_invalid_person_gracefully(
         self, tmp_path, real_db_path, extension_path
@@ -305,12 +294,10 @@ class TestHugoExporter:
         )
 
         # Should have at least one successful export
-        assert 'markdown_files' in result
-        assert len(result['markdown_files']) >= 1
+        assert "markdown_files" in result
+        assert len(result["markdown_files"]) >= 1
 
-    def test_export_with_different_bio_lengths(
-        self, tmp_path, real_db_path, extension_path
-    ):
+    def test_export_with_different_bio_lengths(self, tmp_path, real_db_path, extension_path):
         """Test export with different biography lengths."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -334,16 +321,16 @@ class TestHugoExporter:
         )
 
         # Verify both created successfully
-        assert result_short['markdown'].exists()
-        assert result_standard['markdown'].exists()
+        assert result_short["markdown"].exists()
+        assert result_standard["markdown"].exists()
 
         # Short biography should be shorter
-        short_content = result_short['markdown'].read_text()
-        standard_content = result_standard['markdown'].read_text()
+        short_content = result_short["markdown"].read_text()
+        standard_content = result_standard["markdown"].read_text()
 
         # Both should have front matter and content
-        assert '---' in short_content
-        assert '---' in standard_content
+        assert "---" in short_content
+        assert "---" in standard_content
 
 
 class TestHugoExporterIntegration:
@@ -359,17 +346,13 @@ class TestHugoExporterIntegration:
         """Path to ICU extension."""
         return Path("sqlite-extension/icu.dylib")
 
-    def test_complete_hugo_export_workflow(
-        self, tmp_path, real_db_path, extension_path
-    ):
+    def test_complete_hugo_export_workflow(self, tmp_path, real_db_path, extension_path):
         """Test complete Hugo export workflow."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
 
         exporter = HugoExporter(
-            db=real_db_path,
-            extension_path=extension_path,
-            media_base_path="/media/"
+            db=real_db_path, extension_path=extension_path, media_base_path="/media/"
         )
 
         # Create Hugo directory structure
@@ -386,46 +369,42 @@ class TestHugoExporterIntegration:
         )
 
         # Verify markdown files
-        assert len(result['markdown_files']) >= 1
+        assert len(result["markdown_files"]) >= 1
 
         # Verify timeline files (in static/timelines)
-        assert len(result['timeline_files']) >= 2  # JSON + HTML per person
+        assert len(result["timeline_files"]) >= 2  # JSON + HTML per person
 
         # Verify index file
-        assert result['index_file'].exists()
+        assert result["index_file"].exists()
 
         # Verify Hugo directory structure
         static_dir = tmp_path / "static" / "timelines"
         assert static_dir.exists()
 
         # Verify at least one markdown file has proper structure
-        md_file = result['markdown_files'][0]
+        md_file = result["markdown_files"][0]
         content = md_file.read_text()
 
         # Check front matter
-        assert content.startswith('---')
-        assert 'title:' in content
-        assert 'person_id:' in content
-        assert 'categories:' in content
+        assert content.startswith("---")
+        assert "title:" in content
+        assert "person_id:" in content
+        assert "categories:" in content
 
         # Check content sections
-        assert '## ' in content  # Has at least one section
+        assert "## " in content  # Has at least one section
 
         # Check timeline reference if included
-        if '{{< timeline' in content:
+        if "{{< timeline" in content:
             assert 'src="/timelines/' in content
 
-    def test_media_references_in_export(
-        self, tmp_path, real_db_path, extension_path
-    ):
+    def test_media_references_in_export(self, tmp_path, real_db_path, extension_path):
         """Test that media references are properly formatted."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
 
         exporter = HugoExporter(
-            db=real_db_path,
-            extension_path=extension_path,
-            media_base_path="/media/"
+            db=real_db_path, extension_path=extension_path, media_base_path="/media/"
         )
 
         result = exporter.export_person(
@@ -435,18 +414,16 @@ class TestHugoExporterIntegration:
             include_timeline=False,
         )
 
-        content = result['markdown'].read_text()
+        content = result["markdown"].read_text()
 
         # Check if media section exists (only if person has media)
-        if '## Photos & Documents' in content:
+        if "## Photos & Documents" in content:
             # Should have image markdown syntax
-            assert '![' in content
+            assert "![" in content
             # Should have media base path
-            assert '/media/' in content
+            assert "/media/" in content
 
-    def test_index_page_format(
-        self, tmp_path, real_db_path, extension_path
-    ):
+    def test_index_page_format(self, tmp_path, real_db_path, extension_path):
         """Test index page formatting."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -460,14 +437,14 @@ class TestHugoExporterIntegration:
             generate_index=True,
         )
 
-        index_content = result['index_file'].read_text()
+        index_content = result["index_file"].read_text()
 
         # Verify front matter
-        assert index_content.startswith('---')
+        assert index_content.startswith("---")
         assert 'title: "Family Biographies"' in index_content
 
         # Verify has list of people
-        assert '- [' in index_content  # Markdown link
+        assert "- [" in index_content  # Markdown link
 
         # Verify has metadata footer
-        assert 'Generated' in index_content
+        assert "Generated" in index_content

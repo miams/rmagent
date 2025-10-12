@@ -1,48 +1,47 @@
 """Timeline command - Generate timelines."""
 
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from rmagent.generators.timeline import TimelineGenerator, TimelineFormat
+from rmagent.generators.timeline import TimelineFormat, TimelineGenerator
 
 console = Console()
 
 
 @click.command()
-@click.argument('person_id', type=int)
+@click.argument("person_id", type=int)
 @click.option(
-    '--format',
-    '-f',
-    type=click.Choice(['json', 'html'], case_sensitive=False),
-    default='json',
-    help='Timeline format (json for embedding, html for standalone)',
+    "--format",
+    "-f",
+    type=click.Choice(["json", "html"], case_sensitive=False),
+    default="json",
+    help="Timeline format (json for embedding, html for standalone)",
 )
 @click.option(
-    '--output',
-    '-o',
+    "--output",
+    "-o",
     type=click.Path(path_type=Path),
-    help='Output file (default: stdout for json)',
+    help="Output file (default: stdout for json)",
 )
 @click.option(
-    '--group-by-phase',
+    "--group-by-phase",
     is_flag=True,
-    help='Group events by life phases',
+    help="Group events by life phases",
 )
 @click.option(
-    '--include-family',
+    "--include-family",
     is_flag=True,
-    help='Include family events (spouse, children)',
+    help="Include family events (spouse, children)",
 )
 @click.pass_obj
 def timeline(
     ctx,
     person_id: int,
     format: str,
-    output: Optional[Path],
+    output: Path | None,
     group_by_phase: bool,
     include_family: bool,
 ):
@@ -59,8 +58,8 @@ def timeline(
     try:
         # Map string to enum
         format_enum = {
-            'json': TimelineFormat.JSON,
-            'html': TimelineFormat.HTML,
+            "json": TimelineFormat.JSON,
+            "html": TimelineFormat.HTML,
         }[format.lower()]
 
         with Progress(
@@ -94,7 +93,7 @@ def timeline(
             if format_enum == TimelineFormat.HTML:
                 console.print(f"  Open {output} in your browser to view")
             else:
-                console.print(f"  View at: https://timeline.knightlab.com")
+                console.print("  View at: https://timeline.knightlab.com")
         else:
             # Print JSON to stdout
             if format_enum == TimelineFormat.JSON:

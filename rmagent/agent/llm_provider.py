@@ -13,9 +13,10 @@ import logging
 import os
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Any, Callable, Dict, Optional, Tuple, Type
+from datetime import UTC, datetime
+from typing import Any
 
 try:  # Optional dependency
     import anthropic
@@ -56,7 +57,7 @@ class LLMResult:
     text: str
     model: str
     usage: TokenUsage
-    cost: Optional[float] = None
+    cost: float | None = None
     raw_response: Any = None
 
 
@@ -78,9 +79,9 @@ class LLMProvider(ABC):
     def __init__(
         self,
         model: str,
-        default_max_tokens: Optional[int] = None,
-        retry_config: Optional[RetryConfig] = None,
-        pricing_per_1k: Optional[Tuple[float, float]] = None,
+        default_max_tokens: int | None = None,
+        retry_config: RetryConfig | None = None,
+        pricing_per_1k: tuple[float, float] | None = None,
     ) -> None:
         self.model = model
         self.default_max_tokens = default_max_tokens
@@ -92,7 +93,7 @@ class LLMProvider(ABC):
     def generate(self, prompt: str, **kwargs: Any) -> LLMResult:
         """Invoke provider with retry semantics."""
         attempts = 0
-        last_error: Optional[Exception] = None
+        last_error: Exception | None = None
         invoke_kwargs = dict(kwargs)
         if "max_tokens" not in invoke_kwargs and self.default_max_tokens is not None:
             invoke_kwargs["max_tokens"] = self.default_max_tokens
@@ -134,12 +135,14 @@ class LLMProvider(ABC):
     def _invoke(self, prompt: str, **kwargs: Any) -> LLMResult:
         """Concrete providers implement this call."""
 
-    def _log_debug(self, prompt: str, result: LLMResult, elapsed: float, kwargs: Dict[str, Any]) -> None:
+    def _log_debug(
+        self, prompt: str, result: LLMResult, elapsed: float, kwargs: dict[str, Any]
+    ) -> None:
         debug_logger = logging.getLogger("rmagent.llm_debug")
         if not debug_logger.isEnabledFor(logging.DEBUG):
             return
         log_entry = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "provider": self.__class__.__name__,
             "model": result.model,
             "max_tokens": kwargs.get("max_tokens"),
@@ -159,12 +162,12 @@ class AnthropicProvider(LLMProvider):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         model: str = "claude-3-5-sonnet-20241022",
         max_tokens: int = 1024,
         temperature: float = 0.2,
-        client: Optional[Any] = None,
-        retry_config: Optional[RetryConfig] = None,
+        client: Any | None = None,
+        retry_config: RetryConfig | None = None,
     ) -> None:
         if anthropic is None and client is None:
             raise LLMError("anthropic package is required but not installed")
@@ -214,12 +217,12 @@ class OpenAIProvider(LLMProvider):
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         model: str = "gpt-4o-mini",
-        max_tokens: Optional[int] = None,
+        max_tokens: int | None = None,
         temperature: float = 0.2,
-        client: Optional[Any] = None,
-        retry_config: Optional[RetryConfig] = None,
+        client: Any | None = None,
+        retry_config: RetryConfig | None = None,
     ) -> None:
         if openai is None and client is None:
             raise LLMError("openai package is required but not installed")
@@ -263,11 +266,11 @@ class OllamaProvider(LLMProvider):
 
     def __init__(
         self,
-        base_url: Optional[str] = None,
+        base_url: str | None = None,
         model: str = "llama3.1",
         temperature: float = 0.2,
-        client: Optional[Any] = None,
-        retry_config: Optional[RetryConfig] = None,
+        client: Any | None = None,
+        retry_config: RetryConfig | None = None,
     ) -> None:
         if ollama is None and client is None:
             raise LLMError("ollama package is required but not installed")
@@ -281,7 +284,7 @@ class OllamaProvider(LLMProvider):
         if client is not None:
             self.client = client
         else:
-            kwargs: Dict[str, Any] = {}
+            kwargs: dict[str, Any] = {}
             if base_url or os.getenv("OLLAMA_BASE_URL"):
                 kwargs["host"] = base_url or os.getenv("OLLAMA_BASE_URL")
             self.client = ollama.Client(**kwargs)  # type: ignore[operator]
@@ -301,7 +304,7 @@ class OllamaProvider(LLMProvider):
 
 
 ProviderFactory = Callable[..., LLMProvider]
-PROVIDER_REGISTRY: Dict[str, ProviderFactory] = {
+PROVIDER_REGISTRY: dict[str, ProviderFactory] = {
     "anthropic": AnthropicProvider,
     "openai": OpenAIProvider,
     "ollama": OllamaProvider,

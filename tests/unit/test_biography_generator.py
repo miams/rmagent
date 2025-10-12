@@ -1,19 +1,20 @@
 """Unit tests for biography generator."""
 
-import pytest
 from pathlib import Path
-from unittest.mock import Mock, MagicMock
+from unittest.mock import MagicMock, Mock
 
+import pytest
+
+from rmagent.agent.genealogy_agent import GenealogyAgent
+from rmagent.agent.llm_provider import LLMResult
 from rmagent.generators.biography import (
+    Biography,
     BiographyGenerator,
     BiographyLength,
     CitationStyle,
-    PersonContext,
     EventContext,
-    Biography,
+    PersonContext,
 )
-from rmagent.agent.genealogy_agent import GenealogyAgent
-from rmagent.agent.llm_provider import LLMResult
 
 
 class TestBiographyLength:
@@ -409,7 +410,11 @@ class TestBiographyGenerator:
             is_living=False,
             all_citations=[
                 {"CitationID": 1, "SourceName": "U.S. Census 1850", "CitationName": "Page 123"},
-                {"CitationID": 2, "SourceName": "Birth Certificate", "CitationName": "Certificate No. 456"},
+                {
+                    "CitationID": 2,
+                    "SourceName": "Birth Certificate",
+                    "CitationName": "Certificate No. 456",
+                },
             ],
         )
 
@@ -572,14 +577,61 @@ Michael became a genealogist and researcher.
         with RMDatabase(real_db_path, extension_path=extension_path) as db:
             # Create sample events with different types
             events = [
-                {"EventID": 1, "EventType": 1, "Date": "", "Place": "", "Details": "", "IsPrivate": 0, "Proof": 0, "SortDate": 0},  # Birth
-                {"EventID": 2, "EventType": 17, "Date": "", "Place": "", "Details": "", "IsPrivate": 0, "Proof": 0, "SortDate": 0},  # Education
-                {"EventID": 3, "EventType": 12, "Date": "", "Place": "", "Details": "", "IsPrivate": 0, "Proof": 0, "SortDate": 0},  # Occupation
-                {"EventID": 4, "EventType": 10, "Date": "", "Place": "", "Details": "", "IsPrivate": 0, "Proof": 0, "SortDate": 0},  # Military
-                {"EventID": 5, "EventType": 13, "Date": "", "Place": "", "Details": "", "IsPrivate": 0, "Proof": 0, "SortDate": 0},  # Residence
+                {
+                    "EventID": 1,
+                    "EventType": 1,
+                    "Date": "",
+                    "Place": "",
+                    "Details": "",
+                    "IsPrivate": 0,
+                    "Proof": 0,
+                    "SortDate": 0,
+                },  # Birth
+                {
+                    "EventID": 2,
+                    "EventType": 17,
+                    "Date": "",
+                    "Place": "",
+                    "Details": "",
+                    "IsPrivate": 0,
+                    "Proof": 0,
+                    "SortDate": 0,
+                },  # Education
+                {
+                    "EventID": 3,
+                    "EventType": 12,
+                    "Date": "",
+                    "Place": "",
+                    "Details": "",
+                    "IsPrivate": 0,
+                    "Proof": 0,
+                    "SortDate": 0,
+                },  # Occupation
+                {
+                    "EventID": 4,
+                    "EventType": 10,
+                    "Date": "",
+                    "Place": "",
+                    "Details": "",
+                    "IsPrivate": 0,
+                    "Proof": 0,
+                    "SortDate": 0,
+                },  # Military
+                {
+                    "EventID": 5,
+                    "EventType": 13,
+                    "Date": "",
+                    "Place": "",
+                    "Details": "",
+                    "IsPrivate": 0,
+                    "Proof": 0,
+                    "SortDate": 0,
+                },  # Residence
             ]
 
-            vital, education, occupation, military, residence, other = generator._categorize_events(db, events)
+            vital, education, occupation, military, residence, other = generator._categorize_events(
+                db, events
+            )
 
             assert len(vital) == 1
             assert len(education) == 1

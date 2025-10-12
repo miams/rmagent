@@ -11,20 +11,28 @@ from __future__ import annotations
 import logging
 import os
 from pathlib import Path
-from typing import Any, ClassVar, Dict, Optional, Set
+from typing import Any, ClassVar
 
 from dotenv import load_dotenv
+
 try:
-    from pydantic import BaseModel, Field, ValidationError, field_validator
-    from pydantic import ConfigDict  # type: ignore
+    from pydantic import (
+        BaseModel,
+        ConfigDict,  # type: ignore
+        Field,
+        ValidationError,
+        field_validator,
+    )
 except ImportError:  # pragma: no cover - compatibility for Pydantic v1
-    from pydantic import BaseModel, Field, ValidationError, validator as field_validator  # type: ignore
+    from pydantic import BaseModel, Field, ValidationError  # type: ignore
+    from pydantic import validator as field_validator
 
     class ConfigDict(dict):  # type: ignore
         """Fallback stub for Pydantic v1 compatibility."""
 
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
+
 
 from rmagent.agent.llm_provider import (
     LLMError,
@@ -33,20 +41,20 @@ from rmagent.agent.llm_provider import (
 )
 
 
-def _env(name: str, default: Optional[str] = None) -> Optional[str]:
+def _env(name: str, default: str | None = None) -> str | None:
     """Read environment variable with optional default."""
     value = os.getenv(name)
     return value if value not in (None, "") else default
 
 
-def _parse_bool(value: Optional[str], default: bool) -> bool:
+def _parse_bool(value: str | None, default: bool) -> bool:
     """Parse boolean string flags."""
     if value is None:
         return default
     return value.lower() in {"1", "true", "yes", "on"}
 
 
-def _parse_int(value: Optional[str], default: Optional[int]) -> Optional[int]:
+def _parse_int(value: str | None, default: int | None) -> int | None:
     """Parse optional integer values."""
     if value is None or value == "":
         return default
@@ -65,24 +73,26 @@ class LLMSettings(BaseModel):
 
     default_provider: str = Field(default="anthropic")
     default_temperature: float = Field(default=0.2)
-    max_tokens: Optional[int] = Field(default=1024)
-    anthropic_api_key: Optional[str] = None
-    anthropic_model: Optional[str] = None
-    openai_api_key: Optional[str] = None
-    openai_model: Optional[str] = None
-    ollama_base_url: Optional[str] = None
-    ollama_model: Optional[str] = None
+    max_tokens: int | None = Field(default=1024)
+    anthropic_api_key: str | None = None
+    anthropic_model: str | None = None
+    openai_api_key: str | None = None
+    openai_model: str | None = None
+    ollama_base_url: str | None = None
+    ollama_model: str | None = None
 
     model_config = {"str_strip_whitespace": True}
 
-    allowed_providers: ClassVar[Set[str]] = {"anthropic", "openai", "ollama"}
+    allowed_providers: ClassVar[set[str]] = {"anthropic", "openai", "ollama"}
 
     @field_validator("default_provider")
     @classmethod
     def check_provider(cls, provider: str) -> str:
         provider_lower = provider.lower()
         if provider_lower not in cls.allowed_providers:
-            raise ValueError(f"Unknown provider '{provider}'. Allowed: {sorted(cls.allowed_providers)}")
+            raise ValueError(
+                f"Unknown provider '{provider}'. Allowed: {sorted(cls.allowed_providers)}"
+            )
         return provider_lower
 
     def ensure_credentials(self) -> None:
@@ -94,10 +104,10 @@ class LLMSettings(BaseModel):
         if self.default_provider == "ollama" and not self.ollama_base_url:
             raise ValueError("OLLAMA_BASE_URL is required for default provider 'ollama'")
 
-    def provider_kwargs(self) -> Dict[str, Optional[Any]]:
+    def provider_kwargs(self) -> dict[str, Any | None]:
         """Return kwargs for instantiating the configured provider."""
         provider = self.default_provider
-        kwargs: Dict[str, Optional[Any]] = {"model": None, "temperature": self.default_temperature}
+        kwargs: dict[str, Any | None] = {"model": None, "temperature": self.default_temperature}
         if provider == "anthropic":
             kwargs["api_key"] = self.anthropic_api_key
             kwargs["model"] = self.anthropic_model
@@ -148,14 +158,16 @@ class CitationSettings(BaseModel):
 
     default_style: str = Field(default="footnote")
 
-    allowed_styles: ClassVar[Set[str]] = {"footnote", "parenthetical", "narrative"}
+    allowed_styles: ClassVar[set[str]] = {"footnote", "parenthetical", "narrative"}
 
     @field_validator("default_style")
     @classmethod
     def check_style(cls, style: str) -> str:
         style_lower = style.lower()
         if style_lower not in cls.allowed_styles:
-            raise ValueError(f"Invalid citation style '{style}'. Allowed: {sorted(cls.allowed_styles)}")
+            raise ValueError(
+                f"Invalid citation style '{style}'. Allowed: {sorted(cls.allowed_styles)}"
+            )
         return style_lower
 
 
@@ -193,8 +205,10 @@ class AppConfig(BaseModel):
     logging: LoggingSettings
 
     if isinstance(ConfigDict, dict):  # pragma: no cover - legacy pydantic v1
+
         class Config:
             arbitrary_types_allowed = True
+
     else:
         model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -248,7 +262,7 @@ def configure_logging(settings: LoggingSettings) -> None:
 
 
 def load_app_config(
-    env_path: Optional[Path] = None,
+    env_path: Path | None = None,
     auto_create_dirs: bool = True,
     configure_logger: bool = True,
 ) -> AppConfig:
@@ -280,7 +294,9 @@ def load_app_config(
 
         database_settings = DatabaseSettings(
             database_path=Path(_env("RM_DATABASE_PATH", "data/Iiams.rmtree")),
-            sqlite_extension_path=Path(_env("SQLITE_ICU_EXTENSION", "./sqlite-extension/icu.dylib")),
+            sqlite_extension_path=Path(
+                _env("SQLITE_ICU_EXTENSION", "./sqlite-extension/icu.dylib")
+            ),
         )
 
         output_settings = OutputSettings(

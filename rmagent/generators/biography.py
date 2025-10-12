@@ -12,12 +12,11 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 from rmagent.agent.genealogy_agent import GenealogyAgent
 from rmagent.rmlib.database import RMDatabase
 from rmagent.rmlib.models import OwnerType
-from rmagent.rmlib.parsers.date_parser import parse_rm_date, is_unknown_date
+from rmagent.rmlib.parsers.date_parser import is_unknown_date, parse_rm_date
 from rmagent.rmlib.parsers.name_parser import format_full_name
 from rmagent.rmlib.parsers.place_parser import format_place_medium, format_place_short
 from rmagent.rmlib.queries import QueryService
@@ -50,7 +49,7 @@ class EventContext:
     details: str
     is_private: bool
     proof: int
-    citations: List[Dict]  # CitationID, SourceID, Page, etc.
+    citations: list[dict]  # CitationID, SourceID, Page, etc.
     sort_date: int
 
 
@@ -62,44 +61,44 @@ class PersonContext:
     full_name: str
     given_name: str
     surname: str
-    prefix: Optional[str]
-    suffix: Optional[str]
-    nickname: Optional[str]
+    prefix: str | None
+    suffix: str | None
+    nickname: str | None
 
-    birth_year: Optional[int]
-    birth_date: Optional[str]
-    birth_place: Optional[str]
+    birth_year: int | None
+    birth_date: str | None
+    birth_place: str | None
 
-    death_year: Optional[int]
-    death_date: Optional[str]
-    death_place: Optional[str]
+    death_year: int | None
+    death_date: str | None
+    death_place: str | None
 
     sex: int  # 0=Male, 1=Female, 2=Unknown
     is_private: bool
     is_living: bool  # Calculated based on 110-year rule
 
     # Relationships
-    father_id: Optional[int] = None
-    father_name: Optional[str] = None
-    mother_id: Optional[int] = None
-    mother_name: Optional[str] = None
-    spouses: List[Dict] = field(default_factory=list)
-    children: List[Dict] = field(default_factory=list)
-    siblings: List[Dict] = field(default_factory=list)
+    father_id: int | None = None
+    father_name: str | None = None
+    mother_id: int | None = None
+    mother_name: str | None = None
+    spouses: list[dict] = field(default_factory=list)
+    children: list[dict] = field(default_factory=list)
+    siblings: list[dict] = field(default_factory=list)
 
     # Events categorized by type
-    vital_events: List[EventContext] = field(default_factory=list)
-    education_events: List[EventContext] = field(default_factory=list)
-    occupation_events: List[EventContext] = field(default_factory=list)
-    military_events: List[EventContext] = field(default_factory=list)
-    residence_events: List[EventContext] = field(default_factory=list)
-    other_events: List[EventContext] = field(default_factory=list)
+    vital_events: list[EventContext] = field(default_factory=list)
+    education_events: list[EventContext] = field(default_factory=list)
+    occupation_events: list[EventContext] = field(default_factory=list)
+    military_events: list[EventContext] = field(default_factory=list)
+    residence_events: list[EventContext] = field(default_factory=list)
+    other_events: list[EventContext] = field(default_factory=list)
 
     # Media
-    media_files: List[Dict] = field(default_factory=list)
+    media_files: list[dict] = field(default_factory=list)
 
     # Sources
-    all_citations: List[Dict] = field(default_factory=list)
+    all_citations: list[dict] = field(default_factory=list)
 
 
 @dataclass
@@ -239,10 +238,10 @@ class BiographyGenerator:
 
     def __init__(
         self,
-        db: Optional[RMDatabase | Path | str] = None,
-        agent: Optional[GenealogyAgent] = None,
+        db: RMDatabase | Path | str | None = None,
+        agent: GenealogyAgent | None = None,
         extension_path: Path | str = Path("./sqlite-extension/icu.dylib"),
-        current_year: Optional[int] = None,
+        current_year: int | None = None,
     ):
         # Handle db parameter
         if isinstance(db, (Path, str)):
@@ -302,7 +301,9 @@ class BiographyGenerator:
         if use_ai and self.agent:
             biography = self._generate_with_ai(context, length, citation_style, include_sources)
         else:
-            biography = self._generate_template_based(context, length, citation_style, include_sources)
+            biography = self._generate_template_based(
+                context, length, citation_style, include_sources
+            )
 
         return biography
 
@@ -335,8 +336,12 @@ class BiographyGenerator:
                 is_living = age < 110
 
             # Extract birth/death information
-            birth_date_str, birth_place = self._extract_vital_info(db, person_id, fact_type_id=1)  # Birth
-            death_date_str, death_place = self._extract_vital_info(db, person_id, fact_type_id=2)  # Death
+            birth_date_str, birth_place = self._extract_vital_info(
+                db, person_id, fact_type_id=1
+            )  # Birth
+            death_date_str, death_place = self._extract_vital_info(
+                db, person_id, fact_type_id=2
+            )  # Death
 
             # Get relationships
             parents = query.get_parents(person_id)
@@ -365,9 +370,14 @@ class BiographyGenerator:
 
             # Get all events and categorize
             all_events = query.get_person_events(person_id)
-            vital_events, education_events, occupation_events, military_events, residence_events, other_events = (
-                self._categorize_events(db, all_events)
-            )
+            (
+                vital_events,
+                education_events,
+                occupation_events,
+                military_events,
+                residence_events,
+                other_events,
+            ) = self._categorize_events(db, all_events)
 
             # Get media if requested
             media_files = []
@@ -419,7 +429,9 @@ class BiographyGenerator:
         else:
             raise ValueError("No database provided")
 
-    def _extract_vital_info(self, db: RMDatabase, person_id: int, fact_type_id: int) -> Tuple[Optional[str], Optional[str]]:
+    def _extract_vital_info(
+        self, db: RMDatabase, person_id: int, fact_type_id: int
+    ) -> tuple[str | None, str | None]:
         """Extract date and place for a vital event (birth/death)."""
         query = QueryService(db)
         vital_events = query.get_vital_events(person_id)
@@ -450,8 +462,8 @@ class BiographyGenerator:
         return None, None
 
     def _categorize_events(
-        self, db: RMDatabase, events: List[Dict]
-    ) -> Tuple[List[EventContext], ...]:
+        self, db: RMDatabase, events: list[dict]
+    ) -> tuple[list[EventContext], ...]:
         """Categorize events into vital, education, occupation, military, residence, and other."""
         vital = []
         education = []
@@ -485,7 +497,7 @@ class BiographyGenerator:
 
         return vital, education, occupation, military, residence, other
 
-    def _build_event_context(self, db: RMDatabase, event: Dict) -> EventContext:
+    def _build_event_context(self, db: RMDatabase, event: dict) -> EventContext:
         """Build EventContext from event row."""
         # Parse date
         date_str = _get_row_value(event, "Date", "")
@@ -521,7 +533,7 @@ class BiographyGenerator:
             sort_date=_get_row_value(event, "SortDate", 0),
         )
 
-    def _get_citations_for_event(self, db: RMDatabase, event_id: int) -> List[Dict]:
+    def _get_citations_for_event(self, db: RMDatabase, event_id: int) -> list[dict]:
         """Get all citations for an event."""
         cursor = db.execute(
             """
@@ -535,7 +547,7 @@ class BiographyGenerator:
         )
         return cursor.fetchall()
 
-    def _get_media_for_person(self, db: RMDatabase, person_id: int) -> List[Dict]:
+    def _get_media_for_person(self, db: RMDatabase, person_id: int) -> list[dict]:
         """Get all media files linked to person."""
         cursor = db.execute(
             """
@@ -549,7 +561,7 @@ class BiographyGenerator:
         )
         return cursor.fetchall()
 
-    def _get_all_citations_for_person(self, db: RMDatabase, person_id: int) -> List[Dict]:
+    def _get_all_citations_for_person(self, db: RMDatabase, person_id: int) -> list[dict]:
         """Get all citations associated with person (via events, names, etc.)."""
         # Get citations for all events
         cursor = db.execute(
@@ -775,7 +787,7 @@ class BiographyGenerator:
         if context.children:
             child_count = len(context.children)
             if child_count == 1:
-                lines.append(f"They had one child.")
+                lines.append("They had one child.")
             else:
                 lines.append(f"They had {child_count} children.")
 
@@ -829,7 +841,7 @@ class BiographyGenerator:
 
         return "\n".join(lines)
 
-    def _parse_ai_response(self, response_text: str) -> Dict[str, str]:
+    def _parse_ai_response(self, response_text: str) -> dict[str, str]:
         """Parse AI-generated biography into sections."""
         # Simple parser - looks for section headers
         sections = {

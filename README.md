@@ -276,6 +276,73 @@ RM11/
 └── sqlite-extension/   # SQLite ICU extension for RMNOCASE
 ```
 
+## LangChain Integration (Future Features)
+
+**Status:** LangChain v1.0 upgrade planned after Phase 5 (Testing) & Phase 6 (Documentation) complete.
+
+### Current LangChain Usage
+
+RMAgent currently has **zero active LangChain imports**. Custom "LangChain-style" tool wrappers in `rmagent/agent/tools.py` provide a compatible interface but are standalone implementations.
+
+### Future LangChain Features
+
+When implementing new features using LangChain (census extraction, timeline enrichment, agentic research), follow **v1.0 patterns exclusively**:
+
+#### Quick Start Example (v1.0 Pattern)
+
+```python
+from langchain import create_agent  # v1.0 API
+from langchain.agents import AgentExecutor
+from langchain_anthropic import ChatAnthropic
+from rmagent.agent.lc.tools import query_person, get_events
+
+def create_research_agent():
+    """Create genealogy research agent (v1.0 pattern)."""
+    llm = ChatAnthropic(model="claude-3-5-sonnet-20241022")
+    tools = [query_person, get_events, search_database]
+
+    # v1.0: String system prompt (not ChatPromptTemplate)
+    system_prompt = """You are a professional genealogist.
+    Always cite sources and flag uncertainties."""
+
+    agent = create_agent(
+        model=llm,
+        tools=tools,
+        system_prompt=system_prompt  # v1.0 requirement
+    )
+
+    return AgentExecutor(agent=agent, tools=tools, verbose=True)
+
+# Usage
+agent = create_research_agent()
+result = agent.invoke({
+    "input": "Find census records for person 123"
+})
+```
+
+### v1.0 Breaking Changes (Important!)
+
+When LangChain v1.0 stable releases, use these patterns:
+
+| **Feature** | **❌ 0.3.x (Don't Use)** | **✅ v1.0 (Required)** |
+|------------|------------------------|---------------------|
+| Agent creation | `create_react_agent()` | `create_agent()` |
+| Agent prompts | `prompt=ChatPromptTemplate(...)` | `system_prompt="string"` |
+| State schema | Pydantic models | **Only `TypedDict`** |
+| Context passing | `config["configurable"]` | `context=` parameter |
+
+**Reference:** https://docs.langchain.com/oss/python/migrate/langchain-v1
+
+### Migration Plan
+
+See `docs/RM11_LangChain_Upgrade.md` for complete upgrade strategy and timeline.
+
+**Key Points:**
+- New LangChain code goes in `rmagent/agent/lc/` directory
+- Use v1.0 patterns from day one (no migration needed)
+- Maintain 80%+ test coverage for all LangChain features
+- See `AGENTS.md` for comprehensive best practices
+
 ## Development
 
 ### Run Tests

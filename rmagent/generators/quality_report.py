@@ -12,7 +12,6 @@ import csv
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Union
 
 from rmagent.rmlib.database import RMDatabase
 from rmagent.rmlib.quality import (
@@ -56,7 +55,7 @@ class QualityReportGenerator:
 
     def __init__(
         self,
-        db: Optional[RMDatabase | Path | str] = None,
+        db: RMDatabase | Path | str | None = None,
         extension_path: Path | str = Path("./sqlite-extension/icu.dylib"),
         sample_limit: int = 25,
     ):
@@ -76,14 +75,14 @@ class QualityReportGenerator:
 
         self.extension_path = Path(extension_path)
         self.sample_limit = sample_limit
-        self._last_report: Optional[QualityReport] = None
+        self._last_report: QualityReport | None = None
 
     def generate(
         self,
         format: ReportFormat = ReportFormat.MARKDOWN,
-        output_path: Optional[Path | str] = None,
-        category_filter: Optional[str] = None,
-        severity_filter: Optional[QualitySeverity] = None,
+        output_path: Path | str | None = None,
+        category_filter: str | None = None,
+        severity_filter: QualitySeverity | None = None,
     ) -> str:
         """
         Generate a data quality report.
@@ -146,8 +145,8 @@ class QualityReportGenerator:
     def _apply_filters(
         self,
         report: QualityReport,
-        category_filter: Optional[str],
-        severity_filter: Optional[QualitySeverity],
+        category_filter: str | None,
+        severity_filter: QualitySeverity | None,
     ) -> QualityReport:
         """Apply category and severity filters to the report."""
         filtered_issues = report.issues
@@ -155,15 +154,13 @@ class QualityReportGenerator:
         # Apply category filter
         if category_filter:
             filtered_issues = [
-                issue for issue in filtered_issues
-                if issue.category == category_filter
+                issue for issue in filtered_issues if issue.category == category_filter
             ]
 
         # Apply severity filter
         if severity_filter:
             filtered_issues = [
-                issue for issue in filtered_issues
-                if issue.severity == severity_filter
+                issue for issue in filtered_issues if issue.severity == severity_filter
             ]
 
         # Recalculate totals for filtered issues
@@ -172,14 +169,14 @@ class QualityReportGenerator:
             for severity in QualitySeverity
         }
 
-        totals_by_category: Dict[str, int] = {}
+        totals_by_category: dict[str, int] = {}
         for issue in filtered_issues:
             totals_by_category.setdefault(issue.category, 0)
             totals_by_category[issue.category] += issue.count
 
         # Update summary with filtered issue count
         summary = report.summary.copy()
-        summary['issue_total'] = sum(issue.count for issue in filtered_issues)
+        summary["issue_total"] = sum(issue.count for issue in filtered_issues)
 
         return QualityReport(
             issues=filtered_issues,
@@ -214,7 +211,12 @@ class QualityReportGenerator:
         # Issues by severity
         lines.append("### Issues by Severity")
         lines.append("")
-        for severity in [QualitySeverity.CRITICAL, QualitySeverity.HIGH, QualitySeverity.MEDIUM, QualitySeverity.LOW]:
+        for severity in [
+            QualitySeverity.CRITICAL,
+            QualitySeverity.HIGH,
+            QualitySeverity.MEDIUM,
+            QualitySeverity.LOW,
+        ]:
             count = report.totals_by_severity.get(severity, 0)
             icon = self._severity_icon(severity)
             lines.append(f"- {icon} **{severity.value.capitalize()}:** {count:,}")
@@ -229,7 +231,12 @@ class QualityReportGenerator:
         lines.append("")
 
         # Detailed issues by severity
-        for severity in [QualitySeverity.CRITICAL, QualitySeverity.HIGH, QualitySeverity.MEDIUM, QualitySeverity.LOW]:
+        for severity in [
+            QualitySeverity.CRITICAL,
+            QualitySeverity.HIGH,
+            QualitySeverity.MEDIUM,
+            QualitySeverity.LOW,
+        ]:
             severity_issues = [issue for issue in report.issues if issue.severity == severity]
             if severity_issues:
                 icon = self._severity_icon(severity)
@@ -241,7 +248,7 @@ class QualityReportGenerator:
 
         return "\n".join(lines)
 
-    def _add_issue_markdown(self, lines: List[str], issue: QualityIssue) -> None:
+    def _add_issue_markdown(self, lines: list[str], issue: QualityIssue) -> None:
         """Add an issue section to markdown output."""
         lines.append(f"### {issue.name}")
         lines.append("")
@@ -255,13 +262,13 @@ class QualityReportGenerator:
             lines.append("**Sample Issues:**")
             lines.append("")
 
-            for i, sample in enumerate(issue.samples[:self.sample_limit], 1):
+            for i, sample in enumerate(issue.samples[: self.sample_limit], 1):
                 self._add_sample_markdown(lines, i, sample)
 
         lines.append("---")
         lines.append("")
 
-    def _add_sample_markdown(self, lines: List[str], index: int, sample: Dict) -> None:
+    def _add_sample_markdown(self, lines: list[str], index: int, sample: dict) -> None:
         """Add a sample issue to markdown output."""
         # Format sample based on available fields
         if "PersonID" in sample:
@@ -309,17 +316,32 @@ class QualityReportGenerator:
         lines.append("    <meta name='viewport' content='width=device-width, initial-scale=1.0'>")
         lines.append("    <title>Data Quality Report</title>")
         lines.append("    <style>")
-        lines.append("        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; margin: 40px; }")
-        lines.append("        h1 { color: #333; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; }")
+        lines.append(
+            "        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, "
+            "sans-serif; margin: 40px; }"
+        )
+        lines.append(
+            "        h1 { color: #333; border-bottom: 2px solid #4CAF50; "
+            "padding-bottom: 10px; }"
+        )
         lines.append("        h2 { color: #555; margin-top: 30px; }")
         lines.append("        h3 { color: #666; }")
-        lines.append("        .summary { background-color: #f9f9f9; padding: 15px; border-left: 4px solid #4CAF50; margin: 20px 0; }")
+        lines.append(
+            "        .summary { background-color: #f9f9f9; padding: 15px; "
+            "border-left: 4px solid #4CAF50; margin: 20px 0; }"
+        )
         lines.append("        .critical { color: #d32f2f; }")
         lines.append("        .high { color: #f57c00; }")
         lines.append("        .medium { color: #fbc02d; }")
         lines.append("        .low { color: #388e3c; }")
-        lines.append("        .issue { background-color: #fff; border: 1px solid #ddd; padding: 15px; margin: 15px 0; border-radius: 4px; }")
-        lines.append("        .issue-header { font-weight: bold; font-size: 1.1em; margin-bottom: 10px; }")
+        lines.append(
+            "        .issue { background-color: #fff; border: 1px solid #ddd; padding: 15px; "
+            "margin: 15px 0; border-radius: 4px; }"
+        )
+        lines.append(
+            "        .issue-header { font-weight: bold; font-size: 1.1em; "
+            "margin-bottom: 10px; }"
+        )
         lines.append("        .metadata { color: #666; font-size: 0.9em; }")
         lines.append("        .samples { margin-top: 10px; }")
         lines.append("        .sample { margin: 5px 0; padding-left: 20px; }")
@@ -332,18 +354,31 @@ class QualityReportGenerator:
 
         # Content
         lines.append("    <h1>Data Quality Report</h1>")
-        lines.append(f"    <p><strong>Generated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>")
+        lines.append(
+            f"    <p><strong>Generated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>"
+        )
 
         # Summary
         lines.append("    <div class='summary'>")
         lines.append("        <h2>Summary Statistics</h2>")
         lines.append("        <table>")
         lines.append("            <tr><th>Metric</th><th>Count</th></tr>")
-        lines.append(f"            <tr><td>Total People</td><td>{report.summary.get('total_people', 0):,}</td></tr>")
-        lines.append(f"            <tr><td>Total Events</td><td>{report.summary.get('total_events', 0):,}</td></tr>")
-        lines.append(f"            <tr><td>Total Sources</td><td>{report.summary.get('total_sources', 0):,}</td></tr>")
-        lines.append(f"            <tr><td>Total Citations</td><td>{report.summary.get('total_citations', 0):,}</td></tr>")
-        lines.append(f"            <tr><td><strong>Total Issues</strong></td><td><strong>{report.summary.get('issue_total', 0):,}</strong></td></tr>")
+        lines.append(
+            f"            <tr><td>Total People</td><td>{report.summary.get('total_people', 0):,}</td></tr>"
+        )
+        lines.append(
+            f"            <tr><td>Total Events</td><td>{report.summary.get('total_events', 0):,}</td></tr>"
+        )
+        lines.append(
+            f"            <tr><td>Total Sources</td><td>{report.summary.get('total_sources', 0):,}</td></tr>"
+        )
+        lines.append(
+            f"            <tr><td>Total Citations</td><td>{report.summary.get('total_citations', 0):,}</td></tr>"
+        )
+        lines.append(
+            f"            <tr><td><strong>Total Issues</strong></td>"
+            f"<td><strong>{report.summary.get('issue_total', 0):,}</strong></td></tr>"
+        )
         lines.append("        </table>")
         lines.append("    </div>")
 
@@ -351,28 +386,47 @@ class QualityReportGenerator:
         lines.append("    <h2>Issues by Severity</h2>")
         lines.append("    <table>")
         lines.append("        <tr><th>Severity</th><th>Count</th></tr>")
-        for severity in [QualitySeverity.CRITICAL, QualitySeverity.HIGH, QualitySeverity.MEDIUM, QualitySeverity.LOW]:
+        for severity in [
+            QualitySeverity.CRITICAL,
+            QualitySeverity.HIGH,
+            QualitySeverity.MEDIUM,
+            QualitySeverity.LOW,
+        ]:
             count = report.totals_by_severity.get(severity, 0)
             css_class = severity.value
-            lines.append(f"        <tr><td class='{css_class}'>{severity.value.capitalize()}</td><td>{count:,}</td></tr>")
+            lines.append(
+                f"        <tr><td class='{css_class}'>{severity.value.capitalize()}</td><td>{count:,}</td></tr>"
+            )
         lines.append("    </table>")
 
         # Detailed issues
-        for severity in [QualitySeverity.CRITICAL, QualitySeverity.HIGH, QualitySeverity.MEDIUM, QualitySeverity.LOW]:
+        for severity in [
+            QualitySeverity.CRITICAL,
+            QualitySeverity.HIGH,
+            QualitySeverity.MEDIUM,
+            QualitySeverity.LOW,
+        ]:
             severity_issues = [issue for issue in report.issues if issue.severity == severity]
             if severity_issues:
                 css_class = severity.value
-                lines.append(f"    <h2 class='{css_class}'>{severity.value.capitalize()} Issues</h2>")
+                lines.append(
+                    f"    <h2 class='{css_class}'>{severity.value.capitalize()} Issues</h2>"
+                )
 
                 for issue in severity_issues:
                     lines.append("    <div class='issue'>")
                     lines.append(f"        <div class='issue-header'>{issue.name}</div>")
-                    lines.append(f"        <div class='metadata'>Rule ID: {issue.rule_id} | Category: {issue.category} | Count: {issue.count:,}</div>")
+                    lines.append(
+                        f"        <div class='metadata'>Rule ID: {issue.rule_id} | "
+                        f"Category: {issue.category} | Count: {issue.count:,}</div>"
+                    )
                     lines.append(f"        <p>{issue.description}</p>")
 
                     if issue.samples:
-                        lines.append("        <div class='samples'><strong>Sample Issues:</strong><ul>")
-                        for sample in issue.samples[:self.sample_limit]:
+                        lines.append(
+                            "        <div class='samples'><strong>Sample Issues:</strong><ul>"
+                        )
+                        for sample in issue.samples[: self.sample_limit]:
                             sample_text = self._format_sample_html(sample)
                             lines.append(f"            <li>{sample_text}</li>")
                         lines.append("        </ul></div>")
@@ -385,7 +439,7 @@ class QualityReportGenerator:
 
         return "\n".join(lines)
 
-    def _format_sample_html(self, sample: Dict) -> str:
+    def _format_sample_html(self, sample: dict) -> str:
         """Format a sample issue for HTML output."""
         if "PersonID" in sample:
             person_id = sample["PersonID"]
@@ -417,20 +471,22 @@ class QualityReportGenerator:
         writer = csv.writer(output)
 
         # Header row
-        writer.writerow([
-            "Rule ID",
-            "Rule Name",
-            "Category",
-            "Severity",
-            "Count",
-            "Description",
-            "Sample PersonID",
-            "Sample Name",
-            "Sample SourceID",
-            "Sample Source Name",
-            "Sample EventID",
-            "Sample Event Type",
-        ])
+        writer.writerow(
+            [
+                "Rule ID",
+                "Rule Name",
+                "Category",
+                "Severity",
+                "Count",
+                "Description",
+                "Sample PersonID",
+                "Sample Name",
+                "Sample SourceID",
+                "Sample Source Name",
+                "Sample EventID",
+                "Sample Event Type",
+            ]
+        )
 
         # Data rows
         for issue in report.issues:
@@ -445,7 +501,7 @@ class QualityReportGenerator:
 
             if issue.samples:
                 # Write one row per sample
-                for sample in issue.samples[:self.sample_limit]:
+                for sample in issue.samples[: self.sample_limit]:
                     row = base_row + [
                         sample.get("PersonID", ""),
                         f"{sample.get('Given', '')} {sample.get('Surname', '')}".strip(),

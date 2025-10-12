@@ -19,7 +19,6 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
-from typing import Optional
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -27,12 +26,15 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from rmagent.rmlib.database import RMDatabase
-from rmagent.rmlib.queries import QueryService
-from rmagent.rmlib.quality import DataQualityValidator
+from rmagent.rmlib.parsers.blob_parser import parse_citation_fields, parse_source_fields
 from rmagent.rmlib.parsers.date_parser import parse_rm_date
-from rmagent.rmlib.parsers.place_parser import parse_place_name, format_place_short, format_place_medium
 from rmagent.rmlib.parsers.name_parser import format_full_name
-from rmagent.rmlib.parsers.blob_parser import parse_source_fields, parse_citation_fields
+from rmagent.rmlib.parsers.place_parser import (
+    format_place_medium,
+    format_place_short,
+)
+from rmagent.rmlib.quality import DataQualityValidator
+from rmagent.rmlib.queries import QueryService
 
 
 def get_row_value(row, key: str, default=None):
@@ -54,8 +56,8 @@ def render_italics(text: str) -> str:
         return ""
 
     # Replace both lowercase and uppercase italic tags
-    result = text.replace('<i>', '\033[3m').replace('</i>', '\033[23m')
-    result = result.replace('<I>', '\033[3m').replace('</I>', '\033[23m')
+    result = text.replace("<i>", "\033[3m").replace("</i>", "\033[23m")
+    result = result.replace("<I>", "\033[3m").replace("</I>", "\033[23m")
     return result
 
 
@@ -68,23 +70,23 @@ def format_person_info(person: dict, query_service: QueryService) -> str:
 
     # Format name
     full_name = format_full_name(
-        given=get_row_value(person, 'Given'),
-        surname=get_row_value(person, 'Surname'),
-        prefix=get_row_value(person, 'Prefix'),
-        suffix=get_row_value(person, 'Suffix'),
+        given=get_row_value(person, "Given"),
+        surname=get_row_value(person, "Surname"),
+        prefix=get_row_value(person, "Prefix"),
+        suffix=get_row_value(person, "Suffix"),
     )
     lines.append(f"\nName: {full_name}")
 
     # Format birth/death years
-    birth_year = get_row_value(person, 'BirthYear')
-    death_year = get_row_value(person, 'DeathYear')
+    birth_year = get_row_value(person, "BirthYear")
+    death_year = get_row_value(person, "DeathYear")
     if birth_year or death_year:
         years = f"({birth_year or '?'} - {death_year or '?'})"
         lines.append(f"Years: {years}")
 
     # Format sex
-    sex_map = {0: 'Male', 1: 'Female', 2: 'Unknown'}
-    sex = sex_map.get(get_row_value(person, 'Sex'), 'Unknown')
+    sex_map = {0: "Male", 1: "Female", 2: "Unknown"}
+    sex = sex_map.get(get_row_value(person, "Sex"), "Unknown")
     lines.append(f"Sex: {sex}")
 
     return "\n".join(lines)
@@ -102,7 +104,7 @@ def format_web_tags(person_id: int, db: RMDatabase) -> str:
         WHERE OwnerType = 0 AND OwnerID = ?
         ORDER BY Name
         """,
-        (person_id,)
+        (person_id,),
     )
 
     if not web_tags:
@@ -113,9 +115,9 @@ def format_web_tags(person_id: int, db: RMDatabase) -> str:
     lines.append("-" * 70)
 
     for tag in web_tags:
-        name = get_row_value(tag, 'Name', '[Unnamed]')
-        url = get_row_value(tag, 'URL', '')
-        note = get_row_value(tag, 'Note', '')
+        name = get_row_value(tag, "Name", "[Unnamed]")
+        url = get_row_value(tag, "URL", "")
+        note = get_row_value(tag, "Note", "")
 
         lines.append(f"\n{name}: {url}")
         if note:
@@ -138,10 +140,10 @@ def format_events(person_id: int, query_service: QueryService) -> str:
         return "\n".join(lines)
 
     for event in events:
-        event_type = event['EventType']
+        event_type = event["EventType"]
 
         # Parse and format date
-        date_str = event['Date']
+        date_str = event["Date"]
         if date_str:
             try:
                 date = parse_rm_date(date_str)
@@ -152,7 +154,7 @@ def format_events(person_id: int, query_service: QueryService) -> str:
             formatted_date = "[No date]"
 
         # Parse and format place
-        place_str = get_row_value(event, 'Place', '')
+        place_str = get_row_value(event, "Place", "")
         if place_str:
             try:
                 formatted_place = format_place_short(place_str)
@@ -162,7 +164,7 @@ def format_events(person_id: int, query_service: QueryService) -> str:
             formatted_place = "[No place]"
 
         # Format details
-        details = get_row_value(event, 'Details', '')
+        details = get_row_value(event, "Details", "")
         if details:
             details_str = f" - {details}"
         else:
@@ -199,7 +201,7 @@ def format_citations(person_id: int, db: RMDatabase) -> str:
           AND c.CitationID IS NOT NULL
         ORDER BY e.SortDate, cl.SortOrder
         """,
-        (person_id,)
+        (person_id,),
     )
 
     if not citations:
@@ -214,10 +216,10 @@ def format_citations(person_id: int, db: RMDatabase) -> str:
     citation_num = 0
 
     for cit in citations:
-        event_id = cit['EventID']
-        event_type = cit['EventType']
-        event_date = cit['Date']
-        event_details = get_row_value(cit, 'Details', '')
+        event_id = cit["EventID"]
+        event_type = cit["EventType"]
+        event_date = cit["Date"]
+        event_details = get_row_value(cit, "Details", "")
 
         # Format event header
         if event_id != current_event:
@@ -242,15 +244,15 @@ def format_citations(person_id: int, db: RMDatabase) -> str:
 
         # Citation details
         citation_num += 1
-        citation_id = cit['CitationID']
-        source_name = get_row_value(cit, 'SourceName', '[Unknown Source]')
+        _citation_id = cit["CitationID"]  # Available for future use
+        source_name = get_row_value(cit, "SourceName", "[Unknown Source]")
 
         # Parse citation fields to get page number
         page = ""
-        if cit['CitationFields']:
+        if cit["CitationFields"]:
             try:
-                fields = parse_citation_fields(cit['CitationFields'])
-                page = fields.get('Page', '')
+                fields = parse_citation_fields(cit["CitationFields"])
+                page = fields.get("Page", "")
             except Exception:
                 pass
 
@@ -284,7 +286,7 @@ def format_sources(person_id: int, db: RMDatabase) -> str:
         GROUP BY s.SourceID
         ORDER BY s.Name
         """,
-        (person_id,)
+        (person_id,),
     )
 
     if not sources:
@@ -295,21 +297,21 @@ def format_sources(person_id: int, db: RMDatabase) -> str:
     lines.append("-" * 70)
 
     for i, src in enumerate(sources, 1):
-        source_id = src['SourceID']
-        source_name = src['Name']
-        template_id = src['TemplateID']
-        actual_text = get_row_value(src, 'ActualText', '')
-        citation_count = src['CitationCount']
+        _source_id = src["SourceID"]  # Available for future use
+        source_name = src["Name"]
+        template_id = src["TemplateID"]
+        actual_text = get_row_value(src, "ActualText", "")
+        citation_count = src["CitationCount"]
 
         # Display bibliography
         bibliography_text = None
 
         # First, try to get Bibliography field from BLOB
-        if src['SourceFields']:
+        if src["SourceFields"]:
             try:
-                fields = parse_source_fields(src['SourceFields'])
-                if 'Bibliography' in fields and fields['Bibliography']:
-                    bibliography_text = fields['Bibliography']
+                fields = parse_source_fields(src["SourceFields"])
+                if "Bibliography" in fields and fields["Bibliography"]:
+                    bibliography_text = fields["Bibliography"]
             except Exception:
                 pass
 
@@ -341,15 +343,23 @@ def format_family(person_id: int, query_service: QueryService) -> str:
     # Parents
     parents = query_service.get_parents(person_id)
     if parents:
-        father_name = format_full_name(
-            given=get_row_value(parents, 'FatherGiven'),
-            surname=get_row_value(parents, 'FatherSurname')
-        ) if get_row_value(parents, 'FatherID') else "Unknown"
+        father_name = (
+            format_full_name(
+                given=get_row_value(parents, "FatherGiven"),
+                surname=get_row_value(parents, "FatherSurname"),
+            )
+            if get_row_value(parents, "FatherID")
+            else "Unknown"
+        )
 
-        mother_name = format_full_name(
-            given=get_row_value(parents, 'MotherGiven'),
-            surname=get_row_value(parents, 'MotherSurname')
-        ) if get_row_value(parents, 'MotherID') else "Unknown"
+        mother_name = (
+            format_full_name(
+                given=get_row_value(parents, "MotherGiven"),
+                surname=get_row_value(parents, "MotherSurname"),
+            )
+            if get_row_value(parents, "MotherID")
+            else "Unknown"
+        )
 
         lines.append(f"\nFather: {father_name} (ID: {get_row_value(parents, 'FatherID', 'N/A')})")
         lines.append(f"Mother: {mother_name} (ID: {get_row_value(parents, 'MotherID', 'N/A')})")
@@ -360,10 +370,9 @@ def format_family(person_id: int, query_service: QueryService) -> str:
         lines.append(f"\nSpouses ({len(spouses)}):")
         for spouse in spouses:
             spouse_name = format_full_name(
-                given=get_row_value(spouse, 'Given'),
-                surname=get_row_value(spouse, 'Surname')
+                given=get_row_value(spouse, "Given"), surname=get_row_value(spouse, "Surname")
             )
-            marriage_date = get_row_value(spouse, 'MarriageDate', '')
+            marriage_date = get_row_value(spouse, "MarriageDate", "")
             if marriage_date:
                 try:
                     date = parse_rm_date(marriage_date)
@@ -380,10 +389,9 @@ def format_family(person_id: int, query_service: QueryService) -> str:
         lines.append(f"\nChildren ({len(children)}):")
         for child in children:
             child_name = format_full_name(
-                given=get_row_value(child, 'Given'),
-                surname=get_row_value(child, 'Surname')
+                given=get_row_value(child, "Given"), surname=get_row_value(child, "Surname")
             )
-            birth_year = get_row_value(child, 'BirthYear', '')
+            birth_year = get_row_value(child, "BirthYear", "")
             year_str = f" (b. {birth_year})" if birth_year else ""
             lines.append(f"  - {child_name} (ID: {child['PersonID']}){year_str}")
 
@@ -406,15 +414,15 @@ def generate_basic_biography(person_id: int, query_service: QueryService) -> str
         return "\n".join(lines + ["\nPerson not found."])
 
     full_name = format_full_name(
-        given=get_row_value(person, 'Given'),
-        surname=get_row_value(person, 'Surname'),
-        prefix=get_row_value(person, 'Prefix'),
-        suffix=get_row_value(person, 'Suffix'),
+        given=get_row_value(person, "Given"),
+        surname=get_row_value(person, "Surname"),
+        prefix=get_row_value(person, "Prefix"),
+        suffix=get_row_value(person, "Suffix"),
     )
 
     # Introduction
-    birth_year = get_row_value(person, 'BirthYear')
-    death_year = get_row_value(person, 'DeathYear')
+    birth_year = get_row_value(person, "BirthYear")
+    death_year = get_row_value(person, "DeathYear")
 
     intro = f"\n{full_name}"
     if birth_year and death_year:
@@ -430,10 +438,10 @@ def generate_basic_biography(person_id: int, query_service: QueryService) -> str
     vital_events = query_service.get_vital_events(person_id)
 
     # Birth
-    birth = next((e for e in vital_events if e['FactTypeID'] == 1), None)
+    birth = next((e for e in vital_events if e["FactTypeID"] == 1), None)
     if birth:
-        birth_date = get_row_value(birth, 'Date', '')
-        birth_place = get_row_value(birth, 'Place', '')
+        birth_date = get_row_value(birth, "Date", "")
+        birth_place = get_row_value(birth, "Place", "")
         if birth_date:
             try:
                 date = parse_rm_date(birth_date)
@@ -457,10 +465,9 @@ def generate_basic_biography(person_id: int, query_service: QueryService) -> str
     if spouses:
         for spouse in spouses:
             spouse_name = format_full_name(
-                given=get_row_value(spouse, 'Given'),
-                surname=get_row_value(spouse, 'Surname')
+                given=get_row_value(spouse, "Given"), surname=get_row_value(spouse, "Surname")
             )
-            marriage_date = get_row_value(spouse, 'MarriageDate', '')
+            marriage_date = get_row_value(spouse, "MarriageDate", "")
             if marriage_date:
                 try:
                     date = parse_rm_date(marriage_date)
@@ -477,10 +484,10 @@ def generate_basic_biography(person_id: int, query_service: QueryService) -> str
             lines.append(f"\n{full_name} had {len(children)} children.")
 
     # Death
-    death = next((e for e in vital_events if e['FactTypeID'] == 2), None)
+    death = next((e for e in vital_events if e["FactTypeID"] == 2), None)
     if death:
-        death_date = get_row_value(death, 'Date', '')
-        death_place = get_row_value(death, 'Place', '')
+        death_date = get_row_value(death, "Date", "")
+        death_place = get_row_value(death, "Place", "")
         if death_date:
             try:
                 date = parse_rm_date(death_date)
@@ -502,7 +509,7 @@ def generate_basic_biography(person_id: int, query_service: QueryService) -> str
     return "\n".join(lines)
 
 
-def run_quality_checks(db: RMDatabase, person_id: Optional[int] = None) -> str:
+def run_quality_checks(db: RMDatabase, person_id: int | None = None) -> str:
     """Run data quality checks."""
     lines = []
     lines.append("\n" + "-" * 70)
@@ -556,28 +563,19 @@ def main():
         description="Milestone 1 Working Prototype",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
+    parser.add_argument("--person-id", type=int, required=True, help="Person ID to query")
+    parser.add_argument("--check-quality", action="store_true", help="Run data quality checks")
     parser.add_argument(
-        '--person-id',
-        type=int,
-        required=True,
-        help='Person ID to query'
-    )
-    parser.add_argument(
-        '--check-quality',
-        action='store_true',
-        help='Run data quality checks'
-    )
-    parser.add_argument(
-        '--database',
+        "--database",
         type=str,
-        default='data/Iiams.rmtree',
-        help='Path to RootsMagic database (default: data/Iiams.rmtree)'
+        default="data/Iiams.rmtree",
+        help="Path to RootsMagic database (default: data/Iiams.rmtree)",
     )
     parser.add_argument(
-        '--extension',
+        "--extension",
         type=str,
-        default='sqlite-extension/icu.dylib',
-        help='Path to ICU extension (default: sqlite-extension/icu.dylib)'
+        default="sqlite-extension/icu.dylib",
+        help="Path to ICU extension (default: sqlite-extension/icu.dylib)",
     )
 
     args = parser.parse_args()
@@ -644,9 +642,10 @@ def main():
     except Exception as e:
         print(f"\nError: {e}", file=sys.stderr)
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

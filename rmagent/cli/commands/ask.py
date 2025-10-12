@@ -11,12 +11,12 @@ console = Console()
 
 
 @click.command()
-@click.argument('question', required=False)
+@click.argument("question", required=False)
 @click.option(
-    '--interactive',
-    '-i',
+    "--interactive",
+    "-i",
     is_flag=True,
-    help='Interactive conversation mode',
+    help="Interactive conversation mode",
 )
 @click.pass_obj
 def ask(ctx, question: str, interactive: bool):
@@ -46,7 +46,7 @@ def ask(ctx, question: str, interactive: bool):
                 # Get question from user
                 user_question = Prompt.ask("[cyan]Question[/cyan]")
 
-                if user_question.lower() in ['exit', 'quit', 'q']:
+                if user_question.lower() in ["exit", "quit", "q"]:
                     console.print("\n[dim]Goodbye![/dim]")
                     break
 

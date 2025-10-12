@@ -8,8 +8,8 @@ timeline planning, and Q&A).
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Mapping, Optional
 
 
 @dataclass(frozen=True)
@@ -28,7 +28,7 @@ class PromptTemplate:
     version: str
     description: str
     template: str
-    few_shots: List[FewShotExample]
+    few_shots: list[FewShotExample]
 
     def render(self, substitutions: Mapping[str, str]) -> str:
         """Render the prompt template with safe substitution."""
@@ -113,7 +113,10 @@ QA_TEMPLATE = PromptTemplate(
     few_shots=[
         FewShotExample(
             user="Who were Michael Dorsey Iams' parents?",
-            assistant="Michael Dorsey Iams is recorded as the son of Donald Richard Iams and Gail Cynthia Shepherd (Citation 1184, Source 337).",
+            assistant=(
+                "Michael Dorsey Iams is recorded as the son of Donald Richard Iams "
+                "and Gail Cynthia Shepherd (Citation 1184, Source 337)."
+            ),
         )
     ],
 )
@@ -131,12 +134,15 @@ TIMELINE_TEMPLATE = PromptTemplate(
     few_shots=[
         FewShotExample(
             user="Draft a timeline summary for Donna Lynn Jones using supplied events.",
-            assistant="1964-06-12 marriage in Maricopa County, Arizona (Marriage FactType 300). Annotate missing citations for the 1970 relocation event.",
+            assistant=(
+                "1964-06-12 marriage in Maricopa County, Arizona (Marriage FactType 300). "
+                "Annotate missing citations for the 1970 relocation event."
+            ),
         )
     ],
 )
 
-PROMPTS: Dict[str, PromptTemplate] = {
+PROMPTS: dict[str, PromptTemplate] = {
     tmpl.key: tmpl
     for tmpl in (
         BIOGRAPHY_TEMPLATE,
@@ -162,7 +168,7 @@ def get_prompt(key: str) -> PromptTemplate:
         raise KeyError(f"Unknown prompt key '{key}'. Available: {sorted(PROMPTS)}") from exc
 
 
-def render_prompt(key: str, substitutions: Optional[Mapping[str, str]] = None) -> str:
+def render_prompt(key: str, substitutions: Mapping[str, str] | None = None) -> str:
     """Render a prompt by key with optional substitutions."""
 
     template = get_prompt(key)

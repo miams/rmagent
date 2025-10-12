@@ -22,11 +22,9 @@ Position 23: Second date double date indicator (/, .)
 Position 24: Second date qualifier
 """
 
-from datetime import datetime
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from datetime import datetime
 from enum import Enum
-
 
 # Constants for unknown/missing dates
 UNKNOWN_SORT_DATE = 9223372036854775807
@@ -34,6 +32,7 @@ UNKNOWN_SORT_DATE = 9223372036854775807
 
 class DateType(Enum):
     """Date type indicator (Position 1)."""
+
     NULL = "."
     STANDARD = "D"
     QUAKER = "Q"
@@ -42,6 +41,7 @@ class DateType(Enum):
 
 class DateModifier(Enum):
     """Date modifier (Position 2)."""
+
     NONE = "."
     RANGE = "-"
     AFTER = "A"
@@ -58,6 +58,7 @@ class DateModifier(Enum):
 
 class DateQualifier(Enum):
     """Date qualifier (Position 13/24)."""
+
     NONE = "."
     MAYBE = "?"
     PERHAPS = "1"
@@ -106,8 +107,19 @@ QUALIFIER_DISPLAY = {
 }
 
 MONTH_NAMES = [
-    "", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    "",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
 ]
 
 
@@ -120,23 +132,23 @@ class RMDate:
     modifier: DateModifier
 
     # First date components
-    year: Optional[int] = None
-    month: Optional[int] = None
-    day: Optional[int] = None
+    year: int | None = None
+    month: int | None = None
+    day: int | None = None
     is_bc: bool = False
     is_double_date: bool = False
-    qualifier: Optional[DateQualifier] = None
+    qualifier: DateQualifier | None = None
 
     # Second date components (for ranges)
-    year2: Optional[int] = None
-    month2: Optional[int] = None
-    day2: Optional[int] = None
+    year2: int | None = None
+    month2: int | None = None
+    day2: int | None = None
     is_bc2: bool = False
     is_double_date2: bool = False
-    qualifier2: Optional[DateQualifier] = None
+    qualifier2: DateQualifier | None = None
 
     # Text date (for DateType.TEXT)
-    text: Optional[str] = None
+    text: str | None = None
 
     @property
     def is_null(self) -> bool:
@@ -155,7 +167,7 @@ class RMDate:
             return False
         return self.day is None or self.month is None
 
-    def to_datetime(self) -> Optional[datetime]:
+    def to_datetime(self) -> datetime | None:
         """
         Convert to Python datetime object (if possible).
 
@@ -164,8 +176,13 @@ class RMDate:
         - Date is BC
         - Date is a range
         """
-        if (self.is_null or self.date_type == DateType.TEXT or
-            self.is_partial or self.is_bc or self.is_range):
+        if (
+            self.is_null
+            or self.date_type == DateType.TEXT
+            or self.is_partial
+            or self.is_bc
+            or self.is_range
+        ):
             return None
 
         try:
@@ -183,15 +200,18 @@ class RMDate:
 
         # Format first date
         date1_str = self._format_single_date(
-            self.year, self.month, self.day,
-            self.is_bc, self.is_double_date, self.qualifier
+            self.year, self.month, self.day, self.is_bc, self.is_double_date, self.qualifier
         )
 
         # Handle ranges
         if self.is_range:
             date2_str = self._format_single_date(
-                self.year2, self.month2, self.day2,
-                self.is_bc2, self.is_double_date2, self.qualifier2
+                self.year2,
+                self.month2,
+                self.day2,
+                self.is_bc2,
+                self.is_double_date2,
+                self.qualifier2,
             )
 
             # Format based on modifier
@@ -215,12 +235,12 @@ class RMDate:
 
     def _format_single_date(
         self,
-        year: Optional[int],
-        month: Optional[int],
-        day: Optional[int],
+        year: int | None,
+        month: int | None,
+        day: int | None,
         is_bc: bool,
         is_double_date: bool,
-        qualifier: Optional[DateQualifier]
+        qualifier: DateQualifier | None,
     ) -> str:
         """Format a single date component."""
         parts = []
@@ -264,7 +284,7 @@ class RMDate:
         return " ".join(parts)
 
 
-def parse_rm_date(date_str: Optional[str]) -> RMDate:
+def parse_rm_date(date_str: str | None) -> RMDate:
     """
     Parse a RootsMagic 24-character date string.
 
@@ -283,17 +303,14 @@ def parse_rm_date(date_str: Optional[str]) -> RMDate:
     """
     # Handle null/empty dates
     if not date_str or len(date_str) == 0 or date_str[0] == ".":
-        return RMDate(
-            date_type=DateType.NULL,
-            modifier=DateModifier.NONE
-        )
+        return RMDate(date_type=DateType.NULL, modifier=DateModifier.NONE)
 
     # Handle text dates
     if date_str[0] == "T":
         return RMDate(
             date_type=DateType.TEXT,
             modifier=DateModifier.NONE,
-            text=date_str[1:] if len(date_str) > 1 else ""
+            text=date_str[1:] if len(date_str) > 1 else "",
         )
 
     # Ensure we have at least 24 characters
@@ -309,9 +326,7 @@ def parse_rm_date(date_str: Optional[str]) -> RMDate:
     modifier = _parse_modifier(modifier_char)
 
     # Parse first date
-    year, month, day, is_bc, is_double_date, qualifier = _parse_date_components(
-        date_str[2:13]
-    )
+    year, month, day, is_bc, is_double_date, qualifier = _parse_date_components(date_str[2:13])
 
     # Parse second date (for ranges)
     year2, month2, day2, is_bc2, is_double_date2, qualifier2 = _parse_date_components(
@@ -332,7 +347,7 @@ def parse_rm_date(date_str: Optional[str]) -> RMDate:
         day2=day2,
         is_bc2=is_bc2,
         is_double_date2=is_double_date2,
-        qualifier2=qualifier2
+        qualifier2=qualifier2,
     )
 
 
@@ -344,7 +359,7 @@ def _parse_modifier(char: str) -> DateModifier:
     return DateModifier.NONE
 
 
-def _parse_qualifier(char: str) -> Optional[DateQualifier]:
+def _parse_qualifier(char: str) -> DateQualifier | None:
     """Parse date qualifier character."""
     for qualifier in DateQualifier:
         if qualifier.value == char:
@@ -352,10 +367,9 @@ def _parse_qualifier(char: str) -> Optional[DateQualifier]:
     return None
 
 
-def _parse_date_components(date_part: str) -> Tuple[
-    Optional[int], Optional[int], Optional[int],
-    bool, bool, Optional[DateQualifier]
-]:
+def _parse_date_components(
+    date_part: str,
+) -> tuple[int | None, int | None, int | None, bool, bool, DateQualifier | None]:
     """
     Parse an 11-character date component.
 
@@ -406,7 +420,7 @@ def _parse_date_components(date_part: str) -> Tuple[
     return year, month, day, is_bc, is_double_date, qualifier
 
 
-def is_unknown_date(sort_date: Optional[int]) -> bool:
+def is_unknown_date(sort_date: int | None) -> bool:
     """
     Check if a SortDate value represents an unknown date.
 

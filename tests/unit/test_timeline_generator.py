@@ -1,16 +1,16 @@
 """Unit tests for timeline generator."""
 
 import json
-import pytest
 from pathlib import Path
-from unittest.mock import Mock, patch
+
+import pytest
 
 from rmagent.generators.timeline import (
+    PHASE_COLORS,
+    PHASE_MAPPING,
     LifePhase,
     TimelineFormat,
     TimelineGenerator,
-    PHASE_MAPPING,
-    PHASE_COLORS,
 )
 
 
@@ -128,7 +128,9 @@ class TestTimelineGenerator:
         assert place == "Tulsa, Oklahoma"
 
         # International place
-        place = generator._format_place_for_timeline("London, Greater London, England, United Kingdom")
+        place = generator._format_place_for_timeline(
+            "London, Greater London, England, United Kingdom"
+        )
         assert place == "London, England"
 
         # Simple place
@@ -147,7 +149,7 @@ class TestTimelineGenerator:
             event_type="Birth",
             date="December 30, 1921",
             place="Tulsa, Oklahoma",
-            details="Born at home"
+            details="Born at home",
         )
 
         assert "<p><strong>December 30, 1921</strong> in Tulsa, Oklahoma</p>" in narrative
@@ -158,10 +160,7 @@ class TestTimelineGenerator:
         generator = TimelineGenerator()
 
         narrative = generator._build_event_narrative(
-            event_type="Event",
-            date=None,
-            place="Tulsa, Oklahoma",
-            details=None
+            event_type="Event", date=None, place="Tulsa, Oklahoma", details=None
         )
 
         assert "<p><strong>Date Unknown</strong> in Tulsa, Oklahoma</p>" in narrative
@@ -274,7 +273,7 @@ class TestTimelineGenerator:
 
         # Verify HTML structure
         assert "<!DOCTYPE html>" in html_output
-        assert "<html lang=\"en\">" in html_output
+        assert '<html lang="en">' in html_output
         assert "<title>Timeline: John Doe</title>" in html_output
 
         # Verify TimelineJS3 includes
@@ -349,9 +348,7 @@ class TestTimelineGenerator:
         output_file = tmp_path / "timeline.json"
 
         json_output = generator.generate(
-            person_id=1,
-            format=TimelineFormat.JSON,
-            output_path=output_file
+            person_id=1, format=TimelineFormat.JSON, output_path=output_file
         )
 
         # Verify file was created
@@ -399,9 +396,7 @@ class TestTimelineIntegration:
 
         # Generate JSON
         json_output = generator.generate(
-            person_id=1,
-            format=TimelineFormat.JSON,
-            group_by_phase=True
+            person_id=1, format=TimelineFormat.JSON, group_by_phase=True
         )
 
         # Parse and verify
@@ -482,9 +477,7 @@ class TestTimelineIntegration:
             pytest.skip("Real database or ICU extension not available")
 
         generator = TimelineGenerator(
-            db=real_db_path,
-            extension_path=extension_path,
-            include_private=False
+            db=real_db_path, extension_path=extension_path, include_private=False
         )
 
         json_output = generator.generate(person_id=1, format=TimelineFormat.JSON)

@@ -1,47 +1,46 @@
 """Biography command - Generate AI-powered biographies."""
 
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from rmagent.generators.biography import BiographyGenerator, BiographyLength, CitationStyle
 from rmagent.agent.genealogy_agent import GenealogyAgent
+from rmagent.generators.biography import BiographyGenerator, BiographyLength, CitationStyle
 
 console = Console()
 
 
 @click.command()
-@click.argument('person_id', type=int)
+@click.argument("person_id", type=int)
 @click.option(
-    '--length',
-    type=click.Choice(['short', 'standard', 'comprehensive'], case_sensitive=False),
-    default='standard',
-    help='Biography length',
+    "--length",
+    type=click.Choice(["short", "standard", "comprehensive"], case_sensitive=False),
+    default="standard",
+    help="Biography length",
 )
 @click.option(
-    '--citation-style',
-    type=click.Choice(['footnote', 'parenthetical', 'narrative'], case_sensitive=False),
-    default='footnote',
-    help='Citation style',
+    "--citation-style",
+    type=click.Choice(["footnote", "parenthetical", "narrative"], case_sensitive=False),
+    default="footnote",
+    help="Citation style",
 )
 @click.option(
-    '--output',
-    '-o',
+    "--output",
+    "-o",
     type=click.Path(path_type=Path),
-    help='Output file (default: stdout)',
+    help="Output file (default: stdout)",
 )
 @click.option(
-    '--no-ai',
+    "--no-ai",
     is_flag=True,
-    help='Use template-based generation (no AI)',
+    help="Use template-based generation (no AI)",
 )
 @click.option(
-    '--no-sources',
+    "--no-sources",
     is_flag=True,
-    help='Exclude source citations',
+    help="Exclude source citations",
 )
 @click.pass_obj
 def bio(
@@ -49,7 +48,7 @@ def bio(
     person_id: int,
     length: str,
     citation_style: str,
-    output: Optional[Path],
+    output: Path | None,
     no_ai: bool,
     no_sources: bool,
 ):
@@ -66,15 +65,15 @@ def bio(
     try:
         # Map string to enum
         length_enum = {
-            'short': BiographyLength.SHORT,
-            'standard': BiographyLength.STANDARD,
-            'comprehensive': BiographyLength.COMPREHENSIVE,
+            "short": BiographyLength.SHORT,
+            "standard": BiographyLength.STANDARD,
+            "comprehensive": BiographyLength.COMPREHENSIVE,
         }[length.lower()]
 
         citation_style_enum = {
-            'footnote': CitationStyle.FOOTNOTE,
-            'parenthetical': CitationStyle.PARENTHETICAL,
-            'narrative': CitationStyle.NARRATIVE,
+            "footnote": CitationStyle.FOOTNOTE,
+            "parenthetical": CitationStyle.PARENTHETICAL,
+            "narrative": CitationStyle.NARRATIVE,
         }[citation_style.lower()]
 
         with Progress(
@@ -86,10 +85,14 @@ def bio(
 
             # Create generator
             config = ctx.load_config()
-            agent = None if no_ai else GenealogyAgent(
-                llm_provider=config.build_provider(),
-                db_path=config.database.database_path,
-                extension_path=config.database.sqlite_extension_path,
+            agent = (
+                None
+                if no_ai
+                else GenealogyAgent(
+                    llm_provider=config.build_provider(),
+                    db_path=config.database.database_path,
+                    extension_path=config.database.sqlite_extension_path,
+                )
             )
 
             generator = BiographyGenerator(
@@ -115,7 +118,7 @@ def bio(
         # Output to file or stdout
         if output:
             output.parent.mkdir(parents=True, exist_ok=True)
-            output.write_text(markdown_output, encoding='utf-8')
+            output.write_text(markdown_output, encoding="utf-8")
             console.print(f"\n[green]✓[/green] Biography written to: {output}")
             console.print(f"  Length: {len(markdown_output.split())} words")
         else:

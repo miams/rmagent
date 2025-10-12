@@ -13,21 +13,21 @@ import pytest
 from pydantic import ValidationError
 
 from rmagent.rmlib.models import (
-    Person,
-    Name,
-    Event,
-    Place,
-    Source,
     Citation,
-    Family,
+    Event,
     FactType,
-    Sex,
+    Family,
+    MotherLabel,
+    Name,
     NameType,
     OwnerType,
+    ParentLabel,
+    Person,
+    Place,
     PlaceType,
     ProofLevel,
-    ParentLabel,
-    MotherLabel,
+    Sex,
+    Source,
 )
 
 
@@ -87,7 +87,7 @@ class TestPersonModel:
             Living=True,
             Bookmark=1,
             Note="Test note",
-            UTCModDate=44993.9143704283
+            UTCModDate=44993.9143704283,
         )
         assert person.person_id == 123
         assert person.sex == Sex.FEMALE
@@ -163,7 +163,7 @@ class TestNameModel:
             IsPrivate=False,
             Proof=ProofLevel.PROVEN,
             BirthYear=1850,
-            DeathYear=1920
+            DeathYear=1920,
         )
         assert name.surname == "Smith"
         assert name.given == "John"
@@ -176,14 +176,7 @@ class TestNameModel:
     def test_name_full_name_property(self):
         """Test full_name property."""
         # Complete name
-        name1 = Name(
-            NameID=1,
-            OwnerID=1,
-            Surname="Smith",
-            Given="John",
-            Prefix="Dr.",
-            Suffix="Jr."
-        )
+        name1 = Name(NameID=1, OwnerID=1, Surname="Smith", Given="John", Prefix="Dr.", Suffix="Jr.")
         assert name1.full_name == "Dr. John Smith Jr."
 
         # Name without prefix/suffix
@@ -233,7 +226,7 @@ class TestEventModel:
             IsPrivate=False,
             Proof=ProofLevel.PROVEN,
             Details="Born in hospital",
-            Note="Test note"
+            Note="Test note",
         )
         assert event.event_id == 10
         assert event.family_id == 50
@@ -271,7 +264,7 @@ class TestPlaceModel:
             Latitude=418816670,
             Longitude=-876868960,
             LatLongExact=True,
-            Note="Test note"
+            Note="Test note",
         )
         assert place.place_id == 100
         assert place.name == "Chicago, Cook County, Illinois, USA"
@@ -280,11 +273,7 @@ class TestPlaceModel:
 
     def test_place_coordinate_conversion(self):
         """Test latitude/longitude decimal conversion."""
-        place = Place(
-            PlaceID=1,
-            Latitude=418816670,
-            Longitude=-876868960
-        )
+        place = Place(PlaceID=1, Latitude=418816670, Longitude=-876868960)
         assert place.latitude_decimal == pytest.approx(41.881667, rel=1e-5)
         assert place.longitude_decimal == pytest.approx(-87.686896, rel=1e-5)
 
@@ -313,7 +302,7 @@ class TestSourceModel:
             ActualText="Census record text",
             Comments="Test comments",
             TemplateID=15,
-            Fields=b"\xef\xbb\xbf<Root><Fields></Fields></Root>"
+            Fields=b"\xef\xbb\xbf<Root><Fields></Fields></Root>",
         )
         assert source.source_id == 100
         assert source.name == "1850 U.S. Census"
@@ -339,7 +328,7 @@ class TestCitationModel:
             Comments="Detail comments",
             RefNumber="123",
             Footnote="Custom footnote",
-            Fields=b"\xef\xbb\xbf<Root><Fields><Field><Name>Page</Name><Value>123</Value></Field></Fields></Root>"
+            Fields=b"\xef\xbb\xbf<Root><Fields><Field><Name>Page</Name><Value>123</Value></Field></Fields></Root>",
         )
         assert citation.citation_id == 500
         assert citation.source_id == 100
@@ -367,7 +356,7 @@ class TestFamilyModel:
             FatherLabel=ParentLabel.HUSBAND,
             MotherLabel=MotherLabel.WIFE,
             Proof=ProofLevel.PROVEN,
-            Note="Test note"
+            Note="Test note",
         )
         assert family.family_id == 50
         assert family.father_id == 100
@@ -382,7 +371,7 @@ class TestFamilyModel:
             FatherLabel=ParentLabel.OTHER,
             FatherLabelStr="Guardian",
             MotherLabel=MotherLabel.OTHER,
-            MotherLabelStr="Guardian"
+            MotherLabelStr="Guardian",
         )
         assert family.father_label == ParentLabel.OTHER
         assert family.father_label_str == "Guardian"
@@ -410,7 +399,7 @@ class TestFactTypeModel:
             UseDate=True,
             UsePlace=True,
             Sentence="[person] had [Desc]",
-            Flags=-1
+            Flags=-1,
         )
         assert fact.fact_type_id == 100
         assert fact.name == "Custom Fact"
@@ -419,14 +408,7 @@ class TestFactTypeModel:
 
     def test_fact_type_bool_conversion(self):
         """Test boolean field conversion."""
-        fact = FactType(
-            FactTypeID=1,
-            OwnerType=0,
-            Name="Test",
-            UseValue=1,
-            UseDate=0,
-            UsePlace=1
-        )
+        fact = FactType(FactTypeID=1, OwnerType=0, Name="Test", UseValue=1, UseDate=0, UsePlace=1)
         assert fact.use_value is True
         assert fact.use_date is False
         assert fact.use_place is True
@@ -449,7 +431,7 @@ class TestModelIntegration:
             "Relate2": 0,
             "Flags": 0,
             "Bookmark": 0,
-            "UTCModDate": 44993.9143704283
+            "UTCModDate": 44993.9143704283,
         }
         person = Person(**row_data)
         assert person.person_id == 1
@@ -460,14 +442,14 @@ class TestModelIntegration:
         """Test model serialization to dict."""
         person = Person(PersonID=1, Sex=Sex.MALE, Living=True)
         data = person.model_dump()
-        assert data['person_id'] == 1
-        assert data['sex'] == Sex.MALE
-        assert data['living'] is True
+        assert data["person_id"] == 1
+        assert data["sex"] == Sex.MALE
+        assert data["living"] is True
 
     def test_model_serialization_with_aliases(self):
         """Test model serialization with original field names."""
         person = Person(PersonID=1, Sex=Sex.MALE, Living=True)
         data = person.model_dump(by_alias=True)
-        assert data['PersonID'] == 1
-        assert data['Sex'] == Sex.MALE
-        assert data['Living'] is True
+        assert data["PersonID"] == 1
+        assert data["Sex"] == Sex.MALE
+        assert data["Living"] is True

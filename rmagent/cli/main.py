@@ -8,7 +8,6 @@ quality checks, asking questions, generating timelines, and exporting to Hugo.
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.console import Console
@@ -20,14 +19,15 @@ from rmagent.rmlib.database import RMDatabase
 # Initialize Rich console for formatted output
 console = Console()
 
+
 # Global context for passing shared objects between commands
 class CLIContext:
     """Shared context for CLI commands."""
 
     def __init__(
         self,
-        database_path: Optional[Path] = None,
-        llm_provider: Optional[str] = None,
+        database_path: Path | None = None,
+        llm_provider: str | None = None,
         verbose: bool = False,
     ):
         self.database_path = database_path
@@ -63,25 +63,25 @@ class CLIContext:
 
 @click.group()
 @click.option(
-    '--database',
-    '-d',
+    "--database",
+    "-d",
     type=click.Path(exists=True, path_type=Path),
-    help='Path to RootsMagic database (.rmtree file)',
+    help="Path to RootsMagic database (.rmtree file)",
 )
 @click.option(
-    '--llm-provider',
-    type=click.Choice(['anthropic', 'openai', 'ollama'], case_sensitive=False),
-    help='LLM provider (anthropic/openai/ollama)',
+    "--llm-provider",
+    type=click.Choice(["anthropic", "openai", "ollama"], case_sensitive=False),
+    help="LLM provider (anthropic/openai/ollama)",
 )
 @click.option(
-    '--verbose',
-    '-v',
+    "--verbose",
+    "-v",
     is_flag=True,
-    help='Enable verbose logging',
+    help="Enable verbose logging",
 )
-@click.version_option(version='0.1.0', prog_name='rmagent')
+@click.version_option(version="0.1.0", prog_name="rmagent")
 @click.pass_context
-def cli(ctx, database: Optional[Path], llm_provider: Optional[str], verbose: bool):
+def cli(ctx, database: Path | None, llm_provider: str | None, verbose: bool):
     """
     RMAgent - AI-powered genealogy assistant for RootsMagic databases.
 
@@ -128,7 +128,7 @@ def cli(ctx, database: Optional[Path], llm_provider: Optional[str], verbose: boo
 
 
 # Import and register command modules
-from rmagent.cli.commands import person, bio, quality, ask, timeline, export, search
+from rmagent.cli.commands import ask, bio, export, person, quality, search, timeline
 
 cli.add_command(person.person)
 cli.add_command(bio.bio)
@@ -149,5 +149,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

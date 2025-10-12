@@ -1,14 +1,13 @@
 """Export command - Export to Hugo blog."""
 
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.console import Console
-from rich.progress import Progress, BarColumn, TextColumn, TimeRemainingColumn
+from rich.progress import BarColumn, Progress, TextColumn, TimeRemainingColumn
 
-from rmagent.generators.hugo_exporter import HugoExporter
 from rmagent.generators.biography import BiographyLength
+from rmagent.generators.hugo_exporter import HugoExporter
 
 console = Console()
 
@@ -20,53 +19,53 @@ def export():
 
 
 @export.command()
-@click.argument('person_id', type=int, required=False)
+@click.argument("person_id", type=int, required=False)
 @click.option(
-    '--output-dir',
-    '-o',
+    "--output-dir",
+    "-o",
     type=click.Path(path_type=Path),
-    default='content/people',
-    help='Output directory for Hugo content',
+    default="content/people",
+    help="Output directory for Hugo content",
 )
 @click.option(
-    '--bio-length',
-    type=click.Choice(['short', 'standard', 'comprehensive'], case_sensitive=False),
-    default='standard',
-    help='Biography length',
+    "--bio-length",
+    type=click.Choice(["short", "standard", "comprehensive"], case_sensitive=False),
+    default="standard",
+    help="Biography length",
 )
 @click.option(
-    '--include-timeline',
+    "--include-timeline",
     is_flag=True,
     default=True,
-    help='Include timeline in export',
+    help="Include timeline in export",
 )
 @click.option(
-    '--media-base-path',
+    "--media-base-path",
     type=str,
-    default='/media/',
-    help='Base path for media files in Hugo',
+    default="/media/",
+    help="Base path for media files in Hugo",
 )
 @click.option(
-    '--all',
-    'export_all',
+    "--all",
+    "export_all",
     is_flag=True,
-    help='Export all persons (batch mode)',
+    help="Export all persons (batch mode)",
 )
 @click.option(
-    '--batch-ids',
+    "--batch-ids",
     type=str,
-    help='Comma-separated list of person IDs to export',
+    help="Comma-separated list of person IDs to export",
 )
 @click.pass_obj
 def hugo(
     ctx,
-    person_id: Optional[int],
+    person_id: int | None,
     output_dir: Path,
     bio_length: str,
     include_timeline: bool,
     media_base_path: str,
     export_all: bool,
-    batch_ids: Optional[str],
+    batch_ids: str | None,
 ):
     """
     Export person(s) to Hugo blog format.
@@ -82,9 +81,9 @@ def hugo(
     try:
         # Map string to enum
         length_enum = {
-            'short': BiographyLength.SHORT,
-            'standard': BiographyLength.STANDARD,
-            'comprehensive': BiographyLength.COMPREHENSIVE,
+            "short": BiographyLength.SHORT,
+            "standard": BiographyLength.STANDARD,
+            "comprehensive": BiographyLength.COMPREHENSIVE,
         }[bio_length.lower()]
 
         # Create exporter
@@ -100,11 +99,12 @@ def hugo(
             console.print("[yellow]Warning:[/yellow] Exporting all persons may take a while...")
             # Get all person IDs
             from rmagent.rmlib.database import RMDatabase
-            from rmagent.rmlib.queries import QueryService
 
-            with RMDatabase(config.database.database_path, extension_path=config.database.sqlite_extension_path) as db:
+            with RMDatabase(
+                config.database.database_path, extension_path=config.database.sqlite_extension_path
+            ) as db:
                 all_persons = db.query("SELECT PersonID FROM PersonTable")
-                person_ids = [p['PersonID'] for p in all_persons]
+                person_ids = [p["PersonID"] for p in all_persons]
 
             console.print(f"Exporting {len(person_ids)} persons...")
 
@@ -127,7 +127,7 @@ def hugo(
 
                 progress.update(task, completed=len(person_ids))
 
-            success_count = len(result['markdown_files'])
+            success_count = len(result["markdown_files"])
             error_count = len(person_ids) - success_count
             console.print(f"\n[green]✓[/green] Exported {success_count} persons to: {output_dir}")
             if error_count > 0:
@@ -135,7 +135,7 @@ def hugo(
 
         elif batch_ids:
             # Export specific list of persons
-            person_ids = [int(pid.strip()) for pid in batch_ids.split(',')]
+            person_ids = [int(pid.strip()) for pid in batch_ids.split(",")]
             console.print(f"Exporting {len(person_ids)} persons...")
 
             with Progress(
@@ -157,7 +157,7 @@ def hugo(
 
                 progress.update(task, completed=len(person_ids))
 
-            success_count = len(result['markdown_files'])
+            success_count = len(result["markdown_files"])
             error_count = len(person_ids) - success_count
             console.print(f"\n[green]✓[/green] Exported {success_count} persons to: {output_dir}")
             if error_count > 0:
@@ -181,7 +181,7 @@ def hugo(
                 progress.update(task, completed=True)
 
             console.print(f"\n[green]✓[/green] Exported to: {result['markdown']}")
-            if include_timeline and result.get('timeline_json'):
+            if include_timeline and result.get("timeline_json"):
                 console.print(f"  Timeline JSON: {result['timeline_json']}")
                 console.print(f"  Timeline HTML: {result['timeline_html']}")
 

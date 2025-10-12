@@ -12,19 +12,19 @@ Implements logic for:
 Reference: RM11_Name_Display_Logic.md
 """
 
-from typing import Optional, List, Dict, Any
+import sqlite3
 from dataclasses import dataclass
 from enum import IntEnum
-import sqlite3
 
 
 class NameType(IntEnum):
     """NameType values from NameTable."""
-    BIRTH = 0          # Birth/Standard name (99.6%)
-    AKA = 1            # Also Known As
-    MARRIED = 5        # Married name
-    IMMIGRANT = 6      # Immigrant name (pre-immigration)
-    MAIDEN = 7         # Maiden name (pre-marriage surname)
+
+    BIRTH = 0  # Birth/Standard name (99.6%)
+    AKA = 1  # Also Known As
+    MARRIED = 5  # Married name
+    IMMIGRANT = 6  # Immigrant name (pre-immigration)
+    MAIDEN = 7  # Maiden name (pre-marriage surname)
 
 
 @dataclass
@@ -37,19 +37,19 @@ class Name:
     name_type: NameType
 
     # Name components
-    surname: Optional[str] = None
-    given: Optional[str] = None
-    prefix: Optional[str] = None
-    suffix: Optional[str] = None
-    nickname: Optional[str] = None
+    surname: str | None = None
+    given: str | None = None
+    prefix: str | None = None
+    suffix: str | None = None
+    nickname: str | None = None
 
     # Metaphone encodings (for phonetic searching)
-    surname_mp: Optional[str] = None
-    given_mp: Optional[str] = None
+    surname_mp: str | None = None
+    given_mp: str | None = None
 
     # Birth/death years (for display)
-    birth_year: Optional[int] = None
-    death_year: Optional[int] = None
+    birth_year: int | None = None
+    death_year: int | None = None
 
     def full_name(self, include_nickname: bool = False) -> str:
         """
@@ -85,7 +85,7 @@ class Name:
         if self.suffix:
             parts.append(self.suffix)
 
-        full = ' '.join(parts)
+        full = " ".join(parts)
 
         # Nickname in parentheses
         if include_nickname and self.nickname:
@@ -112,7 +112,7 @@ class Name:
         if self.surname:
             parts.append(self.surname)
 
-        return ' '.join(parts)
+        return " ".join(parts)
 
     def surname_first(self) -> str:
         """
@@ -156,7 +156,7 @@ class Name:
             return f"({self.birth_year}-)"
 
 
-def get_primary_name(person_id: int, db_connection: sqlite3.Connection) -> Optional[Name]:
+def get_primary_name(person_id: int, db_connection: sqlite3.Connection) -> Name | None:
     """
     Get primary name for a person (IsPrimary=1).
 
@@ -174,7 +174,8 @@ def get_primary_name(person_id: int, db_connection: sqlite3.Connection) -> Optio
     """
     cursor = db_connection.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             n.NameID,
             n.OwnerID,
@@ -191,7 +192,9 @@ def get_primary_name(person_id: int, db_connection: sqlite3.Connection) -> Optio
             n.DeathYear
         FROM NameTable n
         WHERE n.OwnerID = ? AND n.IsPrimary = 1
-    """, (person_id,))
+    """,
+        (person_id,),
+    )
 
     row = cursor.fetchone()
 
@@ -211,11 +214,11 @@ def get_primary_name(person_id: int, db_connection: sqlite3.Connection) -> Optio
         surname_mp=row[9],
         given_mp=row[10],
         birth_year=row[11] if row[11] and row[11] > 0 else None,
-        death_year=row[12] if row[12] and row[12] > 0 else None
+        death_year=row[12] if row[12] and row[12] > 0 else None,
     )
 
 
-def get_all_names(person_id: int, db_connection: sqlite3.Connection) -> List[Name]:
+def get_all_names(person_id: int, db_connection: sqlite3.Connection) -> list[Name]:
     """
     Get all names for a person (primary and alternates).
 
@@ -235,7 +238,8 @@ def get_all_names(person_id: int, db_connection: sqlite3.Connection) -> List[Nam
     """
     cursor = db_connection.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT
             n.NameID,
             n.OwnerID,
@@ -253,34 +257,36 @@ def get_all_names(person_id: int, db_connection: sqlite3.Connection) -> List[Nam
         FROM NameTable n
         WHERE n.OwnerID = ?
         ORDER BY n.IsPrimary DESC, n.NameType
-    """, (person_id,))
+    """,
+        (person_id,),
+    )
 
     names = []
     for row in cursor.fetchall():
-        names.append(Name(
-            name_id=row[0],
-            person_id=row[1],
-            is_primary=row[2] == 1,
-            name_type=NameType(row[3]),
-            surname=row[4],
-            given=row[5],
-            prefix=row[6],
-            suffix=row[7],
-            nickname=row[8],
-            surname_mp=row[9],
-            given_mp=row[10],
-            birth_year=row[11] if row[11] and row[11] > 0 else None,
-            death_year=row[12] if row[12] and row[12] > 0 else None
-        ))
+        names.append(
+            Name(
+                name_id=row[0],
+                person_id=row[1],
+                is_primary=row[2] == 1,
+                name_type=NameType(row[3]),
+                surname=row[4],
+                given=row[5],
+                prefix=row[6],
+                suffix=row[7],
+                nickname=row[8],
+                surname_mp=row[9],
+                given_mp=row[10],
+                birth_year=row[11] if row[11] and row[11] > 0 else None,
+                death_year=row[12] if row[12] and row[12] > 0 else None,
+            )
+        )
 
     return names
 
 
 def get_name_at_date(
-    person_id: int,
-    event_sort_date: Optional[int],
-    db_connection: sqlite3.Connection
-) -> Optional[Name]:
+    person_id: int, event_sort_date: int | None, db_connection: sqlite3.Connection
+) -> Name | None:
     """
     Get appropriate name for a specific date (context-aware).
 
@@ -308,7 +314,8 @@ def get_name_at_date(
     cursor = db_connection.cursor()
 
     # Get marriage date if exists
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT MIN(e.SortDate)
         FROM FamilyTable f
         JOIN EventTable e ON f.FamilyID = e.OwnerID AND e.EventType = 300
@@ -316,7 +323,9 @@ def get_name_at_date(
           AND e.SortDate IS NOT NULL
           AND e.SortDate > 0
           AND e.SortDate < 9223372036854775807
-    """, (person_id, person_id))
+    """,
+        (person_id, person_id),
+    )
 
     marriage_result = cursor.fetchone()
 
@@ -326,7 +335,8 @@ def get_name_at_date(
 
         if event_sort_date and event_sort_date < marriage_date:
             # Try to get maiden name (NameType=7)
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT
                     n.NameID,
                     n.OwnerID,
@@ -343,7 +353,9 @@ def get_name_at_date(
                     n.DeathYear
                 FROM NameTable n
                 WHERE n.OwnerID = ? AND n.NameType = 7
-            """, (person_id,))
+            """,
+                (person_id,),
+            )
 
             maiden_row = cursor.fetchone()
 
@@ -361,7 +373,7 @@ def get_name_at_date(
                     surname_mp=maiden_row[9],
                     given_mp=maiden_row[10],
                     birth_year=maiden_row[11] if maiden_row[11] and maiden_row[11] > 0 else None,
-                    death_year=maiden_row[12] if maiden_row[12] and maiden_row[12] > 0 else None
+                    death_year=maiden_row[12] if maiden_row[12] and maiden_row[12] > 0 else None,
                 )
 
     # Default to primary name
@@ -369,12 +381,12 @@ def get_name_at_date(
 
 
 def format_full_name(
-    surname: Optional[str] = None,
-    given: Optional[str] = None,
-    prefix: Optional[str] = None,
-    suffix: Optional[str] = None,
-    nickname: Optional[str] = None,
-    include_nickname: bool = False
+    surname: str | None = None,
+    given: str | None = None,
+    prefix: str | None = None,
+    suffix: str | None = None,
+    nickname: str | None = None,
+    include_nickname: bool = False,
 ) -> str:
     """
     Construct full name from individual components.
@@ -415,7 +427,7 @@ def format_full_name(
     if suffix:
         parts.append(suffix)
 
-    full = ' '.join(parts)
+    full = " ".join(parts)
 
     if include_nickname and nickname:
         full += f' ("{nickname}")'
@@ -423,7 +435,7 @@ def format_full_name(
     return full
 
 
-def validate_name_requirements(person_id: int, db_connection: sqlite3.Connection) -> List[str]:
+def validate_name_requirements(person_id: int, db_connection: sqlite3.Connection) -> list[str]:
     """
     Validate name requirements for a person.
 
@@ -447,11 +459,14 @@ def validate_name_requirements(person_id: int, db_connection: sqlite3.Connection
     cursor = db_connection.cursor()
 
     # Check for exactly one primary name
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT COUNT(*)
         FROM NameTable
         WHERE OwnerID = ? AND IsPrimary = 1
-    """, (person_id,))
+    """,
+        (person_id,),
+    )
 
     primary_count = cursor.fetchone()[0]
 
@@ -461,17 +476,20 @@ def validate_name_requirements(person_id: int, db_connection: sqlite3.Connection
         issues.append(f"Multiple primary names found ({primary_count})")
 
     # Check that primary name has surname or given
-    cursor.execute("""
+    cursor.execute(
+        """
         SELECT Surname, Given
         FROM NameTable
         WHERE OwnerID = ? AND IsPrimary = 1
-    """, (person_id,))
+    """,
+        (person_id,),
+    )
 
     result = cursor.fetchone()
 
     if result:
         surname, given = result
-        if (not surname or surname.strip() == '') and (not given or given.strip() == ''):
+        if (not surname or surname.strip() == "") and (not given or given.strip() == ""):
             issues.append("Primary name missing both surname and given name")
 
     return issues

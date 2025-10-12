@@ -8,16 +8,16 @@ Tests the RMDatabase class for:
 - Query methods
 """
 
-import pytest
 import sqlite3
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+
+import pytest
 
 from rmagent.rmlib.database import (
-    RMDatabase,
     DatabaseError,
     DatabaseNotFoundError,
-    ExtensionLoadError
+    ExtensionLoadError,
+    RMDatabase,
 )
 
 
@@ -31,13 +31,15 @@ class TestRMDatabase:
         conn = sqlite3.connect(str(db_file))
 
         # Create a simple test table
-        conn.execute("""
+        conn.execute(
+            """
             CREATE TABLE PersonTable (
                 PersonID INTEGER PRIMARY KEY,
                 Sex INTEGER,
                 Living INTEGER
             )
-        """)
+        """
+        )
 
         # Insert test data
         conn.execute("INSERT INTO PersonTable VALUES (1, 0, 1)")
@@ -98,7 +100,7 @@ class TestRMDatabase:
         with RMDatabase(db_path, extension_path=extension_path) as db:
             results = db.query("SELECT * FROM PersonTable")
             assert len(results) == 2
-            assert results[0]['PersonID'] == 1
+            assert results[0]["PersonID"] == 1
 
     def test_query_one_method(self, db_path, extension_path):
         """Test query_one method returns single result."""
@@ -109,8 +111,8 @@ class TestRMDatabase:
         with RMDatabase(db_path, extension_path=extension_path) as db:
             result = db.query_one("SELECT * FROM PersonTable WHERE PersonID = ?", (1,))
             assert result is not None
-            assert result['PersonID'] == 1
-            assert result['Sex'] == 0
+            assert result["PersonID"] == 1
+            assert result["Sex"] == 0
 
     def test_query_one_no_results(self, db_path, extension_path):
         """Test query_one returns None when no results."""
@@ -159,8 +161,8 @@ class TestRMDatabase:
         with RMDatabase(db_path, extension_path=extension_path) as db:
             result = db.query_one("SELECT * FROM PersonTable WHERE PersonID = 1")
             # Dict-like access
-            assert result['PersonID'] == 1
-            assert result['Sex'] == 0
+            assert result["PersonID"] == 1
+            assert result["Sex"] == 0
             # Index access
             assert result[0] == 1
 
@@ -207,15 +209,12 @@ class TestRMDatabase:
         with RMDatabase(db_path, extension_path=extension_path) as db:
             # Single parameter
             result = db.query_one("SELECT * FROM PersonTable WHERE PersonID = ?", (1,))
-            assert result['PersonID'] == 1
+            assert result["PersonID"] == 1
 
             # Multiple parameters
-            results = db.query(
-                "SELECT * FROM PersonTable WHERE Sex = ? AND Living = ?",
-                (0, 1)
-            )
+            results = db.query("SELECT * FROM PersonTable WHERE Sex = ? AND Living = ?", (0, 1))
             assert len(results) == 1
-            assert results[0]['PersonID'] == 1
+            assert results[0]["PersonID"] == 1
 
 
 class TestRMDatabaseIntegration:
@@ -254,17 +253,19 @@ class TestRMDatabaseIntegration:
 
         with RMDatabase(real_db_path, extension_path=extension_path) as db:
             # Query with RMNOCASE collation
-            results = db.query("""
+            results = db.query(
+                """
                 SELECT DISTINCT Surname
                 FROM NameTable
                 WHERE Surname IS NOT NULL AND Surname != ''
                 ORDER BY Surname COLLATE RMNOCASE
                 LIMIT 5
-            """)
+            """
+            )
 
             assert len(results) > 0
             # Verify results are sorted (case-insensitive)
-            surnames = [r['Surname'] for r in results]
+            surnames = [r["Surname"] for r in results]
             assert surnames == sorted(surnames, key=str.lower)
 
     def test_complex_query_with_joins(self, real_db_path, extension_path):
@@ -276,15 +277,17 @@ class TestRMDatabaseIntegration:
             pytest.skip("ICU extension not available")
 
         with RMDatabase(real_db_path, extension_path=extension_path) as db:
-            result = db.query_one("""
+            result = db.query_one(
+                """
                 SELECT p.PersonID, n.Surname, n.Given
                 FROM PersonTable p
                 JOIN NameTable n ON p.PersonID = n.OwnerID
                 WHERE n.IsPrimary = 1
                 LIMIT 1
-            """)
+            """
+            )
 
             assert result is not None
-            assert 'PersonID' in result.keys()
-            assert 'Surname' in result.keys()
-            assert 'Given' in result.keys()
+            assert "PersonID" in result.keys()
+            assert "Surname" in result.keys()
+            assert "Given" in result.keys()

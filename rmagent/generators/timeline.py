@@ -8,16 +8,14 @@ Supports both JSON output (for embedding) and standalone HTML viewer.
 from __future__ import annotations
 
 import json
-from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
 
 from rmagent.rmlib.database import RMDatabase
 from rmagent.rmlib.models import OwnerType
-from rmagent.rmlib.parsers.date_parser import parse_rm_date, is_unknown_date, UNKNOWN_SORT_DATE
-from rmagent.rmlib.parsers.place_parser import parse_place_name
+from rmagent.rmlib.parsers.date_parser import UNKNOWN_SORT_DATE, parse_rm_date
 from rmagent.rmlib.parsers.name_parser import format_full_name
+from rmagent.rmlib.parsers.place_parser import parse_place_name
 from rmagent.rmlib.queries import QueryService
 
 
@@ -43,29 +41,24 @@ class LifePhase(str, Enum):
 
 # Event type to life phase mapping (FactTypeID)
 PHASE_MAPPING = {
-    1: LifePhase.EARLY_LIFE,      # Birth
-    3: LifePhase.EARLY_LIFE,      # Baptism
-    4: LifePhase.EARLY_LIFE,      # Christening
-    6: LifePhase.EARLY_LIFE,      # Blessing
-    7: LifePhase.EARLY_LIFE,      # Bar Mitzvah
-
+    1: LifePhase.EARLY_LIFE,  # Birth
+    3: LifePhase.EARLY_LIFE,  # Baptism
+    4: LifePhase.EARLY_LIFE,  # Christening
+    6: LifePhase.EARLY_LIFE,  # Blessing
+    7: LifePhase.EARLY_LIFE,  # Bar Mitzvah
     17: LifePhase.EDUCATION_CAREER,  # Education
     18: LifePhase.EDUCATION_CAREER,  # Graduation
     12: LifePhase.EDUCATION_CAREER,  # Occupation
     27: LifePhase.EDUCATION_CAREER,  # Retirement
-
-    9: LifePhase.FAMILY_LIFE,      # Marriage
-    11: LifePhase.FAMILY_LIFE,     # Divorce
-
+    9: LifePhase.FAMILY_LIFE,  # Marriage
+    11: LifePhase.FAMILY_LIFE,  # Divorce
     10: LifePhase.MILITARY_SERVICE,  # Military Service
-
-    13: LifePhase.MIGRATION,       # Residence
-    14: LifePhase.MIGRATION,       # Immigration
-    15: LifePhase.MIGRATION,       # Emigration
-
-    2: LifePhase.FINAL_YEARS,      # Death
-    5: LifePhase.FINAL_YEARS,      # Burial
-    8: LifePhase.FINAL_YEARS,      # Probate
+    13: LifePhase.MIGRATION,  # Residence
+    14: LifePhase.MIGRATION,  # Immigration
+    15: LifePhase.MIGRATION,  # Emigration
+    2: LifePhase.FINAL_YEARS,  # Death
+    5: LifePhase.FINAL_YEARS,  # Burial
+    8: LifePhase.FINAL_YEARS,  # Probate
 }
 
 # Phase colors for visual distinction
@@ -82,9 +75,9 @@ PHASE_COLORS = {
 
 # Event type priority for same-date sorting
 EVENT_PRIORITY = {
-    1: 1,    # Birth (highest priority)
-    2: 2,    # Death
-    9: 3,    # Marriage
+    1: 1,  # Birth (highest priority)
+    2: 2,  # Death
+    9: 3,  # Marriage
 }
 
 
@@ -124,7 +117,7 @@ class TimelineGenerator:
 
     def __init__(
         self,
-        db: Optional[RMDatabase | Path | str] = None,
+        db: RMDatabase | Path | str | None = None,
         extension_path: Path | str = Path("./sqlite-extension/icu.dylib"),
         include_private: bool = False,
     ):
@@ -149,7 +142,7 @@ class TimelineGenerator:
         self,
         person_id: int,
         format: TimelineFormat = TimelineFormat.JSON,
-        output_path: Optional[Path | str] = None,
+        output_path: Path | str | None = None,
         include_family: bool = False,
         group_by_phase: bool = True,
     ) -> str:
@@ -193,10 +186,10 @@ class TimelineGenerator:
         person_id: int,
         include_family: bool,
         group_by_phase: bool,
-    ) -> Dict:
+    ) -> dict:
         """Extract timeline data from database."""
 
-        def _extract(db: RMDatabase) -> Dict:
+        def _extract(db: RMDatabase) -> dict:
             query = QueryService(db)
 
             # Get person
@@ -236,11 +229,14 @@ class TimelineGenerator:
                 # Skip events without dates AND without meaningful details
                 date_str = _get_row_value(event, "Date", "")
                 details = _get_row_value(event, "Details", "")
-                if (not date_str or is_unknown_date(date_str)) and not details:
+                # Check if date string is null/unknown (empty or starts with ".")
+                if (not date_str or date_str.startswith(".")) and not details:
                     continue
 
                 # Build timeline event
-                timeline_event = self._build_timeline_event(db, event, person_id, birth_year, group_by_phase)
+                timeline_event = self._build_timeline_event(
+                    db, event, person_id, birth_year, group_by_phase
+                )
                 if timeline_event:
                     timeline_events.append(timeline_event)
 
@@ -271,9 +267,9 @@ class TimelineGenerator:
         db: RMDatabase,
         event,
         person_id: int,
-        birth_year: Optional[int],
+        birth_year: int | None,
         group_by_phase: bool,
-    ) -> Optional[Dict]:
+    ) -> dict | None:
         """Build a TimelineJS3 event object from an RM event."""
         event_id = _get_row_value(event, "EventID", 0)
         event_type_id = _get_row_value(event, "EventType", 0)
@@ -291,18 +287,15 @@ class TimelineGenerator:
 
         # Build narrative text
         narrative = self._build_event_narrative(
-            event_type_name,
-            display_date,
-            place_formatted,
-            details
+            event_type_name, display_date, place_formatted, details
         )
 
         # Get media
         media = self._get_event_media(db, event_id)
 
-        # Get citations for credit
+        # Get citations for credit (not currently used in timeline display)
         citations = self._get_event_citations(db, event_id)
-        credit = self._format_citations_credit(citations)
+        _credit = self._format_citations_credit(citations)
 
         # Determine life phase
         phase = None
@@ -337,9 +330,12 @@ class TimelineGenerator:
 
         return timeline_event
 
-    def _parse_date_to_timelinejs(self, rm_date: str) -> Tuple[Optional[Dict], Optional[Dict], Optional[str]]:
+    def _parse_date_to_timelinejs(
+        self, rm_date: str
+    ) -> tuple[dict | None, dict | None, str | None]:
         """Parse RM11 date to TimelineJS3 format."""
-        if not rm_date or is_unknown_date(rm_date):
+        # Check if date string is null/unknown (empty or starts with ".")
+        if not rm_date or rm_date.startswith("."):
             return None, None, None
 
         try:
@@ -372,7 +368,7 @@ class TimelineGenerator:
             # If parsing fails, return None
             return None, None, rm_date
 
-    def _format_place_for_timeline(self, place_str: str) -> Optional[str]:
+    def _format_place_for_timeline(self, place_str: str) -> str | None:
         """Format place for timeline display (short form)."""
         if not place_str:
             return None
@@ -400,9 +396,9 @@ class TimelineGenerator:
     def _build_event_narrative(
         self,
         event_type: str,
-        date: Optional[str],
-        place: Optional[str],
-        details: Optional[str],
+        date: str | None,
+        place: str | None,
+        details: str | None,
     ) -> str:
         """Build narrative text for event."""
         parts = []
@@ -427,14 +423,15 @@ class TimelineGenerator:
 
     def _get_event_type_name(self, db: RMDatabase, event_type_id: int) -> str:
         """Get event type name from FactTypeTable."""
-        cursor = db.execute(
-            "SELECT Name FROM FactTypeTable WHERE FactTypeID = ?",
-            (event_type_id,)
-        )
+        cursor = db.execute("SELECT Name FROM FactTypeTable WHERE FactTypeID = ?", (event_type_id,))
         row = cursor.fetchone()
-        return _get_row_value(row, "Name", f"Event {event_type_id}") if row else f"Event {event_type_id}"
+        return (
+            _get_row_value(row, "Name", f"Event {event_type_id}")
+            if row
+            else f"Event {event_type_id}"
+        )
 
-    def _get_event_media(self, db: RMDatabase, event_id: int) -> Optional[Dict]:
+    def _get_event_media(self, db: RMDatabase, event_id: int) -> dict | None:
         """Get primary media for an event."""
         cursor = db.execute(
             """
@@ -460,7 +457,7 @@ class TimelineGenerator:
             "caption": _get_row_value(row, "Caption", ""),
         }
 
-    def _get_event_citations(self, db: RMDatabase, event_id: int) -> List[Dict]:
+    def _get_event_citations(self, db: RMDatabase, event_id: int) -> list[dict]:
         """Get citations for an event."""
         cursor = db.execute(
             """
@@ -475,7 +472,7 @@ class TimelineGenerator:
         )
         return cursor.fetchall()
 
-    def _format_citations_credit(self, citations: List) -> Optional[str]:
+    def _format_citations_credit(self, citations: list) -> str | None:
         """Format citations as credit string."""
         if not citations:
             return None
@@ -490,7 +487,7 @@ class TimelineGenerator:
             return "Sources: " + "; ".join(sources)
         return None
 
-    def _get_title_media(self, db: RMDatabase, person_id: int) -> Optional[Dict]:
+    def _get_title_media(self, db: RMDatabase, person_id: int) -> dict | None:
         """Get primary media for title slide."""
         cursor = db.execute(
             """
@@ -520,8 +517,8 @@ class TimelineGenerator:
     def _determine_life_phase(
         self,
         event_type_id: int,
-        birth_year: Optional[int],
-        start_date: Optional[Dict],
+        birth_year: int | None,
+        start_date: dict | None,
     ) -> LifePhase:
         """Determine life phase for an event."""
         # Check predefined mapping first
@@ -541,8 +538,9 @@ class TimelineGenerator:
 
         return LifePhase.LIFE_EVENTS
 
-    def _sort_events(self, events: List[Dict]) -> List[Dict]:
+    def _sort_events(self, events: list[dict]) -> list[dict]:
         """Sort events chronologically with priority for same-date events."""
+
         def sort_key(event):
             sort_date = event.get("_sort_date", UNKNOWN_SORT_DATE)
             event_type_id = event.get("_event_type_id", 999)
@@ -561,7 +559,7 @@ class TimelineGenerator:
 
     # ---- JSON Format ----
 
-    def _format_json(self, timeline_data: Dict) -> str:
+    def _format_json(self, timeline_data: dict) -> str:
         """Format timeline as TimelineJS3 JSON."""
         timelinejs = {
             "title": {
@@ -582,7 +580,7 @@ class TimelineGenerator:
 
     # ---- HTML Format ----
 
-    def _format_html(self, timeline_data: Dict) -> str:
+    def _format_html(self, timeline_data: dict) -> str:
         """Format timeline as standalone HTML viewer."""
         # Get JSON data
         json_data = self._format_json(timeline_data)

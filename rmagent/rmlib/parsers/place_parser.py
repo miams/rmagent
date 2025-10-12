@@ -9,16 +9,16 @@ Example: "Baltimore, Baltimore, Maryland, United States"
 Reference: RM11_Place_Format.md
 """
 
-from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
 from enum import IntEnum
 
 
 class PlaceType(IntEnum):
     """PlaceType values (from PlaceTable)."""
+
     STANDARD = 0  # Regular geographic location (88.8%)
-    OTHER = 1     # Other/Unknown (4.3%)
-    DETAIL = 2    # Detail place - specific location within master (6.9%)
+    OTHER = 1  # Other/Unknown (4.3%)
+    DETAIL = 2  # Detail place - specific location within master (6.9%)
 
 
 @dataclass
@@ -29,16 +29,16 @@ class ParsedPlace:
     full: str
 
     # Individual hierarchy levels
-    levels: List[str]
+    levels: list[str]
 
     # Number of levels
     count: int
 
     # Standard hierarchy components (4-level)
-    city: Optional[str] = None
-    county: Optional[str] = None
-    state: Optional[str] = None
-    country: Optional[str] = None
+    city: str | None = None
+    county: str | None = None
+    state: str | None = None
+    country: str | None = None
 
     @property
     def is_us_place(self) -> bool:
@@ -69,7 +69,7 @@ class ParsedPlace:
             return self.full
 
 
-def parse_place_name(place_name: Optional[str]) -> Optional[ParsedPlace]:
+def parse_place_name(place_name: str | None) -> ParsedPlace | None:
     """
     Parse comma-delimited place name into hierarchy levels.
 
@@ -98,7 +98,7 @@ def parse_place_name(place_name: Optional[str]) -> Optional[ParsedPlace]:
         return None
 
     # Split on comma-space
-    levels = [level.strip() for level in place_name.split(',')]
+    levels = [level.strip() for level in place_name.split(",")]
 
     # Remove empty levels
     levels = [level for level in levels if level]
@@ -118,11 +118,11 @@ def parse_place_name(place_name: Optional[str]) -> Optional[ParsedPlace]:
         city=city,
         county=county,
         state=state,
-        country=country
+        country=country,
     )
 
 
-def get_place_level(place_name: Optional[str], level: int) -> Optional[str]:
+def get_place_level(place_name: str | None, level: int) -> str | None:
     """
     Get specific hierarchy level from place name.
 
@@ -140,11 +140,11 @@ def get_place_level(place_name: Optional[str], level: int) -> Optional[str]:
     if not place_name:
         return None
 
-    levels = [level.strip() for level in place_name.split(',')]
+    levels = [level.strip() for level in place_name.split(",")]
     return levels[level].strip() if level < len(levels) else None
 
 
-def get_place_short(place_name: Optional[str], max_levels: int = 2) -> Optional[str]:
+def get_place_short(place_name: str | None, max_levels: int = 2) -> str | None:
     """
     Get shortened place name (first N levels).
 
@@ -162,16 +162,16 @@ def get_place_short(place_name: Optional[str], max_levels: int = 2) -> Optional[
     if not place_name:
         return None
 
-    levels = [level.strip() for level in place_name.split(',')]
+    levels = [level.strip() for level in place_name.split(",")]
 
     # For US places, skip county (level 1) to get City, State
     if len(levels) >= 4 and levels[3] == "United States" and max_levels == 2:
         return f"{levels[0]}, {levels[2]}"
 
-    return ', '.join(levels[:max_levels])
+    return ", ".join(levels[:max_levels])
 
 
-def format_place_short(place_name: Optional[str]) -> str:
+def format_place_short(place_name: str | None) -> str:
     """
     Format place as 'City, State' for US locations.
 
@@ -190,7 +190,7 @@ def format_place_short(place_name: Optional[str]) -> str:
     if not place_name:
         return ""
 
-    levels = [level.strip() for level in place_name.split(',')]
+    levels = [level.strip() for level in place_name.split(",")]
 
     if len(levels) >= 4 and levels[3] == "United States":
         return f"{levels[0]}, {levels[2]}"  # City, State
@@ -200,7 +200,7 @@ def format_place_short(place_name: Optional[str]) -> str:
         return place_name
 
 
-def format_place_medium(place_name: Optional[str]) -> str:
+def format_place_medium(place_name: str | None) -> str:
     """
     Format place as 'City, County, State'.
 
@@ -217,15 +217,17 @@ def format_place_medium(place_name: Optional[str]) -> str:
     if not place_name:
         return ""
 
-    levels = [level.strip() for level in place_name.split(',')]
+    levels = [level.strip() for level in place_name.split(",")]
 
     if len(levels) >= 3:
-        return ', '.join(levels[:3])
+        return ", ".join(levels[:3])
     else:
         return place_name
 
 
-def convert_coordinates(lat_int: Optional[int], lon_int: Optional[int]) -> tuple[Optional[float], Optional[float]]:
+def convert_coordinates(
+    lat_int: int | None, lon_int: int | None
+) -> tuple[float | None, float | None]:
     """
     Convert integer coordinates to decimal degrees.
 
@@ -251,7 +253,7 @@ def convert_coordinates(lat_int: Optional[int], lon_int: Optional[int]) -> tuple
     return latitude, longitude
 
 
-def reverse_place_name(place_name: Optional[str]) -> Optional[str]:
+def reverse_place_name(place_name: str | None) -> str | None:
     """
     Reverse place name hierarchy for sorting.
 
@@ -270,11 +272,11 @@ def reverse_place_name(place_name: Optional[str]) -> Optional[str]:
     if not place_name:
         return None
 
-    levels = [level.strip() for level in place_name.split(',')]
-    return ', '.join(reversed(levels))
+    levels = [level.strip() for level in place_name.split(",")]
+    return ", ".join(reversed(levels))
 
 
-def validate_place_format(place_name: str) -> List[str]:
+def validate_place_format(place_name: str) -> list[str]:
     """
     Validate place name format and return list of issues.
 
@@ -296,15 +298,15 @@ def validate_place_format(place_name: str) -> List[str]:
         return issues
 
     # Check for leading/trailing whitespace
-    if place_name.startswith(' ') or place_name.endswith(' '):
+    if place_name.startswith(" ") or place_name.endswith(" "):
         issues.append("Leading or trailing whitespace")
 
     # Check for empty hierarchy levels (double comma)
-    if ',,' in place_name:
+    if ",," in place_name:
         issues.append("Empty hierarchy level (double comma)")
 
     # Check for missing space after comma
-    if ', ' not in place_name and ',' in place_name:
+    if ", " not in place_name and "," in place_name:
         issues.append("Missing space after comma")
 
     return issues

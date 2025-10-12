@@ -8,11 +8,11 @@ reuse optimized, parameterized statements consistently.
 
 from __future__ import annotations
 
-from typing import List, Optional, Sequence, Tuple
+from collections.abc import Sequence
 
 from .database import RMDatabase
 
-VITAL_EVENT_TYPES: Tuple[int, ...] = (1, 2, 3, 4, 300)
+VITAL_EVENT_TYPES: tuple[int, ...] = (1, 2, 3, 4, 300)
 DEFAULT_GENERATION_LIMIT = 10
 DEFAULT_RESULT_LIMIT = 50
 
@@ -30,8 +30,8 @@ class QueryService:
     # Pattern 2
     def search_primary_names(
         self,
-        surname: Optional[str] = None,
-        given: Optional[str] = None,
+        surname: str | None = None,
+        given: str | None = None,
         limit: int = DEFAULT_RESULT_LIMIT,
     ):
         if surname is None and given is None:
@@ -40,7 +40,7 @@ class QueryService:
             raise ValueError("limit must be positive")
 
         filters = []
-        params: List[object] = []
+        params: list[object] = []
         if surname is not None:
             filters.append("n.Surname = ?")
             params.append(surname)
@@ -120,9 +120,9 @@ class QueryService:
     # Pattern 12
     def get_unsourced_vital_events(
         self,
-        owner_id: Optional[int] = None,
+        owner_id: int | None = None,
         event_types: Sequence[int] = VITAL_EVENT_TYPES,
-        limit: Optional[int] = None,
+        limit: int | None = None,
     ):
         if not event_types:
             raise ValueError("event_types must contain at least one value")
@@ -132,7 +132,7 @@ class QueryService:
         placeholders = ",".join("?" for _ in event_types)
         sql = _GET_UNSOURCED_EVENTS_SQL_TEMPLATE.format(event_type_list=placeholders)
 
-        params: List[object] = list(event_types)
+        params: list[object] = list(event_types)
         if owner_id is not None:
             sql += "\n  AND e.OwnerID = ?"
             params.append(owner_id)
@@ -334,7 +334,9 @@ WHERE e.OwnerType = 0
   AND e.OwnerID = ?
   AND e.EventType IN {placeholder}
 ORDER BY e.SortDate
-""".replace("{placeholder}", "(" + ",".join("?" for _ in VITAL_EVENT_TYPES) + ")")
+""".replace(
+    "{placeholder}", "(" + ",".join("?" for _ in VITAL_EVENT_TYPES) + ")"
+)
 
 _GET_SPOUSES_SQL = """
 SELECT DISTINCT

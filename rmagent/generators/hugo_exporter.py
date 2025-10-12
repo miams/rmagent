@@ -11,10 +11,9 @@ from __future__ import annotations
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Union
 
 from rmagent.generators.biography import BiographyGenerator, BiographyLength, CitationStyle
-from rmagent.generators.timeline import TimelineGenerator, TimelineFormat
+from rmagent.generators.timeline import TimelineFormat, TimelineGenerator
 from rmagent.rmlib.database import RMDatabase
 from rmagent.rmlib.models import OwnerType
 from rmagent.rmlib.parsers.name_parser import format_full_name
@@ -34,13 +33,13 @@ def _slugify(text: str) -> str:
     # Convert to lowercase
     slug = text.lower()
     # Replace spaces and underscores with hyphens
-    slug = re.sub(r'[\s_]+', '-', slug)
+    slug = re.sub(r"[\s_]+", "-", slug)
     # Remove non-alphanumeric characters except hyphens
-    slug = re.sub(r'[^a-z0-9-]', '', slug)
+    slug = re.sub(r"[^a-z0-9-]", "", slug)
     # Remove multiple consecutive hyphens
-    slug = re.sub(r'-+', '-', slug)
+    slug = re.sub(r"-+", "-", slug)
     # Remove leading/trailing hyphens
-    slug = slug.strip('-')
+    slug = slug.strip("-")
     return slug
 
 
@@ -78,7 +77,7 @@ class HugoExporter:
 
     def __init__(
         self,
-        db: Optional[RMDatabase | Path | str] = None,
+        db: RMDatabase | Path | str | None = None,
         extension_path: Path | str = Path("./sqlite-extension/icu.dylib"),
         media_base_path: str = "/media/",
     ):
@@ -97,7 +96,7 @@ class HugoExporter:
             self._owns_db = False
 
         self.extension_path = Path(extension_path)
-        self.media_base_path = media_base_path.rstrip('/') + '/'
+        self.media_base_path = media_base_path.rstrip("/") + "/"
 
     def export_person(
         self,
@@ -106,7 +105,7 @@ class HugoExporter:
         bio_length: BiographyLength = BiographyLength.STANDARD,
         include_timeline: bool = True,
         include_media: bool = True,
-    ) -> Dict[str, Path]:
+    ) -> dict[str, Path]:
         """
         Export a single person as Hugo blog post.
 
@@ -140,11 +139,11 @@ class HugoExporter:
         )
 
         # Create slug for filename
-        slug = _slugify(person_data['full_name'])
+        slug = _slugify(person_data["full_name"])
         markdown_file = output_path / f"{slug}.md"
-        markdown_file.write_text(markdown_content, encoding='utf-8')
+        markdown_file.write_text(markdown_content, encoding="utf-8")
 
-        result = {'markdown': markdown_file}
+        result = {"markdown": markdown_file}
 
         # Generate timeline files if requested
         if include_timeline:
@@ -159,12 +158,12 @@ class HugoExporter:
 
     def export_batch(
         self,
-        person_ids: List[int],
+        person_ids: list[int],
         output_dir: Path | str,
         bio_length: BiographyLength = BiographyLength.STANDARD,
         include_timeline: bool = True,
         generate_index: bool = True,
-    ) -> Dict[str, List[Path]]:
+    ) -> dict[str, list[Path]]:
         """
         Export multiple people as Hugo blog posts.
 
@@ -192,19 +191,19 @@ class HugoExporter:
                     bio_length=bio_length,
                     include_timeline=include_timeline,
                 )
-                markdown_files.append(result['markdown'])
-                if 'timeline_html' in result:
-                    timeline_files.append(result['timeline_html'])
-                if 'timeline_json' in result:
-                    timeline_files.append(result['timeline_json'])
+                markdown_files.append(result["markdown"])
+                if "timeline_html" in result:
+                    timeline_files.append(result["timeline_html"])
+                if "timeline_json" in result:
+                    timeline_files.append(result["timeline_json"])
             except Exception as e:
                 # Continue with other people if one fails
                 print(f"Warning: Failed to export person {person_id}: {e}")
                 continue
 
         result_dict = {
-            'markdown_files': markdown_files,
-            'timeline_files': timeline_files,
+            "markdown_files": markdown_files,
+            "timeline_files": timeline_files,
         }
 
         # Generate index page
@@ -213,14 +212,14 @@ class HugoExporter:
                 person_ids=person_ids,
                 output_dir=output_path,
             )
-            result_dict['index_file'] = index_file
+            result_dict["index_file"] = index_file
 
         return result_dict
 
-    def _extract_person_data(self, person_id: int, include_media: bool) -> Dict:
+    def _extract_person_data(self, person_id: int, include_media: bool) -> dict:
         """Extract person data from database."""
 
-        def _extract(db: RMDatabase) -> Dict:
+        def _extract(db: RMDatabase) -> dict:
             query = QueryService(db)
 
             # Get person
@@ -287,7 +286,7 @@ class HugoExporter:
         person_id: int,
         slug: str,
         output_dir: Path,
-    ) -> Dict[str, Path]:
+    ) -> dict[str, Path]:
         """Generate timeline HTML and JSON files."""
         timeline_generator = TimelineGenerator(
             db=self.db_path or self._db,
@@ -315,13 +314,13 @@ class HugoExporter:
         )
 
         return {
-            'timeline_json': json_file,
-            'timeline_html': html_file,
+            "timeline_json": json_file,
+            "timeline_html": html_file,
         }
 
     def _build_hugo_markdown(
         self,
-        person_data: Dict,
+        person_data: dict,
         biography: str,
         include_timeline: bool,
     ) -> str:
@@ -338,10 +337,10 @@ class HugoExporter:
 
         # Tags (places, time periods)
         tags = []
-        if person_data['places']:
-            tags.extend(person_data['places'][:5])  # Limit to 5 places
-        if person_data['birth_year']:
-            decade = (person_data['birth_year'] // 10) * 10
+        if person_data["places"]:
+            tags.extend(person_data["places"][:5])  # Limit to 5 places
+        if person_data["birth_year"]:
+            decade = (person_data["birth_year"] // 10) * 10
             tags.append(f"{decade}s")
         if tags:
             tag_str = ", ".join([f'"{tag}"' for tag in tags])
@@ -349,9 +348,9 @@ class HugoExporter:
 
         # Custom fields
         lines.append(f"person_id: {person_data['person_id']}")
-        if person_data['birth_year']:
+        if person_data["birth_year"]:
             lines.append(f"birth_year: {person_data['birth_year']}")
-        if person_data['death_year']:
+        if person_data["death_year"]:
             lines.append(f"death_year: {person_data['death_year']}")
 
         lines.append("---")
@@ -360,7 +359,7 @@ class HugoExporter:
         # Biography content
         # Remove the H1 title from biography (Hugo will add it)
         bio_content = biography
-        bio_content = re.sub(r'^#\s+.*$', '', bio_content, count=1, flags=re.MULTILINE)
+        bio_content = re.sub(r"^#\s+.*$", "", bio_content, count=1, flags=re.MULTILINE)
         bio_content = bio_content.strip()
 
         lines.append(bio_content)
@@ -370,19 +369,19 @@ class HugoExporter:
         if include_timeline:
             lines.append("## Timeline")
             lines.append("")
-            slug = _slugify(person_data['full_name'])
+            slug = _slugify(person_data["full_name"])
             lines.append(f'{{{{< timeline src="/timelines/{slug}.json" >}}}}')
             lines.append("")
             lines.append(f"*View [interactive timeline](/timelines/{slug}.html) in new window.*")
             lines.append("")
 
         # Media gallery (if available)
-        if person_data['media_items']:
+        if person_data["media_items"]:
             lines.append("## Photos & Documents")
             lines.append("")
-            for media in person_data['media_items'][:10]:  # Limit to 10 items
+            for media in person_data["media_items"][:10]:  # Limit to 10 items
                 media_url = self._format_media_url(media)
-                caption = media.get('caption', '')
+                caption = media.get("caption", "")
                 lines.append(f"![{caption}]({media_url})")
                 if caption:
                     lines.append(f"*{caption}*")
@@ -390,7 +389,7 @@ class HugoExporter:
 
         return "\n".join(lines)
 
-    def _get_person_places(self, db: RMDatabase, person_id: int) -> List[str]:
+    def _get_person_places(self, db: RMDatabase, person_id: int) -> list[str]:
         """Get unique places associated with person for tags."""
         cursor = db.execute(
             """
@@ -409,7 +408,7 @@ class HugoExporter:
             place_name = _get_row_value(row, "Name")
             if place_name:
                 # Extract just the city or state (first level)
-                parts = place_name.split(',')
+                parts = place_name.split(",")
                 if len(parts) >= 2:
                     # Use state/country (second-to-last part)
                     place = parts[-2].strip()
@@ -420,7 +419,7 @@ class HugoExporter:
 
         return places
 
-    def _get_person_media(self, db: RMDatabase, person_id: int) -> List[Dict]:
+    def _get_person_media(self, db: RMDatabase, person_id: int) -> list[dict]:
         """Get media items for person."""
         cursor = db.execute(
             """
@@ -435,25 +434,27 @@ class HugoExporter:
 
         media_items = []
         for row in cursor.fetchall():
-            media_items.append({
-                'media_id': _get_row_value(row, 'MediaID'),
-                'media_path': _get_row_value(row, 'MediaPath', ''),
-                'media_file': _get_row_value(row, 'MediaFile', ''),
-                'caption': _get_row_value(row, 'Caption', ''),
-                'description': _get_row_value(row, 'Description', ''),
-            })
+            media_items.append(
+                {
+                    "media_id": _get_row_value(row, "MediaID"),
+                    "media_path": _get_row_value(row, "MediaPath", ""),
+                    "media_file": _get_row_value(row, "MediaFile", ""),
+                    "caption": _get_row_value(row, "Caption", ""),
+                    "description": _get_row_value(row, "Description", ""),
+                }
+            )
 
         return media_items
 
-    def _format_media_url(self, media: Dict) -> str:
+    def _format_media_url(self, media: dict) -> str:
         """Format media URL for Hugo."""
-        media_path = media['media_path']
-        media_file = media['media_file']
+        media_path = media["media_path"]
+        media_file = media["media_file"]
 
         # Strip RootsMagic's ?\  prefix if present
-        if media_path.startswith('?\\'):
+        if media_path.startswith("?\\"):
             media_path = media_path[2:]
-        elif media_path.startswith('?/'):
+        elif media_path.startswith("?/"):
             media_path = media_path[2:]
 
         # Combine path components
@@ -463,13 +464,13 @@ class HugoExporter:
             full_path = f"{self.media_base_path}{media_file}"
 
         # Normalize path separators for web
-        full_path = full_path.replace('\\', '/')
+        full_path = full_path.replace("\\", "/")
 
         return full_path
 
     def _generate_index_page(
         self,
-        person_ids: List[int],
+        person_ids: list[int],
         output_dir: Path,
     ) -> Path:
         """Generate _index.md listing all exported people."""
@@ -479,7 +480,7 @@ class HugoExporter:
 
             # Front matter
             lines.append("---")
-            lines.append("title: \"Family Biographies\"")
+            lines.append('title: "Family Biographies"')
             lines.append(f"date: {datetime.now().strftime('%Y-%m-%d')}")
             lines.append("---")
             lines.append("")
@@ -505,28 +506,32 @@ class HugoExporter:
                     death_year = _get_row_value(person, "DeathYear")
                     slug = _slugify(full_name)
 
-                    people.append({
-                        'name': full_name,
-                        'birth_year': birth_year or 0,
-                        'death_year': death_year,
-                        'slug': slug,
-                    })
+                    people.append(
+                        {
+                            "name": full_name,
+                            "birth_year": birth_year or 0,
+                            "death_year": death_year,
+                            "slug": slug,
+                        }
+                    )
 
             # Sort by birth year
-            people.sort(key=lambda x: x['birth_year'])
+            people.sort(key=lambda x: x["birth_year"])
 
             # Generate list
             for person in people:
                 lifespan = ""
-                if person['birth_year'] or person['death_year']:
-                    b = person['birth_year'] or '?'
-                    d = person['death_year'] or '?'
+                if person["birth_year"] or person["death_year"]:
+                    b = person["birth_year"] or "?"
+                    d = person["death_year"] or "?"
                     lifespan = f" ({b}–{d})"
 
                 lines.append(f"- [{person['name']}]({person['slug']}/){lifespan}")
 
             lines.append("")
-            lines.append(f"*{len(people)} biographies • Generated {datetime.now().strftime('%Y-%m-%d')}*")
+            lines.append(
+                f"*{len(people)} biographies • Generated {datetime.now().strftime('%Y-%m-%d')}*"
+            )
 
             return "\n".join(lines)
 
@@ -539,6 +544,6 @@ class HugoExporter:
             raise ValueError("No database provided")
 
         index_file = output_dir / "_index.md"
-        index_file.write_text(content, encoding='utf-8')
+        index_file.write_text(content, encoding="utf-8")
 
         return index_file

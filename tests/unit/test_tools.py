@@ -5,7 +5,6 @@ Tests for rmagent.agent.tools.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List
 
 import pytest
 
@@ -31,10 +30,22 @@ class StubQueryService:
     def __init__(self):
         self.person = {"PersonID": 1, "Given": "Michael", "Surname": "Iams"}
         self.events = [
-            {"EventID": 1, "EventType": "Birth", "Date": "1968-04-30", "Place": "Arizona", "Details": ""},
+            {
+                "EventID": 1,
+                "EventType": "Birth",
+                "Date": "1968-04-30",
+                "Place": "Arizona",
+                "Details": "",
+            },
         ]
         self.ancestors = [
-            {"PersonID": 100, "Given": "Donald", "Surname": "Iams", "Relationship": "Father", "Generation": 1},
+            {
+                "PersonID": 100,
+                "Given": "Donald",
+                "Surname": "Iams",
+                "Relationship": "Father",
+                "Generation": 1,
+            },
         ]
 
     def get_person_with_primary_name(self, person_id: int):

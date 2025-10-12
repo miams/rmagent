@@ -9,18 +9,18 @@ Tests name selection and formatting for:
 - Validation
 """
 
-import pytest
 import sqlite3
-from pathlib import Path
+
+import pytest
 
 from rmagent.rmlib.parsers.name_parser import (
-    get_primary_name,
+    Name,
+    NameType,
+    format_full_name,
     get_all_names,
     get_name_at_date,
-    format_full_name,
+    get_primary_name,
     validate_name_requirements,
-    NameType,
-    Name,
 )
 
 
@@ -32,7 +32,8 @@ def test_db(tmp_path):
     cursor = conn.cursor()
 
     # Create NameTable
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE NameTable (
             NameID INTEGER PRIMARY KEY,
             OwnerID INTEGER,
@@ -48,59 +49,75 @@ def test_db(tmp_path):
             BirthYear INTEGER,
             DeathYear INTEGER
         )
-    """)
+    """
+    )
 
     # Person 1: Standard name
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO NameTable VALUES
         (1, 1, 1, 0, 'Smith', 'John William', 'Dr.', 'Jr.', 'Jack', 'SM0', 'JNW', 1850, 1920)
-    """)
+    """
+    )
 
     # Person 2: Multiple names (primary + maiden)
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO NameTable VALUES
         (2, 2, 1, 0, 'Smith', 'Mary Elizabeth', NULL, NULL, NULL, 'SM0', 'MRL', 1855, 1925),
         (3, 2, 0, 7, 'Jones', 'Mary Elizabeth', NULL, NULL, NULL, 'JNS', 'MRL', 1855, 1925)
-    """)
+    """
+    )
 
     # Person 3: Multiple alternate names (spelling variations)
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO NameTable VALUES
         (4, 3, 1, 0, 'Tittsworth', 'James Fredrick', NULL, NULL, 'Fred', 'TTS0', 'JMSFR', 1880, 1960),
         (5, 3, 0, 0, 'Titsworth', 'James F.', NULL, NULL, NULL, 'TTS0', 'JMSF', 1880, 1960),
         (6, 3, 0, 1, 'Tittsworth', 'Fred', NULL, NULL, NULL, 'TTS0', 'FRT', 1880, 1960)
-    """)
+    """
+    )
 
     # Person 4: No primary name (data quality issue)
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO NameTable VALUES
         (7, 4, 0, 0, 'Johnson', 'Robert', NULL, NULL, NULL, 'JNS', 'RBR', 1900, 1970)
-    """)
+    """
+    )
 
     # Person 5: Multiple primary names (data quality issue)
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO NameTable VALUES
         (8, 5, 1, 0, 'Williams', 'Sarah', NULL, NULL, NULL, 'WLM', 'SR', 1910, 1980),
         (9, 5, 1, 0, 'Williams', 'Sara', NULL, NULL, NULL, 'WLM', 'SR', 1910, 1980)
-    """)
+    """
+    )
 
     # Person 6: Name with no surname or given (data quality issue)
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO NameTable VALUES
         (10, 6, 1, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0)
-    """)
+    """
+    )
 
     # Create FamilyTable for marriage date testing
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE FamilyTable (
             FamilyID INTEGER PRIMARY KEY,
             FatherID INTEGER,
             MotherID INTEGER
         )
-    """)
+    """
+    )
 
     # Create EventTable for marriage date testing
-    cursor.execute("""
+    cursor.execute(
+        """
         CREATE TABLE EventTable (
             EventID INTEGER PRIMARY KEY,
             EventType INTEGER,
@@ -108,15 +125,20 @@ def test_db(tmp_path):
             OwnerID INTEGER,
             SortDate INTEGER
         )
-    """)
+    """
+    )
 
     # Person 2 marriage (EventType=300, SortDate for 1875-06-15)
-    cursor.execute("""
+    cursor.execute(
+        """
         INSERT INTO FamilyTable VALUES (1, 10, 2)
-    """)
-    cursor.execute("""
+    """
+    )
+    cursor.execute(
+        """
         INSERT INTO EventTable VALUES (1, 300, 1, 1, 18750615000000)
-    """)
+    """
+    )
 
     conn.commit()
     return db_path
@@ -136,7 +158,7 @@ class TestName:
             given="John William",
             prefix="Dr.",
             suffix="Jr.",
-            nickname="Jack"
+            nickname="Jack",
         )
 
         assert name.full_name() == "Dr. John William Smith Jr."
@@ -150,7 +172,7 @@ class TestName:
             is_primary=True,
             name_type=NameType.BIRTH,
             surname="Smith",
-            given="John"
+            given="John",
         )
 
         assert name.full_name() == "John Smith"
@@ -158,11 +180,7 @@ class TestName:
     def test_full_name_surname_only(self):
         """Test full name with surname only."""
         name = Name(
-            name_id=1,
-            person_id=1,
-            is_primary=True,
-            name_type=NameType.BIRTH,
-            surname="Smith"
+            name_id=1, person_id=1, is_primary=True, name_type=NameType.BIRTH, surname="Smith"
         )
 
         assert name.full_name() == "Smith"
@@ -177,7 +195,7 @@ class TestName:
             surname="Smith",
             given="John William",
             prefix="Dr.",
-            suffix="Jr."
+            suffix="Jr.",
         )
 
         assert name.short_name() == "John William Smith"
@@ -190,7 +208,7 @@ class TestName:
             is_primary=True,
             name_type=NameType.BIRTH,
             surname="Smith",
-            given="John William"
+            given="John William",
         )
 
         assert name.surname_first() == "Smith, John William"
@@ -205,7 +223,7 @@ class TestName:
             surname="Smith",
             given="John",
             birth_year=1850,
-            death_year=1920
+            death_year=1920,
         )
 
         assert name.lifespan() == "(1850-1920)"
@@ -219,7 +237,7 @@ class TestName:
             name_type=NameType.BIRTH,
             surname="Smith",
             given="John",
-            birth_year=1968
+            birth_year=1968,
         )
 
         assert name.lifespan() == "(1968-)"
@@ -232,7 +250,7 @@ class TestName:
             is_primary=True,
             name_type=NameType.BIRTH,
             surname="Smith",
-            given="John"
+            given="John",
         )
 
         assert name.lifespan() == ""
@@ -426,7 +444,7 @@ class TestFormatFullName:
             prefix="Dr.",
             suffix="Jr.",
             nickname="Jack",
-            include_nickname=True
+            include_nickname=True,
         )
 
         assert full == 'Dr. John William Smith Jr. ("Jack")'
@@ -440,10 +458,7 @@ class TestFormatFullName:
     def test_format_no_nickname(self):
         """Test formatting without nickname."""
         full = format_full_name(
-            surname="Smith",
-            given="John",
-            nickname="Jack",
-            include_nickname=False
+            surname="Smith", given="John", nickname="Jack", include_nickname=False
         )
 
         assert full == "John Smith"
@@ -563,7 +578,7 @@ class TestRealWorldScenarios:
         # Primary name
         primary = get_primary_name(3, conn)
         assert primary.surname == "Tittsworth"
-        assert primary.full_name() == 'James Fredrick Tittsworth'
+        assert primary.full_name() == "James Fredrick Tittsworth"
         assert primary.full_name(include_nickname=True) == 'James Fredrick Tittsworth ("Fred")'
 
         # All names

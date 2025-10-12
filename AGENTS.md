@@ -44,6 +44,352 @@ Only commit sanitized genealogical data; scrub personal details before adding fi
 - Set `LOG_LEVEL=DEBUG` in `config/.env` to stream verbose logs.
 - LLM prompt/response JSON traces (prompt text, completion, provider, model, token totals, latency) write to `LLM_DEBUG_LOG_FILE` (default `logs/llm_debug.jsonl`) for reproducible debugging.
 
+## LangChain v1.0 Best Practices
+
+**CRITICAL:** When adding LangChain features, use v1.0 patterns exclusively. RMAgent currently has zero active LangChain usage.
+
+### Upgrade Status
+- **Current:** LangChain 0.3.27 installed but unused
+- **Target:** Upgrade to v1.0 after Phase 5 (Testing) & Phase 6 (Documentation)
+- **Plan:** See `docs/RM11_LangChain_Upgrade.md` for complete strategy
+
+### Agent Architecture Patterns
+
+#### ✅ v1.0 Pattern: create_agent()
+```python
+from langchain import create_agent  # v1.0 API
+from langchain.agents import AgentExecutor
+from langchain_anthropic import ChatAnthropic
+from rmagent.agent.lc.tools import query_person, get_events
+
+def create_research_agent(model: str = "claude-3-5-sonnet-20241022"):
+    """Create genealogy research agent (v1.0 pattern)."""
+    llm = ChatAnthropic(model=model)
+    tools = [query_person, get_events, search_database]
+
+    # v1.0: String system prompt (not ChatPromptTemplate)
+    system_prompt = """You are a professional genealogist.
+
+    Guidelines:
+    - Always cite sources (PersonID, EventID, census records)
+    - Flag uncertainties and conflicting data
+    - Suggest follow-up research when gaps exist
+    """
+
+    agent = create_agent(
+        model=llm,
+        tools=tools,
+        system_prompt=system_prompt  # v1.0 requirement
+    )
+
+    return AgentExecutor(
+        agent=agent,
+        tools=tools,
+        verbose=True,
+        handle_parsing_errors=True,
+        max_iterations=10
+    )
+```
+
+#### ❌ 0.3.x Pattern (Don't Use)
+```python
+# DON'T USE THIS - Deprecated in v1.0
+from langchain.agents import create_react_agent, initialize_agent
+
+agent = create_react_agent(  # Renamed to create_agent() in v1.0
+    llm=llm,
+    tools=tools,
+    prompt=ChatPromptTemplate(...)  # Changed to system_prompt string
+)
+```
+
+### Tool Design Guidelines
+
+#### Place Tools in `rmagent/agent/lc/tools.py`
+
+**Decorator Pattern (Simple Tools):**
+```python
+from langchain_core.tools import tool
+
+@tool
+def query_person(person_id: int) -> dict:
+    """Return person details from RootsMagic database.
+
+    Args:
+        person_id: PersonID from RootsMagic database
+    """
+    from rmagent.rmlib.database import RMDatabase
+    from rmagent.rmlib.queries import QueryService
+
+    with RMDatabase('data/Iiams.rmtree') as db:
+        queries = QueryService(db)
+        return queries.get_person_with_primary_name(person_id)
+```
+
+**Class Pattern (Structured I/O):**
+```python
+from langchain_core.tools import BaseTool
+from pydantic import BaseModel, Field
+
+class QueryPersonInput(BaseModel):
+    person_id: int = Field(description="PersonID from RootsMagic database")
+
+class QueryPersonTool(BaseTool):
+    name: str = "query_person"
+    description: str = "Return person details from RootsMagic database"
+    args_schema: type[BaseModel] = QueryPersonInput
+
+    query_service: QueryService  # Inject dependency
+
+    def _run(self, person_id: int) -> dict:
+        """Synchronous implementation"""
+        return self.query_service.get_person_with_primary_name(person_id)
+
+    async def _arun(self, person_id: int) -> dict:
+        """Async implementation (future-proof)"""
+        return self._run(person_id)
+```
+
+**Tool Testing Requirements:**
+```python
+# tests/unit/test_lc_tools.py
+def test_query_person_tool_langchain():
+    """Test LangChain v1.0 tool wrapper."""
+    from rmagent.agent.lc.tools import query_person
+
+    result = query_person.invoke({"person_id": 1})
+
+    assert result["PersonID"] == 1
+    assert "Given" in result
+    assert "Surname" in result
+```
+
+### State Management Patterns
+
+**v1.0 Requirement: TypedDict ONLY**
+
+```python
+from typing import TypedDict, Sequence
+from langchain_core.messages import BaseMessage
+from langgraph.graph import StateGraph
+
+# ✅ Correct: TypedDict state
+class ResearchState(TypedDict):
+    messages: Sequence[BaseMessage]
+    person_id: int
+    research_notes: str
+    census_records: list[dict]
+    sources_checked: list[int]
+    confidence: float
+
+# Define workflow with TypedDict state
+workflow = StateGraph(ResearchState)
+
+def research_node(state: ResearchState) -> ResearchState:
+    """Process research step."""
+    # Access state fields
+    person_id = state["person_id"]
+    messages = state["messages"]
+
+    # Return updated state
+    return {
+        **state,
+        "research_notes": "...",
+        "confidence": 0.85
+    }
+
+workflow.add_node("research", research_node)
+```
+
+**❌ Don't Use Pydantic Models (Deprecated in v1.0):**
+```python
+# DON'T DO THIS - v1.0 rejects Pydantic state
+class ResearchState(BaseModel):
+    messages: list[BaseMessage]
+    person_id: int
+```
+
+### Context Passing Pattern (v1.0)
+
+```python
+# ✅ v1.0: Use context parameter
+agent = create_research_agent()
+result = agent.invoke(
+    {"input": "Find census records for person 123"},
+    context={  # v1.0 pattern
+        "database_path": "data/Iiams.rmtree",
+        "sqlite_extension": "./sqlite-extension/icu.dylib"
+    }
+)
+
+# ❌ 0.3.x: config["configurable"] (deprecated)
+result = agent.invoke(
+    {"input": "..."},
+    config={"configurable": {"database_path": "..."}}  # DON'T USE
+)
+```
+
+### Observability Setup
+
+**Custom Callbacks (Preferred):**
+```python
+# rmagent/agent/lc/callbacks.py
+from langchain_core.callbacks import BaseCallbackHandler
+import json
+from pathlib import Path
+
+class RMAgentCallbackHandler(BaseCallbackHandler):
+    """Log all LLM interactions to llm_debug.jsonl."""
+
+    def __init__(self, log_path: Path = Path("logs/llm_debug.jsonl")):
+        self.log_path = log_path
+        self.log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def on_llm_start(self, serialized, prompts, **kwargs):
+        self._log({
+            "event": "llm_start",
+            "timestamp": datetime.now().isoformat(),
+            "prompts": prompts,
+            "model": kwargs.get("invocation_params", {}).get("model_name")
+        })
+
+    def on_llm_end(self, response, **kwargs):
+        self._log({
+            "event": "llm_end",
+            "timestamp": datetime.now().isoformat(),
+            "response": response.generations[0][0].text,
+            "token_usage": response.llm_output.get("token_usage")
+        })
+
+    def on_tool_start(self, serialized, input_str, **kwargs):
+        self._log({
+            "event": "tool_start",
+            "tool": serialized.get("name"),
+            "input": input_str
+        })
+
+    def _log(self, data: dict):
+        with self.log_path.open("a") as f:
+            json.dump(data, f)
+            f.write("\n")
+
+# Usage
+from rmagent.agent.lc.callbacks import RMAgentCallbackHandler
+
+agent = create_research_agent()
+result = agent.invoke(
+    {"input": "Find census records for person 123"},
+    callbacks=[RMAgentCallbackHandler()]
+)
+```
+
+**LangSmith Integration (Optional, Opt-In):**
+```python
+# config/.env additions
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY=sk-ls-xxxxx  # Optional
+LANGCHAIN_PROJECT=rmagent
+
+# ⚠️ Privacy Warning: LangSmith sends data to Anthropic's cloud
+# Users must explicitly enable this in config
+```
+
+### LCEL Chain Patterns
+
+**Census Extraction Chain:**
+```python
+# rmagent/agent/lc/chains.py
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import PydanticOutputParser
+from langchain_anthropic import ChatAnthropic
+from pydantic import BaseModel, Field
+
+class CensusRecord(BaseModel):
+    name: str = Field(description="Full name from census")
+    age: int = Field(description="Age at time of census")
+    birthplace: str = Field(description="Place of birth")
+    occupation: str = Field(description="Occupation listed")
+    confidence: float = Field(description="Confidence 0-1")
+
+parser = PydanticOutputParser(pydantic_object=CensusRecord)
+
+census_prompt = ChatPromptTemplate.from_messages([
+    ("system", """Extract structured census data.
+    {format_instructions}"""),
+    ("human", "OCR: {ocr_text}\nContext: {person_context}")
+])
+
+# LCEL composition
+census_extraction_chain = (
+    {
+        "ocr_text": RunnablePassthrough(),
+        "person_context": lambda x: get_person_context(x["person_id"]),
+        "format_instructions": lambda _: parser.get_format_instructions()
+    }
+    | census_prompt
+    | ChatAnthropic(model="claude-3-5-sonnet-20241022")
+    | parser
+)
+
+# Usage
+result = census_extraction_chain.invoke({
+    "ocr_text": "John Smith 45 Pennsylvania Farmer...",
+    "person_id": 123
+})
+```
+
+### Testing Strategy
+
+**Unit Tests for Tools:**
+```python
+# tests/unit/test_lc_tools.py
+def test_query_person_returns_dict():
+    result = query_person.invoke({"person_id": 1})
+    assert isinstance(result, dict)
+    assert "PersonID" in result
+
+def test_query_person_invalid_id_raises():
+    with pytest.raises(ToolExecutionError):
+        query_person.invoke({"person_id": 999999})
+```
+
+**Integration Tests for Agents:**
+```python
+# tests/integration/test_lc_agents.py
+def test_research_agent_answers_question():
+    agent = create_research_agent()
+    result = agent.invoke({
+        "input": "Who are the parents of person 1?"
+    })
+    assert "parent" in result["output"].lower()
+    assert result["intermediate_steps"]  # Verify tool usage
+```
+
+**Chain Tests:**
+```python
+# tests/unit/test_lc_chains.py
+def test_census_extraction_chain_parses_ocr():
+    result = census_extraction_chain.invoke({
+        "ocr_text": "John Smith 45 Pennsylvania Farmer",
+        "person_id": 1
+    })
+    assert result.name == "John Smith"
+    assert result.age == 45
+    assert result.occupation == "Farmer"
+```
+
+### Migration Checklist
+
+Before implementing LangChain features:
+- [ ] Read `docs/RM11_LangChain_Upgrade.md` migration plan
+- [ ] Verify v1.0 stable release is available (not alpha)
+- [ ] Create new code in `rmagent/agent/lc/` directory
+- [ ] Use v1.0 patterns exclusively (create_agent, system_prompt, TypedDict)
+- [ ] Add unit tests for all tools (80%+ coverage)
+- [ ] Add integration tests for agents
+- [ ] Document in CLAUDE.md when to use LangChain vs legacy code
+
 ## Current Implementation Status (2025-10-10)
 
 🎉 **MILESTONE 2: MVP (Minimum Viable Product) - ACHIEVED!**

@@ -10,17 +10,16 @@ alternative data stores.
 
 from __future__ import annotations
 
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Sequence, Tuple
 
 from rmagent.agent.llm_provider import LLMProvider, LLMResult
 from rmagent.agent.prompts import render_prompt
 from rmagent.rmlib.database import RMDatabase
-from rmagent.rmlib.queries import QueryService
-from rmagent.rmlib.quality import DataQualityValidator, QualityReport
 from rmagent.rmlib.parsers.date_parser import parse_rm_date
-
+from rmagent.rmlib.quality import DataQualityValidator, QualityReport
+from rmagent.rmlib.queries import QueryService
 
 QueryServiceFactory = Callable[[RMDatabase], QueryService]
 ValidatorFactory = Callable[[RMDatabase], DataQualityValidator]
@@ -56,15 +55,17 @@ class GenealogyAgent:
     """
 
     llm_provider: LLMProvider
-    db_path: Optional[Path] = None
+    db_path: Path | None = None
     extension_path: Path = Path("./sqlite-extension/icu.dylib")
     query_service_factory: QueryServiceFactory = _default_query_factory
     validator_factory: ValidatorFactory = _default_validator_factory
-    _memory: List[ConversationTurn] = field(default_factory=list)
+    _memory: list[ConversationTurn] = field(default_factory=list)
 
     # ---- Public API -----------------------------------------------------
 
-    def generate_biography(self, person_id: int, style: str = "standard", max_tokens: Optional[int] = None) -> LLMResult:
+    def generate_biography(
+        self, person_id: int, style: str = "standard", max_tokens: int | None = None
+    ) -> LLMResult:
         """Generate a narrative biography using the configured prompts/LLM."""
 
         context = self._build_biography_context(person_id, style)
@@ -74,7 +75,7 @@ class GenealogyAgent:
     def analyze_data_quality(self) -> QualityReport:
         """Run the full data-quality validator and return the structured report."""
 
-        def _run_validator(db: Optional[RMDatabase]) -> QualityReport:
+        def _run_validator(db: RMDatabase | None) -> QualityReport:
             if db is None:
                 validator = self.validator_factory(None)  # type: ignore[arg-type]
             else:
@@ -83,7 +84,9 @@ class GenealogyAgent:
 
         return self._with_database(_run_validator)
 
-    def ask(self, question: str, person_id: Optional[int] = None, max_tokens: Optional[int] = None) -> LLMResult:
+    def ask(
+        self, question: str, person_id: int | None = None, max_tokens: int | None = None
+    ) -> LLMResult:
         """Answer ad-hoc questions with light context and persistent memory."""
 
         context = self._build_qa_context(question, person_id)
@@ -92,7 +95,7 @@ class GenealogyAgent:
         self._memory.append(ConversationTurn(question=question, answer=result.text))
         return result
 
-    def generate_timeline_summary(self, person_id: int, max_tokens: Optional[int] = None) -> LLMResult:
+    def generate_timeline_summary(self, person_id: int, max_tokens: int | None = None) -> LLMResult:
         """Create a timeline-oriented summary for timeline export preparation."""
 
         context = self._build_timeline_context(person_id)
@@ -106,8 +109,8 @@ class GenealogyAgent:
 
     # ---- Context Builders -----------------------------------------------
 
-    def _build_biography_context(self, person_id: int, style: str) -> Dict[str, str]:
-        def _builder(db: Optional[RMDatabase]) -> Dict[str, str]:
+    def _build_biography_context(self, person_id: int, style: str) -> dict[str, str]:
+        def _builder(db: RMDatabase | None) -> dict[str, str]:
             query = self._make_query_service(db)
             person = self._row_to_dict(query.get_person_with_primary_name(person_id))
             if person is None:
@@ -125,9 +128,13 @@ class GenealogyAgent:
             relationship_notes = self._format_ancestors(ancestors)
             family_overview = self._format_family_overview(spouses, children, siblings)
             early_life_overview = self._format_early_life(person, parents, siblings, life_span)
-            family_loss_notes = self._format_family_losses(life_span, parents, spouses, siblings, children)
+            family_loss_notes = self._format_family_losses(
+                life_span, parents, spouses, siblings, children
+            )
             sibling_lines = self._format_siblings(siblings)
-            sibling_summary = "\n".join(sibling_lines) if sibling_lines else "No sibling records available."
+            sibling_summary = (
+                "\n".join(sibling_lines) if sibling_lines else "No sibling records available."
+            )
 
             return {
                 "person_summary": person_summary,
@@ -142,9 +149,9 @@ class GenealogyAgent:
 
         return self._with_database(_builder)
 
-    def _build_qa_context(self, question: str, person_id: Optional[int]) -> Dict[str, str]:
-        def _builder(db: Optional[RMDatabase]) -> Dict[str, str]:
-            snippets: List[str] = []
+    def _build_qa_context(self, question: str, person_id: int | None) -> dict[str, str]:
+        def _builder(db: RMDatabase | None) -> dict[str, str]:
+            snippets: list[str] = []
             query = self._make_query_service(db)
 
             if person_id is not None:
@@ -161,7 +168,9 @@ class GenealogyAgent:
                     snippets.append(self._format_family_overview(spouses, children, siblings))
                     snippets.append(self._format_early_life(person, parents, siblings, life_span))
 
-            history_snippets = [f"Q: {turn.question}\nA: {turn.answer}" for turn in self._memory[-3:]]
+            history_snippets = [
+                f"Q: {turn.question}\nA: {turn.answer}" for turn in self._memory[-3:]
+            ]
             snippets.extend(history_snippets)
 
             return {
@@ -171,8 +180,8 @@ class GenealogyAgent:
 
         return self._with_database(_builder)
 
-    def _build_timeline_context(self, person_id: int) -> Dict[str, str]:
-        def _builder(db: Optional[RMDatabase]) -> Dict[str, str]:
+    def _build_timeline_context(self, person_id: int) -> dict[str, str]:
+        def _builder(db: RMDatabase | None) -> dict[str, str]:
             query = self._make_query_service(db)
             person = self._row_to_dict(query.get_person_with_primary_name(person_id))
             events = self._rows_to_dicts(query.get_person_events(person_id))
@@ -185,25 +194,27 @@ class GenealogyAgent:
 
     # ---- Helper Methods -------------------------------------------------
 
-    def _invoke_llm(self, prompt: str, max_tokens: Optional[int] = None) -> LLMResult:
+    def _invoke_llm(self, prompt: str, max_tokens: int | None = None) -> LLMResult:
         kwargs = {}
         if max_tokens is not None:
             kwargs["max_tokens"] = max_tokens
         return self.llm_provider.generate(prompt, **kwargs)
 
-    def _with_database(self, fn: Callable[[Optional[RMDatabase]], Dict[str, str] | QualityReport]) -> Dict[str, str] | QualityReport:
+    def _with_database(
+        self, fn: Callable[[RMDatabase | None], dict[str, str] | QualityReport]
+    ) -> dict[str, str] | QualityReport:
         if self.db_path is None:
             return fn(None)
         with RMDatabase(self.db_path, extension_path=self.extension_path) as db:
             return fn(db)
 
-    def _make_query_service(self, db: Optional[RMDatabase]) -> QueryService:
+    def _make_query_service(self, db: RMDatabase | None) -> QueryService:
         if db is None:
             return self.query_service_factory(None)  # type: ignore[arg-type]
         return self.query_service_factory(db)
 
     @staticmethod
-    def _format_person_name(row: Optional[Dict[str, str]]):
+    def _format_person_name(row: dict[str, str] | None):
         if not row:
             return "Unknown Person"
         given = row.get("Given", "").strip()
@@ -284,8 +295,8 @@ class GenealogyAgent:
             sections.append("Siblings:\n" + "\n".join(sibling_lines))
         return "\n\n".join(sections) if sections else "No marriage or child data available."
 
-    def _format_spouses(self, spouses) -> List[str]:
-        lines: List[str] = []
+    def _format_spouses(self, spouses) -> list[str]:
+        lines: list[str] = []
         if not spouses:
             return lines
         for spouse in spouses:
@@ -313,8 +324,8 @@ class GenealogyAgent:
             lines.append(entry)
         return lines
 
-    def _format_children(self, children) -> List[str]:
-        lines: List[str] = []
+    def _format_children(self, children) -> list[str]:
+        lines: list[str] = []
         if not children:
             return lines
         for child in children:
@@ -341,8 +352,8 @@ class GenealogyAgent:
             lines.append(entry)
         return lines
 
-    def _format_siblings(self, siblings) -> List[str]:
-        lines: List[str] = []
+    def _format_siblings(self, siblings) -> list[str]:
+        lines: list[str] = []
         if not siblings:
             return lines
         for sibling in siblings:
@@ -364,7 +375,9 @@ class GenealogyAgent:
             lines.append(entry)
         return lines
 
-    def _format_early_life(self, person, parents, siblings, life_span: Dict[str, Optional[int]]) -> str:
+    def _format_early_life(
+        self, person, parents, siblings, life_span: dict[str, int | None]
+    ) -> str:
         person_name = self._format_person_name(person)
         birth_year = life_span.get("birth_year")
         parent_bits = []
@@ -415,7 +428,7 @@ class GenealogyAgent:
         losses = []
         birth_year = life_span.get("birth_year")
         death_year = life_span.get("death_year")
-        relatives: List[Tuple[str, Dict[str, str]]] = []
+        relatives: list[tuple[str, dict[str, str]]] = []
 
         if parents:
             father = {
@@ -448,9 +461,15 @@ class GenealogyAgent:
             name = self._format_person_name(data)
             losses.append(f"- {name} ({relation}) died in {death_year_value}.")
 
-        return "\n".join(losses) if losses else "No recorded family deaths occurred during the subject's lifetime."
+        return (
+            "\n".join(losses)
+            if losses
+            else "No recorded family deaths occurred during the subject's lifetime."
+        )
 
-    def _calculate_parent_age(self, parents, birth_year_key: str, child_birth_year: Optional[int]) -> Optional[int]:
+    def _calculate_parent_age(
+        self, parents, birth_year_key: str, child_birth_year: int | None
+    ) -> int | None:
         if not parents or child_birth_year is None:
             return None
         birth_year = parents.get(birth_year_key)
@@ -463,14 +482,16 @@ class GenealogyAgent:
             return ""
         return f"{row.get(given_key, '').strip()} {row.get(surname_key, '').strip()}".strip()
 
-    def _determine_birth_order(self, person, siblings, life_span) -> Optional[int]:
-        entries: List[Tuple[Tuple[int, int], int]] = []
+    def _determine_birth_order(self, person, siblings, life_span) -> int | None:
+        entries: list[tuple[tuple[int, int], int]] = []
         subject_id = person.get("PersonID")
         subject_sort = life_span.get("birth_sort")
         subject_year = life_span.get("birth_year")
         entries.append((self._sort_key(subject_sort, subject_year), subject_id or 0))
         for sibling in siblings or []:
-            sort_key = self._sort_key(self._extract_sort_value(sibling.get("BirthSortDate")), sibling.get("BirthYear"))
+            sort_key = self._sort_key(
+                self._extract_sort_value(sibling.get("BirthSortDate")), sibling.get("BirthYear")
+            )
             entries.append((sort_key, sibling.get("PersonID") or 0))
         entries.sort(key=lambda item: (item[0], item[1]))
         for idx, (_, pid) in enumerate(entries, start=1):
@@ -479,24 +500,26 @@ class GenealogyAgent:
         return None
 
     def _is_older_than_subject(self, sibling, life_span) -> bool:
-        sibling_key = self._sort_key(self._extract_sort_value(sibling.get("BirthSortDate")), sibling.get("BirthYear"))
+        sibling_key = self._sort_key(
+            self._extract_sort_value(sibling.get("BirthSortDate")), sibling.get("BirthYear")
+        )
         subject_key = self._sort_key(life_span.get("birth_sort"), life_span.get("birth_year"))
         return sibling_key < subject_key
 
     @staticmethod
-    def _sort_key(sort_value: Optional[int], year: Optional[int]) -> Tuple[int, int]:
+    def _sort_key(sort_value: int | None, year: int | None) -> tuple[int, int]:
         sentinel = 9223372036854775807
         return (
             sort_value if sort_value is not None else sentinel,
             year if year is not None else sentinel,
         )
 
-    def _extract_sort_value(self, value: Optional[int]) -> Optional[int]:
+    def _extract_sort_value(self, value: int | None) -> int | None:
         if value in (None, 0):
             return None
         return value
 
-    def _derive_life_span(self, person, events) -> Dict[str, Optional[int]]:
+    def _derive_life_span(self, person, events) -> dict[str, int | None]:
         birth_year = person.get("BirthYear")
         death_year = person.get("DeathYear")
         birth_sort = None
@@ -517,7 +540,7 @@ class GenealogyAgent:
             "death_sort": death_sort,
         }
 
-    def _fetch_siblings(self, query: QueryService, parents: Optional[Dict[str, str]], person_id: int):
+    def _fetch_siblings(self, query: QueryService, parents: dict[str, str] | None, person_id: int):
         if not parents:
             return []
         siblings = []
@@ -533,10 +556,14 @@ class GenealogyAgent:
                         continue
                     seen.add(pid)
                     siblings.append(row_dict)
-        siblings.sort(key=lambda row: self._sort_key(self._extract_sort_value(row.get("BirthSortDate")), row.get("BirthYear")))
+        siblings.sort(
+            key=lambda row: self._sort_key(
+                self._extract_sort_value(row.get("BirthSortDate")), row.get("BirthYear")
+            )
+        )
         return siblings
 
-    def _parse_year_from_row(self, row, year_key: str, date_key: str) -> Optional[int]:
+    def _parse_year_from_row(self, row, year_key: str, date_key: str) -> int | None:
         if not row:
             return None
         year = row.get(year_key)
@@ -544,7 +571,7 @@ class GenealogyAgent:
             return year
         return self._parse_year_from_rm_date(row.get(date_key))
 
-    def _format_death_detail(self, row) -> Optional[str]:
+    def _format_death_detail(self, row) -> str | None:
         year = row.get("DeathYear")
         if year:
             return f"died {year}"
@@ -560,7 +587,7 @@ class GenealogyAgent:
         return ", ".join(details)
 
     @staticmethod
-    def _format_rm_date(value: Optional[str]) -> Optional[str]:
+    def _format_rm_date(value: str | None) -> str | None:
         if not value:
             return None
         normalized = value.strip()
@@ -576,7 +603,7 @@ class GenealogyAgent:
                 return display
         return normalized
 
-    def _parse_year_from_rm_date(self, value: Optional[str]) -> Optional[int]:
+    def _parse_year_from_rm_date(self, value: str | None) -> int | None:
         if not value:
             return None
         normalized = value.strip()
@@ -592,7 +619,7 @@ class GenealogyAgent:
         return self._extract_year_from_string(normalized)
 
     @staticmethod
-    def _extract_year_from_string(value: str) -> Optional[int]:
+    def _extract_year_from_string(value: str) -> int | None:
         digits = "".join(ch if ch.isdigit() else " " for ch in value)
         for part in digits.split():
             if len(part) == 4:
@@ -602,7 +629,7 @@ class GenealogyAgent:
                     continue
         return None
 
-    def _ordinal(self, value: Optional[int]) -> str:
+    def _ordinal(self, value: int | None) -> str:
         if value is None:
             return ""
         suffix = "th"

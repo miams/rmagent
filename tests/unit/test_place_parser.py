@@ -9,19 +9,16 @@ Tests place name parsing for:
 - Validation
 """
 
-import pytest
-
 from rmagent.rmlib.parsers.place_parser import (
-    parse_place_name,
+    PlaceType,
+    convert_coordinates,
+    format_place_medium,
+    format_place_short,
     get_place_level,
     get_place_short,
-    format_place_short,
-    format_place_medium,
-    convert_coordinates,
+    parse_place_name,
     reverse_place_name,
     validate_place_format,
-    PlaceType,
-    ParsedPlace,
 )
 
 
@@ -56,7 +53,7 @@ class TestParsePlaceName:
         assert place.count == 3
         assert place.city == "Abbeville"
         assert place.county == "South Carolina"  # Actually state, but stored as level 1
-        assert place.state == "United States"    # Actually country, stored as level 2
+        assert place.state == "United States"  # Actually country, stored as level 2
         assert place.country is None
         assert place.is_standard_hierarchy is False
 
@@ -175,7 +172,9 @@ class TestGetPlaceLevel:
 
     def test_get_level_3_country(self):
         """Test getting level 3 (country)."""
-        assert get_place_level("Baltimore, Baltimore, Maryland, United States", 3) == "United States"
+        assert (
+            get_place_level("Baltimore, Baltimore, Maryland, United States", 3) == "United States"
+        )
 
     def test_get_level_out_of_range(self):
         """Test getting level that doesn't exist."""
@@ -193,7 +192,10 @@ class TestGetPlaceShort:
 
     def test_get_short_us_place_2_levels(self):
         """Test short form for US place (skips county)."""
-        assert get_place_short("Baltimore, Baltimore, Maryland, United States", 2) == "Baltimore, Maryland"
+        assert (
+            get_place_short("Baltimore, Baltimore, Maryland, United States", 2)
+            == "Baltimore, Maryland"
+        )
 
     def test_get_short_international_place_2_levels(self):
         """Test short form for international place."""
@@ -215,12 +217,18 @@ class TestFormatPlaceShort:
 
     def test_format_us_4_level(self):
         """Test formatting US 4-level place."""
-        assert format_place_short("Baltimore, Baltimore, Maryland, United States") == "Baltimore, Maryland"
+        assert (
+            format_place_short("Baltimore, Baltimore, Maryland, United States")
+            == "Baltimore, Maryland"
+        )
 
     def test_format_us_3_level(self):
         """Test formatting US 3-level place."""
         # 3-level place: City, State, Country - format returns City, Country (level 0 and 2)
-        assert format_place_short("Abbeville, South Carolina, United States") == "Abbeville, United States"
+        assert (
+            format_place_short("Abbeville, South Carolina, United States")
+            == "Abbeville, United States"
+        )
 
     def test_format_international_4_level(self):
         """Test formatting international 4-level place."""
@@ -241,11 +249,17 @@ class TestFormatPlaceMedium:
 
     def test_format_medium_4_level(self):
         """Test medium format for 4-level place."""
-        assert format_place_medium("Baltimore, Baltimore, Maryland, United States") == "Baltimore, Baltimore, Maryland"
+        assert (
+            format_place_medium("Baltimore, Baltimore, Maryland, United States")
+            == "Baltimore, Baltimore, Maryland"
+        )
 
     def test_format_medium_3_level(self):
         """Test medium format for 3-level place."""
-        assert format_place_medium("Abbeville, South Carolina, United States") == "Abbeville, South Carolina, United States"
+        assert (
+            format_place_medium("Abbeville, South Carolina, United States")
+            == "Abbeville, South Carolina, United States"
+        )
 
     def test_format_medium_1_level(self):
         """Test medium format for single-level place."""

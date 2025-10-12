@@ -12,34 +12,35 @@ Reference:
 - RM11_BLOB_SourceTemplateFieldDefs.md
 """
 
-import xml.etree.ElementTree as ET
-from typing import Dict, List, Optional
-from dataclasses import dataclass
 import logging
+import xml.etree.ElementTree as ET
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
 
 # BOM marker for UTF-8 encoded BLOBs
-UTF8_BOM = b'\xef\xbb\xbf'
+UTF8_BOM = b"\xef\xbb\xbf"
 
 
 @dataclass
 class TemplateField:
     """Represents a field definition in a source template."""
+
     name: str
     field_type: str  # Text, Name, Date, Place
-    hint: Optional[str] = None
-    long_hint: Optional[str] = None
+    hint: str | None = None
+    long_hint: str | None = None
     citation_field: bool = False  # True if stored in CitationTable.Fields
 
 
 class BLOBParseError(Exception):
     """Raised when BLOB data cannot be parsed."""
+
     pass
 
 
-def parse_source_fields(blob_data: Optional[bytes]) -> Dict[str, str]:
+def parse_source_fields(blob_data: bytes | None) -> dict[str, str]:
     """
     Parse SourceTable.Fields BLOB to extract field name-value pairs.
 
@@ -71,13 +72,13 @@ def parse_source_fields(blob_data: Optional[bytes]) -> Dict[str, str]:
 
         # Extract field name-value pairs
         fields = {}
-        for field in root.findall('.//Field'):
-            name_elem = field.find('Name')
-            value_elem = field.find('Value')
+        for field in root.findall(".//Field"):
+            name_elem = field.find("Name")
+            value_elem = field.find("Value")
 
             if name_elem is not None and value_elem is not None:
-                name = name_elem.text or ''
-                value = value_elem.text or ''
+                name = name_elem.text or ""
+                value = value_elem.text or ""
                 fields[name] = value
 
         return fields
@@ -90,7 +91,7 @@ def parse_source_fields(blob_data: Optional[bytes]) -> Dict[str, str]:
         raise BLOBParseError(f"Error parsing SourceTable.Fields: {e}") from e
 
 
-def parse_citation_fields(blob_data: Optional[bytes]) -> Dict[str, str]:
+def parse_citation_fields(blob_data: bytes | None) -> dict[str, str]:
     """
     Parse CitationTable.Fields BLOB to extract field name-value pairs.
 
@@ -117,7 +118,7 @@ def parse_citation_fields(blob_data: Optional[bytes]) -> Dict[str, str]:
     return parse_source_fields(blob_data)
 
 
-def parse_template_field_defs(blob_data: Optional[bytes]) -> List[TemplateField]:
+def parse_template_field_defs(blob_data: bytes | None) -> list[TemplateField]:
     """
     Parse SourceTemplateTable.FieldDefs BLOB to extract template field definitions.
 
@@ -151,33 +152,37 @@ def parse_template_field_defs(blob_data: Optional[bytes]) -> List[TemplateField]
 
         # Extract field definitions
         field_defs = []
-        for field in root.findall('.//Field'):
+        for field in root.findall(".//Field"):
             # Required fields
-            name_elem = field.find('Name')
-            type_elem = field.find('Type')
+            name_elem = field.find("Name")
+            type_elem = field.find("Type")
 
             if name_elem is None or type_elem is None:
                 continue
 
-            name = name_elem.text or ''
-            field_type = type_elem.text or 'Text'
+            name = name_elem.text or ""
+            field_type = type_elem.text or "Text"
 
             # Optional fields
-            hint_elem = field.find('Hint')
-            long_hint_elem = field.find('LongHint')
-            citation_field_elem = field.find('CitationField')
+            hint_elem = field.find("Hint")
+            long_hint_elem = field.find("LongHint")
+            citation_field_elem = field.find("CitationField")
 
             hint = hint_elem.text if hint_elem is not None else None
             long_hint = long_hint_elem.text if long_hint_elem is not None else None
-            citation_field = citation_field_elem.text == 'True' if citation_field_elem is not None else False
+            citation_field = (
+                citation_field_elem.text == "True" if citation_field_elem is not None else False
+            )
 
-            field_defs.append(TemplateField(
-                name=name,
-                field_type=field_type,
-                hint=hint,
-                long_hint=long_hint,
-                citation_field=citation_field
-            ))
+            field_defs.append(
+                TemplateField(
+                    name=name,
+                    field_type=field_type,
+                    hint=hint,
+                    long_hint=long_hint,
+                    citation_field=citation_field,
+                )
+            )
 
         return field_defs
 
@@ -204,12 +209,12 @@ def _decode_blob(blob_data: bytes) -> str:
     """
     # Check for UTF-8 BOM and use utf-8-sig to handle it
     if blob_data.startswith(UTF8_BOM):
-        return blob_data.decode('utf-8-sig')
+        return blob_data.decode("utf-8-sig")
     else:
-        return blob_data.decode('utf-8')
+        return blob_data.decode("utf-8")
 
 
-def has_blob_data(blob_data: Optional[bytes]) -> bool:
+def has_blob_data(blob_data: bytes | None) -> bool:
     """
     Check if BLOB data exists and is not empty.
 
@@ -222,7 +227,7 @@ def has_blob_data(blob_data: Optional[bytes]) -> bool:
     return blob_data is not None and len(blob_data) > 0
 
 
-def is_freeform_source(fields: Dict[str, str]) -> bool:
+def is_freeform_source(fields: dict[str, str]) -> bool:
     """
     Check if source fields represent a free-form source (TemplateID=0).
 
@@ -238,14 +243,14 @@ def is_freeform_source(fields: Dict[str, str]) -> bool:
         True if this appears to be a free-form source
     """
     return (
-        len(fields) == 3 and
-        'Footnote' in fields and
-        'ShortFootnote' in fields and
-        'Bibliography' in fields
+        len(fields) == 3
+        and "Footnote" in fields
+        and "ShortFootnote" in fields
+        and "Bibliography" in fields
     )
 
 
-def get_citation_level_fields(template_fields: List[TemplateField]) -> List[str]:
+def get_citation_level_fields(template_fields: list[TemplateField]) -> list[str]:
     """
     Get list of field names that are stored in CitationTable.Fields.
 
@@ -258,7 +263,7 @@ def get_citation_level_fields(template_fields: List[TemplateField]) -> List[str]
     return [f.name for f in template_fields if f.citation_field]
 
 
-def get_source_level_fields(template_fields: List[TemplateField]) -> List[str]:
+def get_source_level_fields(template_fields: list[TemplateField]) -> list[str]:
     """
     Get list of field names that are stored in SourceTable.Fields.
 

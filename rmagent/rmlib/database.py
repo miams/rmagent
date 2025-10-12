@@ -12,23 +12,26 @@ Example:
 import logging
 import sqlite3
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 class DatabaseError(Exception):
     """Base exception for database-related errors."""
+
     pass
 
 
 class DatabaseNotFoundError(DatabaseError):
     """Raised when database file does not exist."""
+
     pass
 
 
 class ExtensionLoadError(DatabaseError):
     """Raised when SQLite extension cannot be loaded."""
+
     pass
 
 
@@ -59,24 +62,22 @@ class RMDatabase:
 
     def __init__(
         self,
-        db_path: Union[str, Path],
-        extension_path: Union[str, Path] = "./sqlite-extension/icu.dylib",
-        row_factory: Optional[Any] = sqlite3.Row
+        db_path: str | Path,
+        extension_path: str | Path = "./sqlite-extension/icu.dylib",
+        row_factory: Any | None = sqlite3.Row,
     ):
         self.db_path = Path(db_path)
         self.extension_path = Path(extension_path)
         self.row_factory = row_factory
-        self._conn: Optional[sqlite3.Connection] = None
+        self._conn: sqlite3.Connection | None = None
 
         # Validate database exists
         if not self.db_path.exists():
-            raise DatabaseNotFoundError(
-                f"Database file not found: {self.db_path}"
-            )
+            raise DatabaseNotFoundError(f"Database file not found: {self.db_path}")
 
         logger.debug(f"Initialized RMDatabase for {self.db_path}")
 
-    def __enter__(self) -> 'RMDatabase':
+    def __enter__(self) -> "RMDatabase":
         """Enter context manager - establish database connection."""
         self.connect()
         return self
@@ -111,9 +112,7 @@ class RMDatabase:
         except Exception as e:
             self._conn.close()
             self._conn = None
-            raise ExtensionLoadError(
-                f"Failed to load RMNOCASE collation: {e}"
-            ) from e
+            raise ExtensionLoadError(f"Failed to load RMNOCASE collation: {e}") from e
 
         logger.info("Database connection established with RMNOCASE support")
 
@@ -129,9 +128,7 @@ class RMDatabase:
 
         # Check if extension file exists
         if not self.extension_path.exists():
-            raise ExtensionLoadError(
-                f"ICU extension not found: {self.extension_path}"
-            )
+            raise ExtensionLoadError(f"ICU extension not found: {self.extension_path}")
 
         # Enable extension loading
         self._conn.enable_load_extension(True)
@@ -176,10 +173,12 @@ class RMDatabase:
             DatabaseError: If no active connection
         """
         if self._conn is None:
-            raise DatabaseError("No active connection - use 'with RMDatabase(...)' or call connect()")
+            raise DatabaseError(
+                "No active connection - use 'with RMDatabase(...)' or call connect()"
+            )
         return self._conn
 
-    def execute(self, query: str, params: Optional[Tuple] = None) -> sqlite3.Cursor:
+    def execute(self, query: str, params: tuple | None = None) -> sqlite3.Cursor:
         """
         Execute a SQL query.
 
@@ -202,7 +201,7 @@ class RMDatabase:
             cursor.execute(query)
         return cursor
 
-    def query(self, query: str, params: Optional[Tuple] = None) -> List[sqlite3.Row]:
+    def query(self, query: str, params: tuple | None = None) -> list[sqlite3.Row]:
         """
         Execute query and return all results.
 
@@ -218,7 +217,7 @@ class RMDatabase:
         logger.debug(f"Query returned {len(results)} rows")
         return results
 
-    def query_one(self, query: str, params: Optional[Tuple] = None) -> Optional[sqlite3.Row]:
+    def query_one(self, query: str, params: tuple | None = None) -> sqlite3.Row | None:
         """
         Execute query and return single result.
 
@@ -234,7 +233,7 @@ class RMDatabase:
         logger.debug(f"Query returned {'1 row' if result else 'no results'}")
         return result
 
-    def query_value(self, query: str, params: Optional[Tuple] = None) -> Any:
+    def query_value(self, query: str, params: tuple | None = None) -> Any:
         """
         Execute query and return single value from first column of first row.
 

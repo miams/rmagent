@@ -5,9 +5,7 @@ Tests for rmagent.agent.genealogy_agent.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict, List
-
-import pytest
+from typing import Any
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 import sys
@@ -23,7 +21,7 @@ from rmagent.rmlib.quality import QualityIssue, QualityReport, QualitySeverity
 class StubLLMProvider(LLMProvider):
     def __init__(self):
         super().__init__("stub", retry_config=RetryConfig(max_attempts=1))
-        self.prompts: List[str] = []
+        self.prompts: list[str] = []
 
     def _invoke(self, prompt: str, **kwargs) -> LLMResult:
         self.prompts.append(prompt)
@@ -36,14 +34,46 @@ class StubLLMProvider(LLMProvider):
 
 class StubQueryService:
     def __init__(self):
-        self.person = {"PersonID": 1, "Given": "Michael", "Surname": "Iams", "BirthYear": 1968, "DeathYear": None}
+        self.person = {
+            "PersonID": 1,
+            "Given": "Michael",
+            "Surname": "Iams",
+            "BirthYear": 1968,
+            "DeathYear": None,
+        }
         self.events = [
-            {"EventID": 1, "EventType": "Birth", "Date": "1968-04-30", "Place": "Phoenix, Arizona", "Details": "", "SortDate": 19680430},
-            {"EventID": 2, "EventType": "Education", "Date": "1988", "Place": "University of Arizona", "Details": "Graduated", "SortDate": 19880000},
+            {
+                "EventID": 1,
+                "EventType": "Birth",
+                "Date": "1968-04-30",
+                "Place": "Phoenix, Arizona",
+                "Details": "",
+                "SortDate": 19680430,
+            },
+            {
+                "EventID": 2,
+                "EventType": "Education",
+                "Date": "1988",
+                "Place": "University of Arizona",
+                "Details": "Graduated",
+                "SortDate": 19880000,
+            },
         ]
         self.ancestors = [
-            {"PersonID": 1541, "Surname": "Iams", "Given": "Donald", "Relationship": "Father", "Generation": 1},
-            {"PersonID": 1430, "Surname": "Shepherd", "Given": "Gail", "Relationship": "Mother", "Generation": 1},
+            {
+                "PersonID": 1541,
+                "Surname": "Iams",
+                "Given": "Donald",
+                "Relationship": "Father",
+                "Generation": 1,
+            },
+            {
+                "PersonID": 1430,
+                "Surname": "Shepherd",
+                "Given": "Gail",
+                "Relationship": "Mother",
+                "Generation": 1,
+            },
         ]
         self.parents = {
             "FatherID": 1541,

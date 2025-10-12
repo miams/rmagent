@@ -8,11 +8,11 @@ to be dependency-injected for ease of testing.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Dict, Optional
 
-from rmagent.rmlib.queries import QueryService
 from rmagent.rmlib.quality import DataQualityValidator
+from rmagent.rmlib.queries import QueryService
 
 
 class ToolExecutionError(RuntimeError):
@@ -44,7 +44,7 @@ class QueryPersonTool(BaseTool):
         )
         self.query_service = query_service
 
-    def run(self, person_id: int) -> Dict[str, Optional[str]]:
+    def run(self, person_id: int) -> dict[str, str | None]:
         row = self.query_service.get_person_with_primary_name(person_id)
         if row is None:
             raise ToolExecutionError(f"Person {person_id} not found.")
@@ -78,7 +78,10 @@ class GetAncestorsTool(BaseTool):
         self.query_service = query_service
 
     def run(self, person_id: int, generations: int = 3):
-        return [dict(row) for row in self.query_service.get_direct_ancestors(person_id, generations=generations)]
+        return [
+            dict(row)
+            for row in self.query_service.get_direct_ancestors(person_id, generations=generations)
+        ]
 
 
 @dataclass
@@ -92,12 +95,18 @@ class FindRelationshipTool(BaseTool):
         )
         self.query_service = query_service
 
-    def run(self, person_a: int, person_b: int) -> Dict[str, Optional[str]]:
+    def run(self, person_a: int, person_b: int) -> dict[str, str | None]:
         if person_a == person_b:
             return {"relationship": "Same person"}
 
-        ancestors_a = {row["PersonID"]: row for row in self.query_service.get_direct_ancestors(person_a, generations=5)}
-        ancestors_b = {row["PersonID"]: row for row in self.query_service.get_direct_ancestors(person_b, generations=5)}
+        ancestors_a = {
+            row["PersonID"]: row
+            for row in self.query_service.get_direct_ancestors(person_a, generations=5)
+        }
+        ancestors_b = {
+            row["PersonID"]: row
+            for row in self.query_service.get_direct_ancestors(person_b, generations=5)
+        }
 
         shared = set(ancestors_a).intersection(ancestors_b)
         if not shared:
@@ -127,7 +136,10 @@ class ValidateDataTool(BaseTool):
         validator = self.validator_factory()
         report = validator.run_all_checks()
         return {
-            "totals_by_severity": {k.value if hasattr(k, "value") else str(k): v for k, v in report.totals_by_severity.items()},
+            "totals_by_severity": {
+                k.value if hasattr(k, "value") else str(k): v
+                for k, v in report.totals_by_severity.items()
+            },
             "totals_by_category": report.totals_by_category,
             "issue_count": report.summary.get("issue_total", 0),
         }
@@ -144,7 +156,7 @@ class SearchDatabaseTool(BaseTool):
         )
         self.query_service = query_service
 
-    def run(self, surname: Optional[str] = None, given: Optional[str] = None, limit: int = 10):
+    def run(self, surname: str | None = None, given: str | None = None, limit: int = 10):
         if surname is None and given is None:
             raise ToolExecutionError("Provide at least a surname or given name.")
         rows = self.query_service.search_primary_names(surname=surname, given=given, limit=limit)

@@ -11,17 +11,15 @@ Tests the RootsMagic 24-character date format parser for:
 - Datetime conversion
 """
 
-import pytest
 from datetime import datetime
 
 from rmagent.rmlib.parsers.date_parser import (
-    parse_rm_date,
-    is_unknown_date,
-    RMDate,
-    DateType,
+    UNKNOWN_SORT_DATE,
     DateModifier,
     DateQualifier,
-    UNKNOWN_SORT_DATE,
+    DateType,
+    is_unknown_date,
+    parse_rm_date,
 )
 
 
