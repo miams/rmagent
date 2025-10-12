@@ -372,25 +372,33 @@ uv run pytest --cov=rmagent --cov-report=html
 
 ## Documentation
 
-### User Documentation
+**📚 Complete Documentation Index:** [docs/README.md](docs/README.md)
 
-- **[User Guide (PDF)](docs/RMAgent_User_Guide.pdf)** - Complete user guide with configuration, usage examples, and prompt customization
-- **[User Guide (Markdown)](docs/USER_GUIDE.md)** - Same content in Markdown format
-- **[MVP Checkpoint](docs/MVP_CHECKPOINT.md)** - Milestone 2 verification report
+### For New Users
 
-### Technical Documentation
+Start here to get up and running:
 
-Comprehensive technical documentation is available in the `data_reference/` directory:
+1. **[INSTALL.md](INSTALL.md)** - Installation guide (macOS, Linux, Windows/WSL2)
+2. **[CONFIGURATION.md](CONFIGURATION.md)** - Configuration, LLM providers, prompt customization
+3. **[USAGE.md](USAGE.md)** - Complete CLI reference with 50+ examples
+4. **[FAQ.md](FAQ.md)** - Common questions and troubleshooting
 
-- **RM11_Schema_Reference.md** - Complete database schema
-- **RM11_Query_Patterns.md** - Optimized SQL query patterns
-- **RM11_Biography_Best_Practices.md** - Biography writing guidelines
-- **RM11_Data_Quality_Rules.md** - All 24 validation rules
-- **RM11_Documentation_Index.md** - Master index of all 18 docs
+**Comprehensive Guide:** [docs/USER_GUIDE.md](docs/USER_GUIDE.md) (31KB, all-in-one)
 
-### Development Documentation
+### For Developers
 
-- **[AI Agent TODO](docs/AI_AGENT_TODO.md)** - Complete development roadmap and progress tracking
+Start here to contribute or extend RMAgent:
+
+1. **[DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)** - Architecture, design patterns, API reference
+2. **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution workflow and coding standards
+3. **[TESTING.md](TESTING.md)** - Testing guide (279 tests, coverage analysis)
+4. **[CHANGELOG.md](CHANGELOG.md)** - Complete version history
+
+### Additional Documentation
+
+- **[AGENTS.md](AGENTS.md)** - Agent design patterns
+- **[data_reference/](data_reference/)** - RootsMagic 11 schema (18 reference docs)
+- **[docs/](docs/)** - Project documentation and completion reports
 
 ## Status
 

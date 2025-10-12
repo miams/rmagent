@@ -1,8 +1,8 @@
 ---
 title: "RMAgent User Guide"
 subtitle: "AI-Powered Genealogy Assistant for RootsMagic"
-version: "0.1.0"
-date: "October 2025"
+version: "0.2.0"
+date: "October 12, 2025"
 author: "RMAgent Project"
 ---
 
@@ -777,17 +777,26 @@ uv run rmagent search --name "Jones" --place "Virginia" --limit 20
 
 # Customizing Prompts
 
-RMAgent uses customizable prompts for AI interactions. You can modify these to change the style, focus, or structure of generated content.
+RMAgent allows you to customize AI prompts for different workflows **without modifying code**. Prompts are stored as YAML files with support for provider-specific variants.
 
 ## Prompt System Overview
 
-Prompts are stored in `rmagent/agent/prompts.py` and use a registry system with versioning.
+**Default Prompts:** Located in `config/prompts/`
+- `biography.yaml` - Biography generation
+- `quality.yaml` - Data quality analysis
+- `qa.yaml` - Q&A conversations
+- `timeline.yaml` - Timeline synthesis
 
-**Available Prompts:**
-- `biography` - Biography generation
-- `quality` - Data quality analysis
-- `qna` - Question & answer interactions
-- `timeline` - Timeline narrative generation
+**Custom Prompts:** Located in `config/prompts/custom/` (optional, not tracked in git)
+- Override any default prompt
+- Takes precedence over defaults
+- Same YAML format
+
+**Provider-Specific Variants:**
+Each prompt can include optimizations for different LLM providers:
+- **Anthropic Claude:** Detailed instructions, academic tone, complex reasoning
+- **OpenAI GPT:** Direct instructions, efficient phrasing
+- **Ollama (local):** Simpler prompts, concrete examples
 
 ## Biography Prompts
 
@@ -795,203 +804,188 @@ The biography prompt controls how AI generates biographical narratives.
 
 ### Location
 
-File: `rmagent/agent/prompts.py`
+File: `config/prompts/biography.yaml`
 
-Function: `_get_biography_prompt()`
+### Creating a Custom Biography Prompt
 
-### Default Biography Prompt Structure
+**Step 1: Create custom directory**
 
-```python
-def _get_biography_prompt():
-    return """You are a professional genealogist writing biographical narratives.
-
-Context provided:
-- Person summary (name, dates, key facts)
-- Timeline of life events (chronologically ordered)
-- Relationship notes (family context)
-- Source notes (documentation quality)
-
-INSTRUCTIONS:
-
-1. Write in third person, past tense
-2. Use formal but accessible language
-3. Include dates and places when known
-4. Acknowledge uncertainty appropriately
-5. Cite sources naturally in narrative
-6. Follow 9-section structure:
-   - Introduction
-   - Early Life & Family Background
-   - Education & Training
-   - Career & Accomplishments
-   - Marriage & Family
-   - Later Life & Activities
-   - Death & Burial
-   - Legacy & Significance
-   - Sources & Notes
-
-TONE: Professional, objective, compassionate
-
-UNCERTAINTY HANDLING:
-- "likely" - moderate confidence
-- "probably" - lower confidence
-- "possibly" - lowest confidence
-- "circa" or "about" - approximate dates
-
-Output Format: Markdown with proper headings
-
-Now generate the biography based on the provided context:
-
-{context}
-"""
+```bash
+mkdir -p config/prompts/custom
 ```
 
-### Customizing the Biography Prompt
+**Step 2: Copy default prompt**
 
-#### Option 1: Edit Directly (Simple)
-
-Edit `rmagent/agent/prompts.py`:
-
-```python
-def _get_biography_prompt():
-    return """You are writing family history stories for descendants.
-
-[Modify instructions here to change style, tone, or structure]
-
-STYLE: Warm, personal, engaging
-Focus on stories that bring ancestors to life.
-
-{context}
-"""
+```bash
+cp config/prompts/biography.yaml config/prompts/custom/biography.yaml
 ```
 
-#### Option 2: Create Prompt Variants (Advanced)
+**Step 3: Edit with your preferred text editor**
 
-Add multiple biography styles:
-
-```python
-BIOGRAPHY_PROMPTS = {
-    "standard": _get_biography_prompt_standard(),
-    "academic": _get_biography_prompt_academic(),
-    "narrative": _get_biography_prompt_narrative(),
-    "genealogical": _get_biography_prompt_genealogical(),
-}
+```bash
+nano config/prompts/custom/biography.yaml
 ```
 
-Then modify `BiographyGenerator` to accept a `style` parameter.
+**Step 4: Modify the template section**
+
+```yaml
+# config/prompts/custom/biography.yaml
+
+key: biography
+version: "2025-01-08"
+description: "Custom biography generation"
+
+# Your custom prompt template
+template: |
+  Write a genealogical biography in a narrative storytelling style.
+  Focus on family relationships and historical context.
+
+  Person Information:
+  {person_summary}
+
+  Life Events:
+  {timeline_overview}
+
+  [Your additional instructions here]
+```
+
+**Step 5: Test your custom prompt**
+
+```bash
+# Biography will automatically use your custom prompt
+uv run rmagent bio 1 --output test.md
+```
 
 ### Biography Prompt Customization Examples
 
 #### Example 1: Academic Style
 
-```python
-"""You are an academic historian writing for peer review.
+```yaml
+# config/prompts/custom/biography.yaml
 
-REQUIREMENTS:
-- Extensive source citations
-- Critical analysis of evidence
-- Historiographical context
-- Formal academic tone
-- Chicago Manual of Style citations
+template: |
+  Compose a scholarly biographical essay following academic conventions.
 
-Focus on verifiable facts and scholarly rigor.
-"""
+  Requirements:
+  - Formal, third-person narrative voice
+  - Chronological organization by life phase
+  - Source citations in Chicago Manual of Style format
+  - Analysis of social and historical context
+  - Critical evaluation of conflicting evidence
+
+  Subject Information:
+  {person_summary}
+
+  Chronological Evidence:
+  {timeline_overview}
+
+  Family Context:
+  {family_overview}
+
+  Source Documentation:
+  {source_notes}
 ```
 
 #### Example 2: Family History Style
 
-```python
-"""You are writing stories for family members to cherish.
+```yaml
+# config/prompts/custom/biography.yaml
 
-REQUIREMENTS:
-- Warm, personal tone
-- Vivid details and anecdotes
-- Family relationships emphasized
-- Accessible language
-- Emotional context included
+template: |
+  Write an engaging narrative biography that brings history to life.
 
-Write as if telling a story to grandchildren.
-"""
+  Style Guidelines:
+  - Use vivid, descriptive language
+  - Begin with a compelling scene or anecdote
+  - Weave family stories throughout
+  - Connect personal events to historical context
+  - End with legacy and descendants
+
+  Available Information:
+  {person_summary}
+  {timeline_overview}
+  {relationship_notes}
+  {source_notes}
 ```
 
-#### Example 3: Genealogy Proof Standard
+#### Example 3: Concise Summary Style
 
-```python
-"""You are applying Genealogical Proof Standard methodology.
+```yaml
+# config/prompts/custom/biography.yaml
 
-REQUIREMENTS:
-1. Reasonably exhaustive research
-2. Complete and accurate source citations
-3. Thorough analysis and correlation
-4. Resolution of conflicting evidence
-5. Soundly written conclusion
+template: |
+  Create a concise biographical summary (200-300 words).
 
-Acknowledge gaps and conflicts explicitly.
-"""
+  Include:
+  - Birth (date, place, parents)
+  - Key life events (marriage, children, occupation, migration)
+  - Death (date, place, age)
+  - Legacy (2-3 sentences)
+
+  Data:
+  {person_summary}
+  {timeline_overview}
 ```
 
-### Using Custom Context Variables
+### Template Variables Reference
 
 The biography prompt receives these context variables:
 
-```python
-{
-    "person_summary": "Name, dates, places",
-    "timeline_overview": "Chronological events",
-    "relationship_notes": "Family context",
-    "source_notes": "Documentation quality"
-}
-```
-
-You can reference these in your custom prompt:
-
-```python
-"""
-Person: {person_summary}
-
-Life Events:
-{timeline_overview}
-
-Family Context:
-{relationship_notes}
-
-Sources Available:
-{source_notes}
-
-[Your custom instructions here]
-"""
-```
+- `{person_summary}` - Name, dates, parents
+- `{timeline_overview}` - Life events chronology
+- `{early_life_overview}` - Birth/childhood context
+- `{family_overview}` - Spouse, children
+- `{sibling_summary}` - Birth order, relationships
+- `{relationship_notes}` - Key relationships
+- `{family_loss_notes}` - Deaths in family
+- `{source_notes}` - Citation information
 
 ### Testing Custom Prompts
 
-After modifying prompts:
+Compare default vs custom output:
 
 ```bash
-# Test with template mode (no AI)
-uv run rmagent bio 1 --no-ai
+# Use default prompt
+uv run rmagent bio 1 --output default.md
 
-# Test with AI
-uv run rmagent bio 1 --length standard
+# Copy and edit to custom
+cp config/prompts/biography.yaml config/prompts/custom/biography.yaml
+nano config/prompts/custom/biography.yaml
+
+# Use custom prompt
+uv run rmagent bio 1 --output custom.md
 
 # Compare outputs
-uv run rmagent bio 1 --output test-bio-1.md
-uv run rmagent bio 2 --output test-bio-2.md
+diff default.md custom.md
 ```
 
 ## Quality Analysis Prompts
 
-Located in `rmagent/agent/prompts.py` → `_get_quality_prompt()`
+Located in `config/prompts/quality.yaml`
 
 Customize to change how data quality issues are analyzed and prioritized.
 
+**To customize:**
+```bash
+cp config/prompts/quality.yaml config/prompts/custom/quality.yaml
+nano config/prompts/custom/quality.yaml
+```
+
 ## Q&A Prompts
 
-Located in `rmagent/agent/prompts.py` → `_get_qna_prompt()`
+Located in `config/prompts/qa.yaml`
 
 Customize to change:
 - Question interpretation style
 - Answer format and structure
 - Source attribution approach
 - Conversation memory handling
+
+**To customize:**
+```bash
+cp config/prompts/qa.yaml config/prompts/custom/qa.yaml
+nano config/prompts/custom/qa.yaml
+```
 
 ## Prompt Best Practices
 
