@@ -263,7 +263,7 @@ class CitationProcessor:
         self, footnotes: list[tuple[int, CitationInfo]], tracker: CitationTracker
     ) -> str:
         """
-        Generate footnotes section with numbered entries.
+        Generate footnotes section with numbered entries and 3-character indent.
         First citation per source uses full footnote, subsequent use short.
         """
         lines = []
@@ -275,7 +275,8 @@ class CitationProcessor:
             # Use full or short footnote
             footnote_text = citation_info.footnote if is_first else citation_info.short_footnote
 
-            lines.append(f"[^{footnote_num}]: {footnote_text}")
+            # Add 3-character indent to each footnote
+            lines.append(f"   [^{footnote_num}]: {footnote_text}")
 
         return "\n".join(lines)
 
@@ -283,6 +284,7 @@ class CitationProcessor:
         """
         Generate alphabetically sorted bibliography using SourceTable.ActualText.
         Deduplicate by SourceID.
+        Uses hanging indent format (3 spaces for continuation lines).
         """
         # Build unique sources map: SourceID -> CitationInfo
         sources = {}
@@ -295,10 +297,11 @@ class CitationProcessor:
         # Sort alphabetically by bibliography text
         sorted_sources = sorted(sources.values(), key=lambda c: c.bibliography.lower())
 
-        # Format as list
+        # Format with 3-character indent (no bullets)
         lines = []
         for citation_info in sorted_sources:
-            lines.append(f"- {citation_info.bibliography}")
+            # 3-character indent, no bullet
+            lines.append(f"   {citation_info.bibliography}")
 
         return "\n".join(lines)
 
