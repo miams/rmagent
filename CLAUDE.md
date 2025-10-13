@@ -90,25 +90,12 @@ conn.enable_load_extension(False)
 
 ## Development Setup
 
-Uses **uv** for Python package management:
-
+Uses **uv** for package management. Key commands:
 ```bash
-# Install dependencies
-uv sync                              # Production
-uv sync --extra dev                  # With dev tools
-
-# Development workflow
-uv run pytest                        # Run tests
-uv run pytest --cov=rmagent          # With coverage
-uv run black .                       # Format
-uv run ruff check .                  # Lint
-uv run mypy rmagent/                 # Type check
-
-# Run CLI commands
-uv run rmagent person 1 --events --family
-uv run rmagent bio 1 --length comprehensive
-uv run rmagent quality --category logical
-uv run rmagent search --name "Smith"
+uv sync --extra dev                  # Install dependencies
+uv run pytest --cov=rmagent          # Run tests with coverage
+uv run black . && uv run ruff check .  # Format and lint
+uv run rmagent person 1 --events     # Run CLI commands
 ```
 
 Configuration in `config/.env`:
@@ -116,7 +103,7 @@ Configuration in `config/.env`:
 DEFAULT_LLM_PROVIDER=anthropic
 ANTHROPIC_API_KEY=sk-ant-xxxxx
 RM_DATABASE_PATH=data/Iiams.rmtree
-LOG_LEVEL=DEBUG                      # Enable LLM logging to logs/llm_debug.jsonl
+LOG_LEVEL=DEBUG                      # Enable LLM logging
 ```
 
 ## Project Status (2025-10-12)
@@ -172,45 +159,18 @@ All commands use `uv run rmagent [command]`:
 
 ## LangChain v1.0 Integration (Future)
 
-**Current Status:** RMAgent uses custom LLM provider abstraction (no active LangChain imports). LangChain v1.0 integration planned for Phase 7 (advanced agentic workflows). See `docs/RM11_LangChain_Upgrade.md` for complete migration plan.
+**Status:** Zero active LangChain imports. v1.0 upgrade planned for Phase 7. See `docs/RM11_LangChain_Upgrade.md` and `AGENTS.md` for patterns.
 
-**v1.0 Breaking Changes (When Implementing):**
-- Agent creation: `create_agent()` (not `create_react_agent()`)
-- Prompts: `system_prompt="string"` (not `ChatPromptTemplate`)
-- State: Use `TypedDict` only (not Pydantic models)
-- Reference: https://docs.langchain.com/oss/python/migrate/langchain-v1
-
-**Planned Directory Structure:**
-```
-rmagent/agent/
-├── llm_provider.py      # Current: Multi-provider abstraction
-├── genealogy_agent.py   # Current: Simple agent for CLI
-├── prompts.py           # Current: YAML-based prompts
-└── lc/                  # Future: LangChain v1.0 integration
-    ├── tools.py         # v1.0 BaseTool implementations
-    ├── chains.py        # LCEL chains for census extraction
-    └── agents.py        # v1.0 agentic workflows
-```
+**v1.0 Requirements:** `create_agent()`, `system_prompt="string"`, TypedDict state only. New code goes in `rmagent/agent/lc/` directory.
 
 ## Git Workflow
 
 ```bash
-# Repository setup
-git clone git@github.com:miams/rmagent.git
-ssh-add ~/.ssh/miams-github
-
-# Commit conventions (Conventional Commits)
-git commit -m "feat: add new feature"
-git commit -m "fix: resolve bug"
-git commit -m "docs: update documentation"
-git commit -m "test: add tests"
-git commit -m "refactor: restructure code"
+git clone git@github.com:miams/rmagent.git && ssh-add ~/.ssh/miams-github
+git commit -m "feat: description"  # Use: feat|fix|docs|test|refactor
 ```
 
-**Branches:**
-- **main** - Production-ready code
-- **develop** - Integration branch
-- **feature/** - Feature branches
+**Branches:** main (production), develop (integration), feature/* (new work)
 
 ## Quick Reference
 
