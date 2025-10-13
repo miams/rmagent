@@ -43,7 +43,7 @@ class GenealogyFormatters:
         lines = []
         for event in events or []:
             event_type = event.get("EventType")
-            date = event.get("Date") or ""
+            date = GenealogyFormatters.format_rm_date(event.get("Date")) or ""
             place = event.get("Place") or ""
             details = event.get("Details") or ""
             note = event.get("Note") or ""
