@@ -40,36 +40,7 @@ template_sections:
   length_guidance: |
     BIOGRAPHY LENGTH & DETAIL REQUIREMENTS:
 
-    The Person Summary above indicates the requested style. Follow these guidelines:
-
-    **SHORT (250-500 words):**
-    - Focus on essential life events only: birth, death, marriage, key career milestones
-    - 2-3 concise paragraphs covering introduction, major life events, and death
-    - Minimal family details - just mention parents' names and spouse
-    - Omit detailed historical context and analysis
-    - Use brief, factual sentences
-
-    **STANDARD (500-1500 words):**
-    - Balanced narrative covering all major life sections
-    - 5-8 paragraphs with moderate detail
-    - Include: birth, early life, education, career, marriage, children (names only), later life, death
-    - Moderate family context: mention parents, spouse(s), number of children
-    - Include some historical context where relevant
-    - Use complete sections with section headers
-
-    **COMPREHENSIVE (1500+ words):**
-    - Detailed multi-section biography with rich historical and family context
-    - 10+ paragraphs covering all aspects of life with extensive detail
-    - CRITICAL: Expand significantly on family relationships:
-      * Parents: Include their backgrounds, occupations, when/where they died, their ages at subject's birth
-      * Siblings: Name each sibling, their birth/death dates, occupations, marriages, birth order analysis
-      * Spouse(s): Detailed background of each spouse, their family, courtship context, marriage details
-      * Children: Name each child with birth/death dates, marriages, occupations, accomplishments
-    - Include detailed historical context (migration patterns, economic conditions, social dynamics)
-    - Analyze family patterns (geographic mobility, occupational trends, mortality patterns)
-    - Use event notes extensively - they contain rich primary source material
-    - Flag uncertainties explicitly and suggest research directions
-    - All sections should be well-developed with multiple paragraphs where data supports it
+    {length_guidance}
 
   citation_instructions: |
     CRITICAL CITATION INSTRUCTIONS:
@@ -157,35 +128,7 @@ provider_overrides:
       length_guidance: |
         BIOGRAPHY LENGTH & DETAIL REQUIREMENTS (Academic Standard):
 
-        Check the Person Summary for the requested style and follow these scholarly guidelines:
-
-        **SHORT (250-500 words):** Concise biographical sketch
-        - Essential vital statistics and major life milestones only
-        - 2-3 tight paragraphs: introduction, key events, conclusion
-        - Mention parents and spouse by name only
-        - No extended analysis or context
-
-        **STANDARD (500-1500 words):** Scholarly biographical article
-        - Comprehensive coverage of all life phases
-        - 5-8 well-structured paragraphs with clear transitions
-        - Include full vital events, education, career trajectory, family formation
-        - Moderate family context: parents' background, spouse details, children's names
-        - Integrate relevant historical and social context
-        - Academic tone with careful attribution
-
-        **COMPREHENSIVE (1500+ words):** Full-length biographical essay
-        - Exhaustive treatment with deep historical and genealogical analysis
-        - 10+ paragraphs organized into thematic sections
-        - EXTENSIVE family reconstruction:
-          * Parents: Full biographical sketches including origins, occupations, migration history, death circumstances
-          * Siblings: Individual profiles with vital dates, marriages, careers, life outcomes, birth order dynamics
-          * Spouse(s): Detailed family backgrounds, courtship context, marriage analysis, relationship dynamics
-          * Children: Complete profiles including vital dates, education, marriages, careers, accomplishments, geographic distribution
-        - Rich historical contextualization: demographic trends, economic conditions, migration patterns, social structures
-        - Genealogical analysis: family naming patterns, geographic mobility, occupational succession, mortality patterns
-        - Extensive use of primary source material from event notes
-        - Critical evaluation of evidence quality and gaps
-        - Research recommendations for future investigation
+        {length_guidance}
 
       closing: |
         Generate a rigorous, well-documented biographical narrative that synthesizes all available evidence.
@@ -206,26 +149,9 @@ provider_overrides:
         6. Legacy & Descendants
 
       length_guidance: |
-        LENGTH INSTRUCTIONS - Check Person Summary for style:
+        LENGTH INSTRUCTIONS:
 
-        SHORT: Write 250-500 words (2-3 paragraphs)
-        - Just the key facts: birth, death, marriage, main career
-        - Name parents and spouse briefly
-
-        STANDARD: Write 500-1500 words (5-8 paragraphs)
-        - Cover all major life events
-        - Include parents, spouse, and list children's names
-        - Add some historical context
-
-        COMPREHENSIVE: Write 1500+ words (10+ paragraphs)
-        - Write detailed sections for each life phase
-        - IMPORTANT: Include details about ALL family members:
-          * Parents: their jobs, when they died, ages
-          * Siblings: name each one with birth/death dates and jobs
-          * Spouse: their family background and marriage details
-          * Children: name each one with birth/death dates, jobs, and families
-        - Add historical context and family patterns
-        - Use information from event notes
+        {length_guidance}
 
       citation_instructions: |
         IMPORTANT CITATION FORMAT:

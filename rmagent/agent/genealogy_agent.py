@@ -146,6 +146,9 @@ class GenealogyAgent:
             all_citations = self._collect_all_citations_for_person(query, person_id)
             available_citations = GenealogyFormatters.format_available_citations(all_citations)
 
+            # Generate style-specific length guidance
+            length_guidance = self._get_length_guidance_for_style(style)
+
             return {
                 "person_summary": person_summary,
                 "person_notes": person_notes_formatted,
@@ -157,6 +160,7 @@ class GenealogyAgent:
                 "sibling_summary": sibling_summary,
                 "source_notes": "Sources include citations extracted from RootsMagic events.",
                 "available_citations": available_citations,
+                "length_guidance": length_guidance,
             }
 
         return self._with_database(_builder)
@@ -205,6 +209,46 @@ class GenealogyAgent:
         return self._with_database(_builder)
 
     # ---- Helper Methods -------------------------------------------------
+
+    def _get_length_guidance_for_style(self, style: str) -> str:
+        """Return length-specific guidance based on requested style."""
+        style_lower = style.lower()
+
+        if style_lower == "short":
+            return """**SHORT (250-500 words):**
+- Focus on essential life events only: birth, death, marriage, key career milestones
+- 2-3 concise paragraphs covering introduction, major life events, and death
+- Minimal family details - just mention parents' names and spouse
+- Omit detailed historical context and analysis
+- Use brief, factual sentences"""
+
+        elif style_lower == "standard":
+            return """**STANDARD (500-1500 words):**
+- Balanced narrative covering all major life sections
+- 5-8 paragraphs with moderate detail
+- Include: birth, early life, education, career, marriage, children (names only), later life, death
+- Moderate family context: mention parents, spouse(s), number of children
+- Include some historical context where relevant
+- Use complete sections with section headers"""
+
+        elif style_lower == "comprehensive":
+            return """**COMPREHENSIVE (1500+ words):**
+- Detailed multi-section biography with rich historical and family context
+- 10+ paragraphs covering all aspects of life with extensive detail
+- CRITICAL: Expand significantly on family relationships:
+  * Parents: Include their backgrounds, occupations, when/where they died, their ages at subject's birth
+  * Siblings: Name each sibling, their birth/death dates, occupations, marriages, birth order analysis
+  * Spouse(s): Detailed background of each spouse, their family, courtship context, marriage details
+  * Children: Name each child with birth/death dates, marriages, occupations, accomplishments
+- Include detailed historical context (migration patterns, economic conditions, social dynamics)
+- Analyze family patterns (geographic mobility, occupational trends, mortality patterns)
+- Use event notes extensively - they contain rich primary source material
+- Flag uncertainties explicitly and suggest research directions
+- All sections should be well-developed with multiple paragraphs where data supports it"""
+
+        else:
+            # Default to standard if unrecognized
+            return self._get_length_guidance_for_style("standard")
 
     def _invoke_llm(self, prompt: str, max_tokens: int | None = None) -> LLMResult:
         kwargs = {}
