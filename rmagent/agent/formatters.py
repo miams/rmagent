@@ -54,11 +54,14 @@ class GenealogyFormatters:
 
             # Add note if present (often contains full article transcriptions)
             if note:
-                # Indent note content for readability
+                # Show "NOTE: " prefix only once, then indent subsequent lines
                 note_lines = note.split('\n')
-                for note_line in note_lines:
+                for idx, note_line in enumerate(note_lines):
                     if note_line.strip():
-                        lines.append(f"    NOTE: {note_line.strip()}")
+                        if idx == 0:
+                            lines.append(f"    NOTE: {note_line.strip()}")
+                        else:
+                            lines.append(f"    {note_line.strip()}")
 
         return "\n".join(lines) if lines else "No events available."
 
