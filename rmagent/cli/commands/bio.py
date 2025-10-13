@@ -46,6 +46,11 @@ DEFAULT_BIO_DIR = Path("./reports/biographies")
     is_flag=True,
     help="Exclude source citations",
 )
+@click.option(
+    "--meta/--no-meta",
+    default=None,
+    help="Include Hugo-style front matter metadata (default: from config)",
+)
 @click.pass_obj
 def bio(
     ctx,
@@ -55,6 +60,7 @@ def bio(
     output: Path | None,
     no_ai: bool,
     no_sources: bool,
+    meta: bool | None,
 ):
     """
     Generate biography for a person.
@@ -116,8 +122,11 @@ def bio(
 
             progress.update(task, completed=True)
 
+        # Determine metadata inclusion (from flag or config default)
+        include_metadata = meta if meta is not None else config.biography.meta_default
+
         # Render as markdown
-        markdown_output = bio_result.render_markdown()
+        markdown_output = bio_result.render_markdown(include_metadata=include_metadata)
 
         # Determine output path
         if output:

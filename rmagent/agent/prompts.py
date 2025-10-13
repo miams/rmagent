@@ -94,19 +94,69 @@ class PromptRegistry:
             return yaml.safe_load(f)
 
     def _yaml_to_template(self, data: dict[str, Any], provider: str | None = None) -> PromptTemplate:
-        """Convert YAML data to PromptTemplate.
+        """Convert YAML data to PromptTemplate with section inheritance support.
 
         Args:
             data: YAML data dictionary
             provider: LLM provider for provider-specific variants
+
+        Supports two modes:
+        1. Simple mode: Single 'template' string (full replacement with provider_overrides)
+        2. Section mode: 'template_sections' dict + 'template' with {section_name} placeholders
+           Provider overrides can replace individual sections only
         """
-        # Check for provider-specific override
-        template_text = data["template"]
-        if provider and "provider_overrides" in data:
-            overrides = data["provider_overrides"]
-            if provider in overrides and "template" in overrides[provider]:
-                template_text = overrides[provider]["template"]
-                logger.debug(f"Using {provider}-specific prompt for '{data['key']}'")
+        # Check if using section-based templates
+        if "template_sections" in data:
+            # Build sections dict (default sections)
+            sections = dict(data["template_sections"])
+
+            # Apply provider-specific section overrides
+            if provider and "provider_overrides" in data:
+                overrides = data["provider_overrides"]
+                if provider in overrides:
+                    provider_data = overrides[provider]
+                    # Merge section overrides
+                    if "sections" in provider_data:
+                        sections.update(provider_data["sections"])
+                        logger.debug(
+                            f"Applied {provider}-specific section overrides for '{data['key']}': "
+                            f"{list(provider_data['sections'].keys())}"
+                        )
+
+                    # Check for full template override (takes precedence)
+                    if "template" in provider_data:
+                        template_text = provider_data["template"]
+                        logger.debug(f"Using {provider}-specific full template for '{data['key']}'")
+                    else:
+                        # Use default template with merged sections
+                        # Use SafeDict to preserve user variable placeholders
+                        class _SafeDict(dict):
+                            def __missing__(self, key):
+                                return "{" + key + "}"
+
+                        template_text = data["template"].format_map(_SafeDict(**sections))
+                else:
+                    # No provider override, use default
+                    class _SafeDict(dict):
+                        def __missing__(self, key):
+                            return "{" + key + "}"
+
+                    template_text = data["template"].format_map(_SafeDict(**sections))
+            else:
+                # No provider specified or no overrides, use default
+                class _SafeDict(dict):
+                    def __missing__(self, key):
+                        return "{" + key + "}"
+
+                template_text = data["template"].format_map(_SafeDict(**sections))
+        else:
+            # Simple mode: full template replacement (backward compatible)
+            template_text = data["template"]
+            if provider and "provider_overrides" in data:
+                overrides = data["provider_overrides"]
+                if provider in overrides and "template" in overrides[provider]:
+                    template_text = overrides[provider]["template"]
+                    logger.debug(f"Using {provider}-specific prompt for '{data['key']}'")
 
         # Parse few-shot examples
         few_shots = []

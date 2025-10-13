@@ -10,6 +10,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Phase 6 comprehensive documentation suite (INSTALL.md, USAGE.md, CONFIGURATION.md, FAQ.md, EXAMPLES.md)
 - Developer documentation (CONTRIBUTING.md, TESTING.md, ARCHITECTURE.md, API.md)
+- Biography enhancement: Primary portrait images with text wrapping in introduction section
+- Biography enhancement: Additional images displayed in Photos section
+- Biography enhancement: Death information (date, place, age) in introduction paragraph
+- Biography enhancement: Updated title format to "# Biography of [Name] ([birth_year]-[death_year])"
+
+### Changed
+- **Major refactoring:** Biography generator modularized from single 1,400-line file to 5 focused modules:
+  - `biography/models.py` - Data models & enums (195 lines)
+  - `biography/generator.py` - Main generator class (635 lines)
+  - `biography/rendering.py` - Markdown rendering (220 lines)
+  - `biography/citations.py` - Citation processing (308 lines)
+  - `biography/templates.py` - Template generation (231 lines)
+- Improved maintainability: Each module now has a single, clear responsibility
+- Enhanced testability: Components can be tested independently
+- Better extensibility: Easy to add new renderers or citation styles
+- Updated DEVELOPER_GUIDE.md to reflect new modular biography structure
+
+### Fixed
+- Python syntax warning in docstring (added raw string prefix)
+
+### Test Coverage
+- All 24 biography generator tests passing after refactoring
+- Module coverage: generator (88%), models (90%), rendering (71%), citations (68%), templates (63%)
 
 ## [0.2.0] - 2025-10-12 - Phase 5 Complete
 

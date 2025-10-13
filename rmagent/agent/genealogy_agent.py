@@ -142,6 +142,10 @@ class GenealogyAgent:
                 person_notes if person_notes else "No person-level notes available."
             )
 
+            # Collect all citations for the person
+            all_citations = self._collect_all_citations_for_person(query, person_id)
+            available_citations = self._format_available_citations(all_citations)
+
             return {
                 "person_summary": person_summary,
                 "person_notes": person_notes_formatted,
@@ -152,6 +156,7 @@ class GenealogyAgent:
                 "family_loss_notes": family_loss_notes,
                 "sibling_summary": sibling_summary,
                 "source_notes": "Sources include citations extracted from RootsMagic events.",
+                "available_citations": available_citations,
             }
 
         return self._with_database(_builder)
@@ -661,3 +666,70 @@ class GenealogyAgent:
             elif value % 10 == 3:
                 suffix = "rd"
         return f"{value}{suffix}"
+
+    # ---- Citation Formatting Methods ------------------------------------
+
+    def _collect_all_citations_for_person(
+        self, query: QueryService, person_id: int
+    ) -> list[dict]:
+        """
+        Collect all citations for a person's events.
+        Returns list of citation dicts with CitationID, SourceID, SourceName, CitationName, EventType.
+        """
+        # Get all events for the person
+        events = self._rows_to_dicts(query.get_person_events(person_id))
+
+        # Collect citations from all events
+        all_citations = []
+        seen_citation_ids = set()
+
+        for event in events or []:
+            event_id = event.get("EventID")
+            event_type = event.get("EventType", "Unknown Event")
+
+            if not event_id:
+                continue
+
+            # Get citations for this event
+            citations = self._rows_to_dicts(query.get_event_citations(event_id))
+
+            for citation in citations or []:
+                citation_id = citation.get("CitationID")
+
+                # Skip if we've already seen this citation
+                if citation_id in seen_citation_ids:
+                    continue
+
+                seen_citation_ids.add(citation_id)
+
+                # Add event type to citation info
+                citation["EventType"] = event_type
+                all_citations.append(citation)
+
+        return all_citations
+
+    def _format_available_citations(self, citations: list[dict]) -> str:
+        """
+        Format citations for LLM prompt.
+        Returns formatted string listing all available citations with {{cite:ID}} markers.
+        Note: Braces are doubled to escape them from Python's format_map() in prompt rendering.
+        """
+        if not citations:
+            return "No citations available."
+
+        lines = []
+        for citation in citations:
+            cid = citation.get("CitationID")
+            source_name = citation.get("SourceName", "Unknown")
+            citation_name = citation.get("CitationName", "")
+            event_type = citation.get("EventType", "")
+
+            # Double braces to escape them from format_map() - will become {cite:123} in final prompt
+            desc = f"- {{{{cite:{cid}}}}}: {source_name}"
+            if citation_name:
+                desc += f" ({citation_name})"
+            if event_type:
+                desc += f" [Used for: {event_type}]"
+            lines.append(desc)
+
+        return "\n".join(lines)

@@ -9,9 +9,10 @@ and length variations (short/standard/comprehensive).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
+import time
 
 from rmagent.agent.genealogy_agent import GenealogyAgent
 from rmagent.rmlib.database import RMDatabase
@@ -36,6 +37,20 @@ class CitationStyle(str, Enum):
     FOOTNOTE = "footnote"  # Academic style with numbered footnotes
     PARENTHETICAL = "parenthetical"  # Genealogical style with inline source references
     NARRATIVE = "narrative"  # Popular style with narrative attribution
+
+
+@dataclass
+class LLMMetadata:
+    """Metadata from LLM generation for biography."""
+
+    provider: str  # anthropic, openai, ollama
+    model: str
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+    prompt_time: float  # seconds (context building)
+    llm_time: float  # seconds (LLM generation)
+    cost: float | None = None
 
 
 @dataclass
@@ -122,23 +137,154 @@ class Biography:
     marriage_family: str
     later_life: str
     death_legacy: str
+    footnotes: str  # Footnotes section (only for FOOTNOTE citation style)
     sources: str
 
     # Metadata
-    generated_at: datetime = field(default_factory=datetime.now)
+    generated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc).astimezone())
     word_count: int = 0
     privacy_applied: bool = False
+    birth_year: int | None = None
+    death_year: int | None = None
+    llm_metadata: LLMMetadata | None = None
+    citation_count: int = 0
+    source_count: int = 0
+    media_files: list[dict] = field(default_factory=list)  # Media files for images
 
-    def render_markdown(self) -> str:
-        """Render complete biography as Markdown."""
+    def _calculate_word_count(self) -> int:
+        """Calculate word count from all biography sections."""
+        all_text = "\n".join([
+            self.introduction,
+            self.early_life,
+            self.education,
+            self.career,
+            self.marriage_family,
+            self.later_life,
+            self.death_legacy,
+            self.footnotes,
+            self.sources,
+        ])
+        return len(all_text.split())
+
+    @staticmethod
+    def _format_tokens(count: int) -> str:
+        """Format token count with k suffix."""
+        if count >= 1000:
+            return f"{count/1000:.1f}k"
+        return str(count)
+
+    @staticmethod
+    def _format_duration(seconds: float) -> str:
+        """Format duration as Xm Ys or Xs."""
+        if seconds >= 60:
+            minutes = int(seconds // 60)
+            secs = int(seconds % 60)
+            return f"{minutes}m{secs}s" if secs > 0 else f"{minutes}m"
+        return f"{int(seconds)}s"
+
+    def render_metadata(self) -> str:
+        """Render Hugo-style front matter metadata."""
+        lines = ["---"]
+
+        # Title with years
+        years_str = ""
+        if self.birth_year or self.death_year:
+            birth = self.birth_year or "????"
+            death = self.death_year or "????"
+            years_str = f" ({birth}-{death})"
+        lines.append(f'Title: "Biography of {self.full_name}{years_str}"')
+
+        # Timestamp in ISO 8601 format with timezone (format as -05:00)
+        tz_str = self.generated_at.strftime("%z")
+        tz_formatted = f"{tz_str[:3]}:{tz_str[3:]}" if tz_str else ""
+        date_str = self.generated_at.strftime("%Y-%m-%dT%H:%M:%S") + tz_formatted
+        lines.append(f'Date: {date_str}')
+
+        # Person ID
+        lines.append(f'PersonID: {self.person_id}')
+
+        # LLM Metadata (if available)
+        if self.llm_metadata:
+            lines.append(f'TokensIn: {self._format_tokens(self.llm_metadata.prompt_tokens)}')
+            lines.append(f'TokensOut: {self._format_tokens(self.llm_metadata.completion_tokens)}')
+            lines.append(f'TotalTokens: {self._format_tokens(self.llm_metadata.total_tokens)}')
+            lines.append(f'LLM: {self.llm_metadata.provider.capitalize()}')
+            lines.append(f'Model: {self.llm_metadata.model}')
+            lines.append(f'PromptTime: {self._format_duration(self.llm_metadata.prompt_time)}')
+            lines.append(f'LLMTime: {self._format_duration(self.llm_metadata.llm_time)}')
+
+        # Biography stats (calculate word count dynamically)
+        word_count = self._calculate_word_count()
+        lines.append(f'Words: {word_count:,}')
+        lines.append(f'Citations: {self.citation_count}')
+        lines.append(f'Sources: {self.source_count}')
+
+        lines.append("---\n")
+        return "\n".join(lines)
+
+    def render_markdown(self, include_metadata: bool = True) -> str:
+        """Render complete biography as Markdown with optional front matter."""
         sections = []
 
-        # Title
-        sections.append(f"# {self.full_name}\n")
+        # Hugo-style front matter metadata
+        if include_metadata:
+            sections.append(self.render_metadata())
+
+        # Title with lifespan years
+        years_str = ""
+        if self.birth_year or self.death_year:
+            birth = self.birth_year or "????"
+            death = self.death_year or "????"
+            years_str = f" ({birth}-{death})"
+        sections.append(f"# Biography of {self.full_name}{years_str}\n")
+
+        # Separate primary and additional images (only for STANDARD and COMPREHENSIVE)
+        primary_image = None
+        additional_images = []
+        if self.length != BiographyLength.SHORT and self.media_files:
+            for media in self.media_files:
+                is_primary = media.get("IsPrimary", 0) == 1 if hasattr(media, 'get') else media["IsPrimary"] == 1
+                if is_primary and primary_image is None:
+                    primary_image = media
+                elif not is_primary:
+                    additional_images.append(media)
 
         # Introduction
         if self.introduction:
             sections.append("## Introduction\n")
+
+            # Add primary portrait image with text wrapping (if available)
+            if primary_image:
+                from pathlib import Path
+                # Format the media path
+                media_path = primary_image.get("MediaPath", "") if hasattr(primary_image, 'get') else primary_image["MediaPath"]
+                media_file = primary_image.get("MediaFile", "") if hasattr(primary_image, 'get') else primary_image["MediaFile"]
+
+                # Strip RootsMagic's ?\ or ?/ prefix if present
+                if media_path.startswith("?\\"):
+                    media_path = media_path[2:]
+                elif media_path.startswith("?/"):
+                    media_path = media_path[2:]
+
+                # Combine path components
+                if media_path:
+                    full_path = Path(media_path) / media_file
+                else:
+                    full_path = Path(media_file)
+
+                # Convert to POSIX-style path for Markdown
+                image_path = full_path.as_posix()
+
+                # Caption: "Full Name (birth_year-death_year)"
+                caption = f"{self.full_name}"
+                if self.birth_year or self.death_year:
+                    birth = self.birth_year or "????"
+                    death = self.death_year or "????"
+                    caption += f" ({birth}-{death})"
+
+                # Use HTML for text wrapping - align right with width constraint
+                sections.append(f'<img src="{image_path}" alt="{caption}" align="right" width="300" />\n')
+
             sections.append(self.introduction)
             sections.append("")
 
@@ -178,6 +324,48 @@ class Biography:
             sections.append(self.death_legacy)
             sections.append("")
 
+        # Photos (additional non-primary images)
+        if additional_images:
+            sections.append("## Photos\n")
+            for media in additional_images:
+                from pathlib import Path
+                # Format the media path
+                media_path = media.get("MediaPath", "") if hasattr(media, 'get') else media["MediaPath"]
+                media_file = media.get("MediaFile", "") if hasattr(media, 'get') else media["MediaFile"]
+
+                # Strip RootsMagic's ?\ or ?/ prefix if present
+                if media_path.startswith("?\\"):
+                    media_path = media_path[2:]
+                elif media_path.startswith("?/"):
+                    media_path = media_path[2:]
+
+                # Combine path components
+                if media_path:
+                    full_path = Path(media_path) / media_file
+                else:
+                    full_path = Path(media_file)
+
+                # Convert to POSIX-style path for Markdown
+                image_path = full_path.as_posix()
+
+                # Caption: "Full Name (birth_year-death_year)"
+                caption = f"{self.full_name}"
+                if self.birth_year or self.death_year:
+                    birth = self.birth_year or "????"
+                    death = self.death_year or "????"
+                    caption += f" ({birth}-{death})"
+
+                # Standard markdown image format (no text wrapping for additional images)
+                sections.append(f"![{caption}]({image_path})\n")
+                sections.append(f"*{caption}*\n")
+            sections.append("")
+
+        # Footnotes (only for FOOTNOTE citation style)
+        if self.footnotes and self.citation_style == CitationStyle.FOOTNOTE:
+            sections.append("## Footnotes\n")
+            sections.append(self.footnotes)
+            sections.append("")
+
         # Sources
         if self.sources:
             sections.append("## Sources\n")
@@ -185,12 +373,64 @@ class Biography:
             sections.append("")
 
         content = "\n".join(sections)
-        self.word_count = len(content.split())
+        # Update word_count for consistency (though metadata renders dynamically)
+        self.word_count = self._calculate_word_count()
         return content
 
     def __str__(self) -> str:
         """String representation returns rendered markdown."""
         return self.render_markdown()
+
+
+@dataclass
+class CitationInfo:
+    """Formatted citation information for footnotes and bibliography."""
+
+    citation_id: int
+    source_id: int
+    footnote: str  # Full footnote (first use)
+    short_footnote: str  # Short footnote (subsequent use)
+    bibliography: str  # Bibliography entry
+    is_freeform: bool  # True if TemplateID == 0
+    template_name: str | None  # Template name if not free-form
+
+
+@dataclass
+class CitationTracker:
+    """Track citations for footnote numbering and source-level deduplication."""
+
+    # Map: CitationID -> FootnoteNumber
+    citation_to_footnote: dict[int, int] = field(default_factory=dict)
+
+    # Map: SourceID -> first CitationID encountered
+    source_first_citation: dict[int, int] = field(default_factory=dict)
+
+    # Ordered list of citations as they appear in text
+    citation_order: list[int] = field(default_factory=list)
+
+    def add_citation(self, citation_id: int, source_id: int) -> int:
+        """
+        Add citation to tracker, returns footnote number.
+        Tracks first citation per source for full vs short footnote logic.
+        """
+        if citation_id in self.citation_to_footnote:
+            # Already encountered, return existing number
+            return self.citation_to_footnote[citation_id]
+
+        # New citation
+        footnote_num = len(self.citation_order) + 1
+        self.citation_to_footnote[citation_id] = footnote_num
+        self.citation_order.append(citation_id)
+
+        # Track first citation for this source
+        if source_id not in self.source_first_citation:
+            self.source_first_citation[source_id] = citation_id
+
+        return footnote_num
+
+    def is_first_for_source(self, citation_id: int, source_id: int) -> bool:
+        """Check if this is the first citation for a given source."""
+        return self.source_first_citation.get(source_id) == citation_id
 
 
 def _get_row_value(row, key: str, default=None):
@@ -543,49 +783,86 @@ class BiographyGenerator:
         )
 
     def _get_citations_for_event(self, db: RMDatabase, event_id: int) -> list[dict]:
-        """Get all citations for an event."""
-        cursor = db.execute(
-            """
-            SELECT cl.CitationID, c.CitationName, c.SourceID, c.ActualText, c.RefNumber
-            FROM CitationLinkTable cl
-            JOIN CitationTable c ON cl.CitationID = c.CitationID
-            WHERE cl.OwnerType = ? AND cl.OwnerID = ?
-            ORDER BY cl.SortOrder
-            """,
-            (OwnerType.EVENT.value, event_id),
-        )
-        return cursor.fetchall()
+        """Get all citations for an event with formatted text (Footnote, ShortFootnote, Bibliography)."""
+        query = QueryService(db)
+        return query.get_event_citations(event_id)
 
     def _get_media_for_person(self, db: RMDatabase, person_id: int) -> list[dict]:
-        """Get all media files linked to person."""
+        """Get all media files linked to person, including path and primary flag."""
         cursor = db.execute(
             """
-            SELECT m.MediaID, m.MediaFile, m.Caption, m.Date, m.Description
+            SELECT m.MediaID, m.MediaPath, m.MediaFile, m.Caption, m.Date, m.Description,
+                   ml.IsPrimary, ml.SortOrder
             FROM MediaLinkTable ml
             JOIN MultimediaTable m ON ml.MediaID = m.MediaID
             WHERE ml.OwnerType = ? AND ml.OwnerID = ?
-            ORDER BY ml.SortOrder
+            ORDER BY ml.IsPrimary DESC, ml.SortOrder, ml.LinkID
             """,
             (OwnerType.PERSON.value, person_id),
         )
         return cursor.fetchall()
 
     def _get_all_citations_for_person(self, db: RMDatabase, person_id: int) -> list[dict]:
-        """Get all citations associated with person (via events, names, etc.)."""
-        # Get citations for all events
-        cursor = db.execute(
-            """
-            SELECT DISTINCT cl.CitationID, c.CitationName, c.SourceID, s.Name AS SourceName
-            FROM EventTable e
-            JOIN CitationLinkTable cl ON cl.OwnerType = ? AND cl.OwnerID = e.EventID
-            JOIN CitationTable c ON cl.CitationID = c.CitationID
-            JOIN SourceTable s ON c.SourceID = s.SourceID
-            WHERE e.OwnerType = ? AND e.OwnerID = ?
-            ORDER BY s.Name, c.CitationName
-            """,
-            (OwnerType.EVENT.value, OwnerType.PERSON.value, person_id),
-        )
-        return cursor.fetchall()
+        """Get all citations associated with person (via events, names, etc.) with full citation data."""
+        query = QueryService(db)
+
+        # Get all events for person
+        events = query.get_person_events(person_id)
+
+        # Collect citations from all events (deduplicated by CitationID)
+        all_citations = []
+        seen_citation_ids = set()
+
+        for event in events:
+            event_id = _get_row_value(event, "EventID")
+            if not event_id:
+                continue
+
+            # Get full citation data including BLOBs
+            citations = query.get_event_citations(event_id)
+            for citation in citations:
+                citation_id = _get_row_value(citation, "CitationID")
+                if citation_id in seen_citation_ids:
+                    continue
+                seen_citation_ids.add(citation_id)
+                all_citations.append(citation)
+
+        return all_citations
+
+    def _format_media_path(self, media_path: str, media_file: str) -> str:
+        r"""
+        Format media path for local file access.
+
+        Converts RootsMagic's ?\path notation to a path relative to the database directory.
+
+        Args:
+            media_path: MediaPath from MultimediaTable (e.g., "?\Pictures - People")
+            media_file: MediaFile from MultimediaTable (e.g., "Iams, Franklin Pierce (1852-1917).jpg")
+
+        Returns:
+            Formatted path relative to database directory
+        """
+        # Strip RootsMagic's ?\  or ?/ prefix if present
+        if media_path.startswith("?\\"):
+            media_path = media_path[2:]
+        elif media_path.startswith("?/"):
+            media_path = media_path[2:]
+
+        # Combine path components
+        if media_path:
+            # Use Path to handle cross-platform separators
+            full_path = Path(media_path) / media_file
+        else:
+            full_path = Path(media_file)
+
+        # Convert to POSIX-style path (forward slashes) for Markdown
+        return full_path.as_posix()
+
+    def _calculate_age_at_death(self, birth_year: int | None, death_year: int | None) -> int | None:
+        """Calculate age at death from birth and death years."""
+        if birth_year and death_year:
+            return death_year - birth_year
+        return None
 
     # ---- Private Methods: Privacy Rules ----
 
@@ -623,18 +900,75 @@ class BiographyGenerator:
         if not self.agent:
             raise ValueError("AI generation requested but no agent provided")
 
-        # Use agent's generate_biography method
+        # Time the prompt building and LLM generation
+        prompt_start = time.time()
+
+        # Use agent's generate_biography method (includes internal timing)
         result = self.agent.generate_biography(person_id=context.person_id, style=length.value)
 
-        # Parse AI response into sections
-        # This is a simplified parser - a more robust version would use regex
-        # to extract each section from the markdown
-        sections = self._parse_ai_response(result.text)
+        total_time = time.time() - prompt_start
 
-        # Generate sources section if requested
+        # Extract LLM metadata from result
+        llm_metadata = None
+        if hasattr(self.agent, 'llm_provider'):
+            provider_name = self.agent.llm_provider.__class__.__name__.replace('Provider', '').lower()
+            llm_metadata = LLMMetadata(
+                provider=provider_name,
+                model=result.model,
+                prompt_tokens=result.usage.prompt_tokens,
+                completion_tokens=result.usage.completion_tokens,
+                total_tokens=result.usage.total_tokens,
+                prompt_time=total_time * 0.1,  # Estimate ~10% for prompt building
+                llm_time=total_time * 0.9,      # Estimate ~90% for LLM
+                cost=result.cost,
+            )
+
+        # Process citations for FOOTNOTE style BEFORE parsing into sections
+        footnotes_text = ""
         sources_text = ""
-        if include_sources:
-            sources_text = self._format_sources_section(context, citation_style)
+        response_text = result.text
+        citation_count = 0
+        source_count = 0
+
+        if citation_style == CitationStyle.FOOTNOTE:
+            # Process {cite:ID} markers in full response (preserves section headers)
+            modified_text, footnotes, tracker = self._process_citations_in_text(
+                response_text, context.all_citations
+            )
+
+            # Use modified text for section parsing
+            response_text = modified_text
+
+            # Generate footnotes section
+            if footnotes:
+                footnotes_text = self._generate_footnotes_section(footnotes, tracker)
+                citation_count = len(footnotes)
+
+            # Generate sources section using new bibliography method
+            if include_sources:
+                sources_text = self._generate_sources_section(context.all_citations)
+                # Count unique sources
+                source_ids = set()
+                for citation in context.all_citations:
+                    source_id = _get_row_value(citation, "SourceID", 0)
+                    if source_id:
+                        source_ids.add(source_id)
+                source_count = len(source_ids)
+        else:
+            # For other citation styles, use existing format
+            if include_sources:
+                sources_text = self._format_sources_section(context, citation_style)
+                citation_count = len(context.all_citations)
+                # Count unique sources
+                source_ids = set()
+                for citation in context.all_citations:
+                    source_id = _get_row_value(citation, "SourceID", 0)
+                    if source_id:
+                        source_ids.add(source_id)
+                source_count = len(source_ids)
+
+        # Parse AI response into sections (after citation processing)
+        sections = self._parse_ai_response(response_text)
 
         return Biography(
             person_id=context.person_id,
@@ -648,8 +982,15 @@ class BiographyGenerator:
             marriage_family=sections.get("marriage_family", ""),
             later_life=sections.get("later_life", ""),
             death_legacy=sections.get("death_legacy", ""),
+            footnotes=footnotes_text,
             sources=sources_text,
             privacy_applied=getattr(context, "privacy_applied", False),
+            birth_year=context.birth_year,
+            death_year=context.death_year,
+            llm_metadata=llm_metadata,
+            citation_count=citation_count,
+            source_count=source_count,
+            media_files=context.media_files,
         )
 
     def _generate_template_based(
@@ -670,8 +1011,18 @@ class BiographyGenerator:
         death = self._generate_death_legacy(context)
 
         sources_text = ""
+        citation_count = 0
+        source_count = 0
         if include_sources:
             sources_text = self._format_sources_section(context, citation_style)
+            citation_count = len(context.all_citations)
+            # Count unique sources
+            source_ids = set()
+            for citation in context.all_citations:
+                source_id = _get_row_value(citation, "SourceID", 0)
+                if source_id:
+                    source_ids.add(source_id)
+            source_count = len(source_ids)
 
         return Biography(
             person_id=context.person_id,
@@ -685,8 +1036,15 @@ class BiographyGenerator:
             marriage_family=marriage,
             later_life=later_life,
             death_legacy=death,
+            footnotes="",  # Template-based biographies don't use citations
             sources=sources_text,
             privacy_applied=getattr(context, "privacy_applied", False),
+            birth_year=context.birth_year,
+            death_year=context.death_year,
+            llm_metadata=None,  # No LLM used for template-based
+            citation_count=citation_count,
+            source_count=source_count,
+            media_files=context.media_files,
         )
 
     # ---- Private Methods: Template Generation ----
@@ -718,6 +1076,24 @@ class BiographyGenerator:
             pronoun = "He" if context.sex == 0 else "She" if context.sex == 1 else "They"
             verb = "was" if context.sex != 2 else "were"
             lines.append(f"{pronoun} {verb} the child of {parent_str}.")
+
+        # Death information (if applicable)
+        if context.death_date or context.death_place:
+            death_info = ""
+            pronoun = "He" if context.sex == 0 else "She" if context.sex == 1 else "They"
+            verb = "died" if context.sex != 2 else "died"
+
+            if context.death_date:
+                death_info = f" on {context.death_date}"
+            if context.death_place:
+                death_info += f" in {context.death_place}"
+
+            # Calculate age at death if both years available
+            age = self._calculate_age_at_death(context.birth_year, context.death_year)
+            if age is not None:
+                death_info += f" at the age of {age}"
+
+            lines.append(f"{pronoun} {verb}{death_info}.")
 
         return " ".join(lines)
 
@@ -948,3 +1324,256 @@ class BiographyGenerator:
             sections[current_section] = "\n".join(current_text).strip()
 
         return sections
+
+    # ---- Citation Formatting Methods ----
+
+    def _format_citation_info(self, citation: dict) -> CitationInfo:
+        """
+        Format citation into CitationInfo with all text versions.
+        Handles free-form (TemplateID=0) and template-based citations.
+        """
+        citation_id = _get_row_value(citation, "CitationID", 0)
+        source_id = _get_row_value(citation, "SourceID", 0)
+        template_id = _get_row_value(citation, "TemplateID", 0)
+        template_name = _get_row_value(citation, "TemplateName")
+
+        is_freeform = template_id == 0
+
+        if is_freeform:
+            # Use formatted fields from CitationTable if available
+            footnote = _get_row_value(citation, "Footnote")
+            short_footnote = _get_row_value(citation, "ShortFootnote")
+            bibliography = _get_row_value(citation, "CitationBibliography")
+
+            # Fallback: Generate from Fields BLOB if NULL
+            if not footnote:
+                footnote = self._generate_citation_from_fields(citation)
+            if not short_footnote:
+                short_footnote = self._generate_short_footnote_from_fields(citation, footnote)
+            if not bibliography:
+                bibliography = self._generate_bibliography_from_fields(citation)
+        else:
+            # Template-based: Show placeholders
+            footnote = f"[Citation {citation_id}, Template: {template_name}]"
+            short_footnote = footnote
+            bibliography = f"[Source {source_id}, Template: {template_name}]"
+
+        return CitationInfo(
+            citation_id=citation_id,
+            source_id=source_id,
+            footnote=footnote,
+            short_footnote=short_footnote,
+            bibliography=bibliography,
+            is_freeform=is_freeform,
+            template_name=template_name,
+        )
+
+    def _generate_citation_from_fields(self, citation: dict) -> str:
+        """
+        Generate footnote text from BLOB fields (fallback).
+        First checks SourceFields for pre-formatted Footnote, then CitationFields for page/details.
+        Returns citation with WARNING only if all approaches fail.
+        """
+        citation_id = _get_row_value(citation, "CitationID", 0)
+
+        # First, check SourceFields BLOB for pre-formatted Footnote
+        source_fields_blob = _get_row_value(citation, "SourceFields")
+        if source_fields_blob:
+            from rmagent.rmlib.parsers.blob_parser import parse_source_fields
+
+            try:
+                source_fields = parse_source_fields(source_fields_blob)
+                footnote = source_fields.get("Footnote", "")
+                if footnote:
+                    return footnote
+            except Exception:
+                pass  # Continue to next approach
+
+        # Fallback: Check CitationFields BLOB for page/details
+        citation_fields_blob = _get_row_value(citation, "CitationFields")
+        if citation_fields_blob:
+            from rmagent.rmlib.parsers.blob_parser import parse_citation_fields
+
+            try:
+                fields = parse_citation_fields(citation_fields_blob)
+                # Simple format: Page field is most common
+                page = fields.get("Page", "")
+                if page:
+                    return f"p. {page}"
+                # If no page, show first non-empty field
+                for key, value in fields.items():
+                    if value:
+                        return f"{key}: {value}"
+            except Exception:
+                pass
+
+        return f"[Citation {citation_id}] ⚠️ WARNING: Missing citation fields"
+
+    def _generate_short_footnote_from_fields(self, citation: dict, full_footnote: str) -> str:
+        """
+        Generate short footnote text from BLOB fields (fallback).
+        First checks SourceFields for pre-formatted ShortFootnote, then falls back to full footnote.
+        """
+        # Check SourceFields BLOB for pre-formatted ShortFootnote
+        source_fields_blob = _get_row_value(citation, "SourceFields")
+        if source_fields_blob:
+            from rmagent.rmlib.parsers.blob_parser import parse_source_fields
+
+            try:
+                source_fields = parse_source_fields(source_fields_blob)
+                short_footnote = source_fields.get("ShortFootnote", "")
+                if short_footnote:
+                    return short_footnote
+            except Exception:
+                pass
+
+        # Fallback: use full footnote
+        return full_footnote
+
+    def _generate_bibliography_from_fields(self, citation: dict) -> str:
+        """
+        Generate bibliography entry from SourceFields BLOB (fallback).
+        First checks for pre-formatted Bibliography field, then constructs from individual fields.
+        Returns source name with WARNING only if all approaches fail.
+        """
+        source_id = _get_row_value(citation, "SourceID", 0)
+        source_name = _get_row_value(citation, "SourceName", "[Unknown Source]")
+        fields_blob = _get_row_value(citation, "SourceFields")
+
+        if not fields_blob:
+            return f"{source_name} ⚠️ WARNING: Missing source fields"
+
+        from rmagent.rmlib.parsers.blob_parser import parse_source_fields
+
+        try:
+            fields = parse_source_fields(fields_blob)
+
+            # First, check for pre-formatted Bibliography field (RootsMagic stores formatted text here)
+            bibliography = fields.get("Bibliography", "")
+            if bibliography:
+                return bibliography
+
+            # Fallback: Evidence Explained basic format: Author. Title. Publisher, Year.
+            author = fields.get("Author", "")
+            title = fields.get("Title", "")
+            publisher = fields.get("Publisher", "")
+            year = fields.get("Year", "")
+
+            parts = []
+            if author:
+                parts.append(f"{author}.")
+            if title:
+                parts.append(f"*{title}.*")
+            if publisher and year:
+                parts.append(f"{publisher}, {year}.")
+            elif publisher:
+                parts.append(f"{publisher}.")
+            elif year:
+                parts.append(f"{year}.")
+
+            if parts:
+                return " ".join(parts)
+            return f"{source_name} ⚠️ WARNING: No source details in fields"
+        except Exception as e:
+            return f"{source_name} ⚠️ WARNING: Failed to parse source fields ({e})"
+
+    def _process_citations_in_text(
+        self, text: str, all_citations: list[dict]
+    ) -> tuple[str, list[tuple[int, CitationInfo]], CitationTracker]:
+        """
+        Process {{cite:ID}} markers in text, replace with [^N] footnote markers.
+
+        Returns:
+            - Modified text with [^N] markers
+            - List of (footnote_num, CitationInfo) in order of appearance
+            - CitationTracker with all citation metadata
+        """
+        import re
+
+        tracker = CitationTracker()
+
+        # Build lookup: CitationID -> CitationInfo
+        citation_lookup = {}
+        for citation in all_citations:
+            cid = _get_row_value(citation, "CitationID", 0)
+            citation_lookup[cid] = self._format_citation_info(citation)
+
+        # Find all {{cite:ID}} markers (double braces as specified in prompt)
+        pattern = r"\{\{cite:(\d+)\}\}"
+        matches = list(re.finditer(pattern, text))
+
+        # Replace markers with footnote numbers (in reverse to preserve positions)
+        replacements = []
+        for match in matches:
+            citation_id = int(match.group(1))
+
+            if citation_id not in citation_lookup:
+                # Citation not found, leave placeholder
+                footnote_marker = f"[^{citation_id}?]"
+            else:
+                citation_info = citation_lookup[citation_id]
+                source_id = citation_info.source_id
+
+                # Get or assign footnote number
+                footnote_num = tracker.add_citation(citation_id, source_id)
+                footnote_marker = f"[^{footnote_num}]"
+
+            replacements.append((match.span(), footnote_marker))
+
+        # Apply replacements in reverse order to preserve positions
+        modified_text = text
+        for (start, end), replacement in reversed(replacements):
+            modified_text = modified_text[:start] + replacement + modified_text[end:]
+
+        # Build ordered footnote list
+        footnotes = []
+        for citation_id in tracker.citation_order:
+            citation_info = citation_lookup.get(citation_id)
+            if citation_info:
+                footnote_num = tracker.citation_to_footnote[citation_id]
+                footnotes.append((footnote_num, citation_info))
+
+        return modified_text, footnotes, tracker
+
+    def _generate_footnotes_section(
+        self, footnotes: list[tuple[int, CitationInfo]], tracker: CitationTracker
+    ) -> str:
+        """
+        Generate footnotes section with numbered entries.
+        First citation per source uses full footnote, subsequent use short.
+        """
+        lines = []
+
+        for footnote_num, citation_info in footnotes:
+            # Determine if first citation for this source
+            is_first = tracker.is_first_for_source(citation_info.citation_id, citation_info.source_id)
+
+            # Use full or short footnote
+            footnote_text = citation_info.footnote if is_first else citation_info.short_footnote
+
+            lines.append(f"[^{footnote_num}]: {footnote_text}")
+
+        return "\n".join(lines)
+
+    def _generate_sources_section(self, all_citations: list[dict]) -> str:
+        """
+        Generate alphabetically sorted bibliography using SourceTable.ActualText.
+        Deduplicate by SourceID.
+        """
+        # Build unique sources map: SourceID -> CitationInfo
+        sources = {}
+        for citation in all_citations:
+            source_id = _get_row_value(citation, "SourceID", 0)
+            if source_id not in sources:
+                citation_info = self._format_citation_info(citation)
+                sources[source_id] = citation_info
+
+        # Sort alphabetically by bibliography text
+        sorted_sources = sorted(sources.values(), key=lambda c: c.bibliography.lower())
+
+        # Format as list
+        lines = []
+        for citation_info in sorted_sources:
+            lines.append(f"- {citation_info.bibliography}")
+
+        return "\n".join(lines)

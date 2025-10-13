@@ -144,6 +144,7 @@ class TestBiography:
             marriage_family="He married Jane Doe.",
             later_life="He lived in Pennsylvania.",
             death_legacy="He died in 1920.",
+            footnotes="",
             sources="1. Census records",
         )
 
@@ -166,11 +167,12 @@ class TestBiography:
             marriage_family="",
             later_life="",
             death_legacy="He died in 1920.",
+            footnotes="",
             sources="",
         )
 
         markdown = bio.render_markdown()
-        assert "# John Smith" in markdown
+        assert "# Biography of John Smith" in markdown
         assert "## Introduction" in markdown
         assert "## Early Life & Family Background" in markdown
         assert "John Smith was born in 1850." in markdown
@@ -190,11 +192,12 @@ class TestBiography:
             marriage_family="",
             later_life="",
             death_legacy="",
+            footnotes="",
             sources="",
         )
 
         str_output = str(bio)
-        assert "# John Smith" in str_output
+        assert "# Biography of John Smith" in str_output
 
 
 class TestBiographyGenerator:
@@ -332,7 +335,8 @@ class TestBiographyGenerator:
 
     def test_generate_introduction(self):
         """Test generating introduction section."""
-        generator = BiographyGenerator()
+        from rmagent.generators.biography import BiographyTemplates
+        templates = BiographyTemplates()
 
         context = PersonContext(
             person_id=1,
@@ -355,7 +359,7 @@ class TestBiographyGenerator:
             mother_name="Lucy Virginia Dorsey",
         )
 
-        intro = generator._generate_introduction(context)
+        intro = templates.generate_introduction(context)
 
         assert "John Dorsey Iams" in intro
         assert "30 Dec 1921" in intro
@@ -365,7 +369,8 @@ class TestBiographyGenerator:
 
     def test_generate_early_life(self):
         """Test generating early life section."""
-        generator = BiographyGenerator()
+        from rmagent.generators.biography import BiographyTemplates
+        templates = BiographyTemplates()
 
         # Test with siblings
         context = PersonContext(
@@ -388,12 +393,13 @@ class TestBiographyGenerator:
             siblings=[{"PersonID": 2}, {"PersonID": 3}],
         )
 
-        early_life = generator._generate_early_life(context)
+        early_life = templates.generate_early_life(context)
         assert "2 siblings" in early_life
 
     def test_format_sources_footnote_style(self):
         """Test formatting sources in footnote style."""
-        generator = BiographyGenerator()
+        from rmagent.generators.biography import CitationProcessor
+        citation_processor = CitationProcessor()
 
         context = PersonContext(
             person_id=1,
@@ -422,7 +428,7 @@ class TestBiographyGenerator:
             ],
         )
 
-        sources = generator._format_sources_section(context, CitationStyle.FOOTNOTE)
+        sources = citation_processor.format_sources_section(context, CitationStyle.FOOTNOTE)
 
         assert "1. *U.S. Census 1850*" in sources
         assert "2. *Birth Certificate*" in sources
@@ -431,7 +437,8 @@ class TestBiographyGenerator:
 
     def test_format_sources_parenthetical_style(self):
         """Test formatting sources in parenthetical style."""
-        generator = BiographyGenerator()
+        from rmagent.generators.biography import CitationProcessor
+        citation_processor = CitationProcessor()
 
         context = PersonContext(
             person_id=1,
@@ -455,14 +462,15 @@ class TestBiographyGenerator:
             ],
         )
 
-        sources = generator._format_sources_section(context, CitationStyle.PARENTHETICAL)
+        sources = citation_processor.format_sources_section(context, CitationStyle.PARENTHETICAL)
 
         assert "- *U.S. Census 1850*" in sources
         assert "(Page 123)" in sources
 
     def test_parse_ai_response(self):
         """Test parsing AI-generated biography."""
-        generator = BiographyGenerator()
+        from rmagent.generators.biography import BiographyTemplates
+        templates = BiographyTemplates()
 
         ai_response = """
 ## Introduction
@@ -482,7 +490,7 @@ John worked as a blacksmith for thirty years.
 John died in 1920 in Pennsylvania.
 """
 
-        sections = generator._parse_ai_response(ai_response)
+        sections = templates.parse_ai_response(ai_response)
 
         assert "John Smith was born" in sections["introduction"]
         assert "grew up on a farm" in sections["early_life"]

@@ -118,6 +118,7 @@ def test_render_prompt_with_provider():
         "biography",
         {
             "person_summary": "John Doe",
+            "person_notes": "No notes",
             "timeline_overview": "Timeline",
             "early_life_overview": "Early life",
             "family_overview": "Family",
@@ -125,6 +126,7 @@ def test_render_prompt_with_provider():
             "relationship_notes": "Relationships",
             "family_loss_notes": "Losses",
             "source_notes": "Sources",
+            "available_citations": "No citations",
         },
         provider="anthropic",
     )

@@ -964,14 +964,23 @@ _GET_EVENT_CITATIONS_SQL = """
 SELECT
   c.CitationID,
   c.CitationName,
+  c.Footnote,
+  c.ShortFootnote,
+  c.Bibliography AS CitationBibliography,
+  c.Fields AS CitationFields,
   s.SourceID,
   s.Name AS SourceName,
-  s.TemplateID
+  s.TemplateID,
+  s.ActualText AS SourceBibliography,
+  s.Fields AS SourceFields,
+  st.Name AS TemplateName
 FROM CitationLinkTable cl
 JOIN CitationTable c
   ON cl.CitationID = c.CitationID
 JOIN SourceTable s
   ON c.SourceID = s.SourceID
+LEFT JOIN SourceTemplateTable st
+  ON s.TemplateID = st.TemplateID
 WHERE cl.OwnerType = 2
   AND cl.OwnerID = ?
 ORDER BY cl.SortOrder,

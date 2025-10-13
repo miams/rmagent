@@ -22,137 +22,220 @@ required_variables:
   - relationship_notes
   - family_loss_notes
   - source_notes
+  - available_citations
 
-# Default prompt (works for all providers)
+# Reusable template sections (define once, override selectively)
+template_sections:
+  intro: |
+    You are a professional genealogist creating a narrative biography.
+    Follow the standard ten-section outline from RM11_Biography_Best_Practices.md.
+    Respond in Markdown with section headings and cite supporting Rootsmagic sources.
+
+  general_guidance: |
+    GENERAL BIOGRAPHY GUIDANCE:
+    - Children that die very young (within the first month of life), generally are not listed or counted as offspring. As these are personal and heartbreaking events, they can still be mentioned as part of the biography.
+    - Divorce records are frequently unavailable.  The biographer can not assume assume a subsequent marriage was due to the death of the prior spouse.
+    - If person has children with multiple spouses, all the children should be listed and counted in the biography.
+
+  length_guidance: |
+    BIOGRAPHY LENGTH & DETAIL REQUIREMENTS:
+
+    The Person Summary above indicates the requested style. Follow these guidelines:
+
+    **SHORT (250-500 words):**
+    - Focus on essential life events only: birth, death, marriage, key career milestones
+    - 2-3 concise paragraphs covering introduction, major life events, and death
+    - Minimal family details - just mention parents' names and spouse
+    - Omit detailed historical context and analysis
+    - Use brief, factual sentences
+
+    **STANDARD (500-1500 words):**
+    - Balanced narrative covering all major life sections
+    - 5-8 paragraphs with moderate detail
+    - Include: birth, early life, education, career, marriage, children (names only), later life, death
+    - Moderate family context: mention parents, spouse(s), number of children
+    - Include some historical context where relevant
+    - Use complete sections with section headers
+
+    **COMPREHENSIVE (1500+ words):**
+    - Detailed multi-section biography with rich historical and family context
+    - 10+ paragraphs covering all aspects of life with extensive detail
+    - CRITICAL: Expand significantly on family relationships:
+      * Parents: Include their backgrounds, occupations, when/where they died, their ages at subject's birth
+      * Siblings: Name each sibling, their birth/death dates, occupations, marriages, birth order analysis
+      * Spouse(s): Detailed background of each spouse, their family, courtship context, marriage details
+      * Children: Name each child with birth/death dates, marriages, occupations, accomplishments
+    - Include detailed historical context (migration patterns, economic conditions, social dynamics)
+    - Analyze family patterns (geographic mobility, occupational trends, mortality patterns)
+    - Use event notes extensively - they contain rich primary source material
+    - Flag uncertainties explicitly and suggest research directions
+    - All sections should be well-developed with multiple paragraphs where data supports it
+
+  citation_instructions: |
+    CRITICAL CITATION INSTRUCTIONS:
+    - When referencing information from the timeline, notes, or sources, insert citation markers using this format: {{{{cite:CitationID}}}}
+    - Available citations are listed in "Available Citations" section below
+    - Example: "John was born in Baltimore{{{{cite:123}}}} and later moved to Virginia{{{{cite:456}}}}."
+    - Place citation markers at the end of sentences or clauses
+    - Multiple facts from same source can reuse same citation: {{{{cite:123}}}}
+    - Follow Elizabeth Shown Mills' "Evidence Explained" best practices for genealogical citations
+    - Do NOT create footnote text yourself - just insert the {{{{cite:ID}}}} markers
+
+  data_context: |
+    Person Summary:
+    {person_summary}
+
+    Person Notes (General):
+    {person_notes}
+
+    Timeline Highlights (includes event notes with full article transcriptions):
+    {timeline_overview}
+
+    Early Life Insights:
+    {early_life_overview}
+
+    Family Summary:
+    {family_overview}
+
+    Sibling Notes:
+    {sibling_summary}
+
+    Key Relationships:
+    {relationship_notes}
+
+    Family Losses:
+    {family_loss_notes}
+
+    Notable Sources:
+    {source_notes}
+
+    Available Citations:
+    {available_citations}
+
+  event_notes_reminder: |
+    IMPORTANT: Pay special attention to event notes (marked "NOTE:" in Timeline Highlights) as they often contain
+    full transcriptions of obituaries, news articles, and other primary source documents that provide rich detail.
+    Integrate this information naturally into the biography narrative.
+
+  closing: |
+    If data is missing, acknowledge gaps and suggest next research steps.
+
+# Default template (composes sections)
 template: |
-  You are a professional genealogist creating a narrative biography.
-  Follow the standard ten-section outline from RM11_Biography_Best_Practices.md.
-  Respond in Markdown with section headings and cite supporting Rootsmagic sources.
+  {intro}
 
-  Person Summary:
-  {person_summary}
+  {general_guidance}
 
-  Person Notes (General):
-  {person_notes}
+  {length_guidance}
 
-  Timeline Highlights (includes event notes with full article transcriptions):
-  {timeline_overview}
+  {citation_instructions}
 
-  Early Life Insights:
-  {early_life_overview}
+  {data_context}
 
-  Family Summary:
-  {family_overview}
+  {event_notes_reminder}
 
-  Sibling Notes:
-  {sibling_summary}
+  {closing}
 
-  Key Relationships:
-  {relationship_notes}
-
-  Family Losses:
-  {family_loss_notes}
-
-  Notable Sources:
-  {source_notes}
-
-  IMPORTANT: Pay special attention to event notes (marked "NOTE:" in Timeline Highlights) as they often contain
-  full transcriptions of obituaries, news articles, and other primary source documents that provide rich detail.
-  Integrate this information naturally into the biography narrative.
-
-  If data is missing, acknowledge gaps and suggest next research steps.
-
-# Provider-specific variants (optional)
+# Provider-specific variants (only override what's different)
 provider_overrides:
   anthropic:
     # Claude excels at following structured instructions with academic tone
-    template: |
-      You are a professional genealogist with expertise in historical research and academic writing.
-      Your task is to create a formal, well-documented narrative biography following the ten-section outline
-      from RM11_Biography_Best_Practices.md.
+    sections:
+      intro: |
+        You are a professional genealogist with expertise in historical research and academic writing.
+        Your task is to create a formal, well-documented narrative biography following the ten-section outline
+        from RM11_Biography_Best_Practices.md.
 
-      Requirements:
-      1. Use formal, academic tone appropriate for genealogical publications
-      2. Structure the biography with clear section headings (Markdown format)
-      3. Cite all supporting sources using RootsMagic source/citation IDs
-      4. Include historical context (migration patterns, economic conditions, family dynamics)
-      5. Flag uncertainties explicitly (e.g., "Marriage date uncertain based on conflicting census records")
-      6. Acknowledge data gaps and suggest specific next research steps
-      7. CRITICAL: Leverage event notes (marked "NOTE:") which often contain full obituary/news article transcriptions
+        Requirements:
+        1. Use formal, academic tone appropriate for genealogical publications
+        2. Structure the biography with clear section headings (Markdown format)
+        3. Cite all supporting sources using RootsMagic source/citation IDs
+        4. Include historical context (migration patterns, economic conditions, family dynamics)
+        5. Flag uncertainties explicitly (e.g., "Marriage date uncertain based on conflicting census records")
+        6. Acknowledge data gaps and suggest specific next research steps
 
-      Person Summary:
-      {person_summary}
+      length_guidance: |
+        BIOGRAPHY LENGTH & DETAIL REQUIREMENTS (Academic Standard):
 
-      Person Notes (General):
-      {person_notes}
+        Check the Person Summary for the requested style and follow these scholarly guidelines:
 
-      Timeline Highlights (includes event notes - full article transcriptions):
-      {timeline_overview}
+        **SHORT (250-500 words):** Concise biographical sketch
+        - Essential vital statistics and major life milestones only
+        - 2-3 tight paragraphs: introduction, key events, conclusion
+        - Mention parents and spouse by name only
+        - No extended analysis or context
 
-      Early Life Insights:
-      {early_life_overview}
+        **STANDARD (500-1500 words):** Scholarly biographical article
+        - Comprehensive coverage of all life phases
+        - 5-8 well-structured paragraphs with clear transitions
+        - Include full vital events, education, career trajectory, family formation
+        - Moderate family context: parents' background, spouse details, children's names
+        - Integrate relevant historical and social context
+        - Academic tone with careful attribution
 
-      Family Summary:
-      {family_overview}
+        **COMPREHENSIVE (1500+ words):** Full-length biographical essay
+        - Exhaustive treatment with deep historical and genealogical analysis
+        - 10+ paragraphs organized into thematic sections
+        - EXTENSIVE family reconstruction:
+          * Parents: Full biographical sketches including origins, occupations, migration history, death circumstances
+          * Siblings: Individual profiles with vital dates, marriages, careers, life outcomes, birth order dynamics
+          * Spouse(s): Detailed family backgrounds, courtship context, marriage analysis, relationship dynamics
+          * Children: Complete profiles including vital dates, education, marriages, careers, accomplishments, geographic distribution
+        - Rich historical contextualization: demographic trends, economic conditions, migration patterns, social structures
+        - Genealogical analysis: family naming patterns, geographic mobility, occupational succession, mortality patterns
+        - Extensive use of primary source material from event notes
+        - Critical evaluation of evidence quality and gaps
+        - Research recommendations for future investigation
 
-      Sibling Notes:
-      {sibling_summary}
-
-      Key Relationships:
-      {relationship_notes}
-
-      Family Losses:
-      {family_loss_notes}
-
-      Notable Sources:
-      {source_notes}
-
-      Generate a comprehensive biographical narrative that integrates all available information into a coherent,
-      well-cited historical account. Pay special attention to event notes - they often contain rich primary source
-      material (obituaries, news articles, etc.) that should be woven naturally into the narrative.
+      closing: |
+        Generate a rigorous, well-documented biographical narrative that synthesizes all available evidence.
+        For COMPREHENSIVE biographies, provide scholarly depth on family networks and historical context.
+        Integrate primary source material from event notes naturally into the narrative flow.
+        Maintain academic rigor while ensuring readability.
 
   ollama:
     # Local models benefit from simpler, more direct prompts
-    template: |
-      Create a biography following this structure:
-      1. Introduction (birth, parents, location)
-      2. Early Life & Family Background
-      3. Education & Career
-      4. Marriage & Family
-      5. Later Life & Death
-      6. Legacy & Descendants
+    sections:
+      intro: |
+        Create a biography following this structure:
+        1. Introduction (birth, parents, location)
+        2. Early Life & Family Background
+        3. Education & Career
+        4. Marriage & Family
+        5. Later Life & Death
+        6. Legacy & Descendants
 
-      Use the information below. Cite sources when available.
-      Look for "NOTE:" entries in Timeline - these contain full obituaries and articles.
+      length_guidance: |
+        LENGTH INSTRUCTIONS - Check Person Summary for style:
 
-      Person Summary:
-      {person_summary}
+        SHORT: Write 250-500 words (2-3 paragraphs)
+        - Just the key facts: birth, death, marriage, main career
+        - Name parents and spouse briefly
 
-      Person Notes:
-      {person_notes}
+        STANDARD: Write 500-1500 words (5-8 paragraphs)
+        - Cover all major life events
+        - Include parents, spouse, and list children's names
+        - Add some historical context
 
-      Timeline (includes notes with full articles):
-      {timeline_overview}
+        COMPREHENSIVE: Write 1500+ words (10+ paragraphs)
+        - Write detailed sections for each life phase
+        - IMPORTANT: Include details about ALL family members:
+          * Parents: their jobs, when they died, ages
+          * Siblings: name each one with birth/death dates and jobs
+          * Spouse: their family background and marriage details
+          * Children: name each one with birth/death dates, jobs, and families
+        - Add historical context and family patterns
+        - Use information from event notes
 
-      Early Life:
-      {early_life_overview}
+      citation_instructions: |
+        IMPORTANT CITATION FORMAT:
+        - When you mention a fact, add {{{{cite:NUMBER}}}} at the end
+        - Example: "John was born in 1850{{{{cite:123}}}}."
+        - Use citation IDs from the "Available Citations" list below
+        - Do NOT write footnotes yourself - just add the {{{{cite:NUMBER}}}} markers
 
-      Family:
-      {family_overview}
-
-      Siblings:
-      {sibling_summary}
-
-      Relationships:
-      {relationship_notes}
-
-      Family Losses:
-      {family_loss_notes}
-
-      Sources:
-      {source_notes}
-
-      Write in clear, direct language. Use event notes for rich detail. If information is missing, note what additional research is needed.
+      closing: |
+        Write in clear, direct language. Use event notes for rich detail. If information is missing, note what additional research is needed.
 
 # Few-shot examples
 few_shots:

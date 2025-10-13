@@ -79,7 +79,13 @@ rmagent/
 │   │
 │   ├── generators/          # Output generators
 │   │   ├── __init__.py
-│   │   ├── biography.py     # Biography generator
+│   │   ├── biography/       # Biography generator (modular)
+│   │   │   ├── __init__.py  # Public API
+│   │   │   ├── models.py    # Data models & enums
+│   │   │   ├── generator.py # Main generator class
+│   │   │   ├── rendering.py # Markdown rendering
+│   │   │   ├── citations.py # Citation processing
+│   │   │   └── templates.py # Template generation
 │   │   ├── timeline.py      # Timeline generator
 │   │   ├── quality_report.py # Quality report generator
 │   │   └── hugo_exporter.py # Hugo export
@@ -274,8 +280,12 @@ class GenealogyAgent:
 
 **Purpose:** Generate structured output formats
 
-**BiographyGenerator** (`biography.py`)
+**BiographyGenerator** (`biography/`)
+
+Modular biography generation with separated concerns:
+
 ```python
+# biography/generator.py - Main generator class
 class BiographyGenerator:
     """Generate biographical narratives.
 
@@ -294,7 +304,45 @@ class BiographyGenerator:
         citation_style: CitationStyle = CitationStyle.FOOTNOTE,
         use_ai: bool = True
     ) -> Biography
+
+# biography/models.py - Data models
+@dataclass
+class Biography:
+    """Generated biography with structured sections."""
+    person_id: int
+    full_name: str
+    introduction: str
+    # ... other sections
+
+    def render_markdown(self) -> str
+        """Render as Markdown."""
+
+# biography/rendering.py - Markdown formatting
+class BiographyRenderer:
+    """Handles Markdown rendering and formatting."""
+    def render_markdown(self, bio: Biography) -> str
+    def render_metadata(self, bio: Biography) -> str
+
+# biography/citations.py - Citation processing
+class CitationProcessor:
+    """Process citations and generate footnotes."""
+    def process_citations_in_text(self, text: str) -> str
+    def generate_footnotes_section(self) -> str
+    def generate_sources_section(self) -> str
+
+# biography/templates.py - Template-based generation
+class BiographyTemplates:
+    """Generate biography sections without AI."""
+    def generate_introduction(self, context: PersonContext) -> str
+    def generate_early_life(self, context: PersonContext) -> str
+    # ... other sections
 ```
+
+**Module Benefits:**
+- **Maintainability:** Each file 200-600 lines vs 1,400+ monolithic
+- **Testability:** Components tested independently
+- **Extensibility:** Easy to add new renderers or citation styles
+- **Clarity:** Clear separation of data, logic, and presentation
 
 **TimelineGenerator** (`timeline.py`)
 ```python

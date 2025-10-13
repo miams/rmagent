@@ -171,6 +171,12 @@ class CitationSettings(BaseModel):
         return style_lower
 
 
+class BiographySettings(BaseModel):
+    """Biography generation preferences."""
+
+    meta_default: bool = Field(default=True)
+
+
 class SearchSettings(BaseModel):
     """Search configuration settings."""
 
@@ -227,6 +233,7 @@ class AppConfig(BaseModel):
     output: OutputSettings
     privacy: PrivacySettings
     citation: CitationSettings
+    biography: BiographySettings
     search: SearchSettings
     logging: LoggingSettings
 
@@ -339,6 +346,10 @@ def load_app_config(
             default_style=_env("DEFAULT_CITATION_STYLE", "footnote"),
         )
 
+        biography_settings = BiographySettings(
+            meta_default=_parse_bool(_env("BIOGRAPHY_META_DEFAULT", "true"), True),
+        )
+
         search_settings = SearchSettings(
             surname_variants_all=_env(
                 "SURNAME_VARIANTS_ALL", "Iams,Iames,Iiams,Iiames,Ijams,Ijames,Imes,Eimes"
@@ -357,6 +368,7 @@ def load_app_config(
             output=output_settings,
             privacy=privacy_settings,
             citation=citation_settings,
+            biography=biography_settings,
             search=search_settings,
             logging=logging_settings,
         )
