@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `biography/rendering.py` - Markdown rendering (220 lines)
   - `biography/citations.py` - Citation processing (308 lines)
   - `biography/templates.py` - Template generation (231 lines)
+- **Major refactoring:** Genealogy agent and query service modularized for better organization:
+  - `rmlib/sql_queries.py` - SQL query constants extracted from queries.py (541 lines)
+  - `rmlib/queries.py` - Query service class reduced from 1,076 to 581 lines (-46%)
+  - `agent/formatters.py` - Formatting utilities extracted from genealogy_agent.py (505 lines)
+  - `agent/genealogy_agent.py` - Agent orchestration reduced from 735 to 289 lines (-61%)
 - Improved maintainability: Each module now has a single, clear responsibility
 - Enhanced testability: Components can be tested independently
 - Better extensibility: Easy to add new renderers or citation styles
@@ -31,8 +36,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Python syntax warning in docstring (added raw string prefix)
 
 ### Test Coverage
-- All 24 biography generator tests passing after refactoring
-- Module coverage: generator (88%), models (90%), rendering (71%), citations (68%), templates (63%)
+- All 418 tests passing after refactoring
+- Biography modules: generator (88%), models (90%), rendering (71%), citations (68%), templates (63%)
+- Refactored modules: genealogy_agent (84%), queries (91%), formatters (included in agent coverage)
+- Overall: 82% coverage across codebase
 
 ## [0.2.0] - 2025-10-12 - Phase 5 Complete
 

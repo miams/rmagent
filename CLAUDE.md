@@ -132,6 +132,11 @@ LOG_LEVEL=DEBUG                      # Enable LLM logging to logs/llm_debug.json
 - ✅ Phase 6: Documentation (2/3) - User & developer docs complete
 
 **Recent Enhancements:**
+- **Major refactoring:** Modularized genealogy_agent.py and queries.py for better maintainability
+  - `agent/formatters.py` - Extracted formatting utilities (505 lines)
+  - `agent/genealogy_agent.py` - Focused on orchestration (735→289 lines, -61%)
+  - `rmlib/sql_queries.py` - Extracted SQL constants (541 lines)
+  - `rmlib/queries.py` - Focused on query service (1,076→581 lines, -46%)
 - Biography notes integration (PersonTable.Note + EventTable.Note in AI context)
 - Structured biography file output (`./reports/biographies/Surname, Given (bbbb-dddd).md`)
 - Source formatting improvements (italic rendering, type prefix removal)
@@ -212,11 +217,13 @@ git commit -m "refactor: restructure code"
 **Sample Database:** `data/Iiams.rmtree` (11,571 persons, 29,543 events, 114 sources, 10,838 citations)
 
 **Key Files:**
-- `rmagent/agent/genealogy_agent.py` - Agent orchestration
+- `rmagent/agent/genealogy_agent.py` - Agent orchestration (289 lines)
+- `rmagent/agent/formatters.py` - Formatting utilities for genealogical data (505 lines)
 - `rmagent/agent/llm_provider.py` - Multi-provider abstraction (Anthropic/OpenAI/Ollama)
 - `rmagent/config/config.py` - Configuration with `load_app_config()`
 - `rmagent/rmlib/database.py` - Database connection with RMNOCASE
-- `rmagent/rmlib/queries.py` - 15 optimized query patterns
+- `rmagent/rmlib/queries.py` - Query service class (581 lines)
+- `rmagent/rmlib/sql_queries.py` - SQL query constants (541 lines)
 - `sqlite-extension/python_example.py` - RMNOCASE collation examples
 
 **External Resources:**
