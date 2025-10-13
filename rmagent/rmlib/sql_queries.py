@@ -18,7 +18,8 @@ SELECT
   n.Suffix,
   n.BirthYear,
   n.DeathYear,
-  p.Sex
+  p.Sex,
+  p.Note
 FROM PersonTable p
 JOIN NameTable n
   ON p.PersonID = n.OwnerID

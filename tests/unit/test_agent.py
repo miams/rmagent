@@ -40,6 +40,7 @@ class StubQueryService:
             "Surname": "Iams",
             "BirthYear": 1968,
             "DeathYear": None,
+            "Note": "Test person note",
         }
         self.events = [
             {
@@ -162,6 +163,10 @@ class StubQueryService:
         if person_id == self.person["PersonID"]:
             return list(self.children)
         return [dict(row) for row in self.parent_children.get(person_id, [])]
+
+    def get_event_citations(self, event_id: int):
+        # Return empty list for stub - no citations needed for test
+        return []
 
     def search_primary_names(self, surname=None, given=None, limit=10):
         return [dict(self.person)]
