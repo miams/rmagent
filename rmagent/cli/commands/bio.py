@@ -51,6 +51,11 @@ DEFAULT_BIO_DIR = Path("./reports/biographies")
     default=None,
     help="Include Hugo-style front matter metadata (default: from config)",
 )
+@click.option(
+    "--show-prompt",
+    is_flag=True,
+    help="Display the LLM prompt being sent (requires --no-no-ai)",
+)
 @click.pass_obj
 def bio(
     ctx,
@@ -61,6 +66,7 @@ def bio(
     no_ai: bool,
     no_sources: bool,
     meta: bool | None,
+    show_prompt: bool,
 ):
     """
     Generate biography for a person.
@@ -71,8 +77,14 @@ def bio(
         rmagent bio 1 --length comprehensive
         rmagent bio 1 --output bio.md --citation-style footnote
         rmagent bio 1 --no-ai  # Template-based (no LLM)
+        rmagent bio 1 --show-prompt  # Display the LLM prompt
     """
     try:
+        # Validate --show-prompt usage
+        if show_prompt and no_ai:
+            console.print("[red]Error:[/red] --show-prompt requires AI generation (remove --no-ai)")
+            raise click.Abort()
+
         # Map string to enum
         length_enum = {
             "short": BiographyLength.SHORT,
@@ -86,30 +98,49 @@ def bio(
             "narrative": CitationStyle.NARRATIVE,
         }[citation_style.lower()]
 
+        # Create generator and agent
+        config = ctx.load_config()
+        agent = (
+            None
+            if no_ai
+            else GenealogyAgent(
+                llm_provider=config.build_provider(),
+                db_path=config.database.database_path,
+                extension_path=config.database.sqlite_extension_path,
+            )
+        )
+
+        generator = BiographyGenerator(
+            db=config.database.database_path,
+            extension_path=config.database.sqlite_extension_path,
+            agent=agent,
+        )
+
+        # Show prompt if requested
+        if show_prompt and agent:
+            from rmagent.agent.prompts import render_prompt
+
+            console.print("\n[bold cyan]═══ Biography Generation Prompt ═══[/bold cyan]\n")
+
+            # Build the same context the agent would build
+            context = agent._build_biography_context(person_id, length.lower())
+            prompt = render_prompt("biography", context)
+
+            # Display the prompt with proper line breaks
+            console.print(prompt)
+            console.print("\n[bold cyan]═══ End of Prompt ═══[/bold cyan]\n")
+
+            # Ask if user wants to continue
+            if not click.confirm("Continue with biography generation?", default=True):
+                console.print("[yellow]Biography generation cancelled.[/yellow]")
+                return
+
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
             console=console,
         ) as progress:
             task = progress.add_task(f"Generating biography for person {person_id}...", total=None)
-
-            # Create generator
-            config = ctx.load_config()
-            agent = (
-                None
-                if no_ai
-                else GenealogyAgent(
-                    llm_provider=config.build_provider(),
-                    db_path=config.database.database_path,
-                    extension_path=config.database.sqlite_extension_path,
-                )
-            )
-
-            generator = BiographyGenerator(
-                db=config.database.database_path,
-                extension_path=config.database.sqlite_extension_path,
-                agent=agent,
-            )
 
             # Generate biography
             bio_result = generator.generate(
