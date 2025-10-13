@@ -124,7 +124,13 @@ class GenealogyAgent:
             life_span = GenealogyFormatters.derive_life_span(person, events)
 
             person_summary = GenealogyFormatters.format_person_summary(person, style)
-            timeline_overview = GenealogyFormatters.format_events(events)
+
+            # Build event-to-citations mapping for inline citation markers
+            event_citations_map = self._build_event_citations_map(query, events)
+
+            # Format timeline with inline citation IDs
+            timeline_overview = GenealogyFormatters.format_events(events, event_citations_map)
+
             relationship_notes = GenealogyFormatters.format_ancestors(ancestors)
             family_overview = GenealogyFormatters.format_family_overview(spouses, children, siblings)
             early_life_overview = GenealogyFormatters.format_early_life(person, parents, siblings, life_span)
@@ -142,10 +148,6 @@ class GenealogyAgent:
                 person_notes if person_notes else "No person-level notes available."
             )
 
-            # Collect all citations for the person
-            all_citations = self._collect_all_citations_for_person(query, person_id)
-            available_citations = GenealogyFormatters.format_available_citations(all_citations)
-
             # Generate style-specific length guidance
             length_guidance = self._get_length_guidance_for_style(style)
 
@@ -158,8 +160,7 @@ class GenealogyAgent:
                 "early_life_overview": early_life_overview,
                 "family_loss_notes": family_loss_notes,
                 "sibling_summary": sibling_summary,
-                "source_notes": "Sources include citations extracted from RootsMagic events.",
-                "available_citations": available_citations,
+                "source_notes": "Sources are cited inline with timeline events using {{cite:ID}} markers.",
                 "length_guidance": length_guidance,
             }
 
@@ -293,12 +294,51 @@ class GenealogyAgent:
         )
         return siblings
 
+    def _build_event_citations_map(
+        self, query: QueryService, events: list[dict]
+    ) -> dict[int, list[int]]:
+        """
+        Build mapping of EventID -> list of CitationIDs for inline citation markers.
+
+        Args:
+            query: QueryService instance
+            events: List of event dicts with EventID
+
+        Returns:
+            Dict mapping EventID to list of CitationIDs (e.g., {123: [456, 789]})
+        """
+        event_citations_map: dict[int, list[int]] = {}
+
+        for event in events or []:
+            event_id = event.get("EventID")
+            if not event_id:
+                continue
+
+            # Get citations for this event
+            citations = GenealogyFormatters.rows_to_dicts(query.get_event_citations(event_id))
+
+            # Extract citation IDs
+            citation_ids = []
+            for citation in citations or []:
+                citation_id = citation.get("CitationID")
+                if citation_id:
+                    citation_ids.append(citation_id)
+
+            # Store mapping
+            if citation_ids:
+                event_citations_map[event_id] = citation_ids
+
+        return event_citations_map
+
     def _collect_all_citations_for_person(
         self, query: QueryService, person_id: int
     ) -> list[dict]:
         """
         Collect all citations for a person's events using QueryService.
         Returns list of citation dicts with CitationID, SourceID, SourceName, CitationName, EventType.
+
+        NOTE: This method is kept for backward compatibility but may be deprecated
+        in favor of _build_event_citations_map for inline citation markers.
         """
         # Get all events for the person
         events = GenealogyFormatters.rows_to_dicts(query.get_person_events(person_id))

@@ -22,7 +22,6 @@ required_variables:
   - relationship_notes
   - family_loss_notes
   - source_notes
-  - available_citations
 
 # Reusable template sections (define once, override selectively)
 template_sections:
@@ -44,13 +43,38 @@ template_sections:
 
   citation_instructions: |
     CRITICAL CITATION INSTRUCTIONS:
-    - When referencing information from the timeline, notes, or sources, insert citation markers using this format: {{{{cite:CitationID}}}}
-    - Available citations are listed in "Available Citations" section below
-    - Example: "John was born in Baltimore{{{{cite:123}}}} and later moved to Virginia{{{{cite:456}}}}."
-    - Place citation markers at the end of sentences or clauses
+
+    Citation markers are already embedded inline with timeline events in the format {{{{cite:CitationID}}}}.
+    When you incorporate facts from the timeline into the biography narrative, you MUST include the
+    corresponding citation markers from the source event.
+
+    📜 GENEALOGY CITATION RULESET:
+
+    1. Cite every non-common-knowledge fact.
+       • Names, dates, places, relationships, occupations, property details — all require citations if drawn from records or research.
+
+    2. Cite every inference or conclusion built on evidence.
+       • If a statement depends on records or sources, cite those sources even if the wording is analytical or interpretive.
+
+    3. Use separate citations for separate facts.
+       • If multiple facts in a sentence come from different sources, place a citation immediately after each fact.
+
+    4. Do not cite universally known information.
+       • Widely accepted historical facts (e.g., "The Revolutionary War began in 1775") do not require citations.
+
+    5. Repeat citations if needed for clarity.
+       • Restate key citations when facts are reused or arguments span multiple paragraphs.
+
+    6. Citations must enable verification.
+       • They should identify the specific source(s) where the information was obtained.
+
+    FORMATTING EXAMPLES:
+    - "John was born in Baltimore{{{{cite:123}}}} and later moved to Virginia{{{{cite:456}}}}."
+    - "He married Sarah{{{{cite:789}}}} on 15 June 1850{{{{cite:789}}}}."
     - Multiple facts from same source can reuse same citation: {{{{cite:123}}}}
-    - Follow Elizabeth Shown Mills' "Evidence Explained" best practices for genealogical citations
-    - Do NOT create footnote text yourself - just insert the {{{{cite:ID}}}} markers
+
+    IMPORTANT: Do NOT create footnote text yourself - just insert the {{{{cite:ID}}}} markers that are
+    provided with the timeline events. The citation rendering will be handled separately.
 
   data_context: |
     Person Summary:
@@ -59,7 +83,7 @@ template_sections:
     Person Notes (General):
     {person_notes}
 
-    Timeline Highlights (includes event notes with full article transcriptions):
+    Timeline Highlights (includes event notes with full article transcriptions and inline citation markers):
     {timeline_overview}
 
     Early Life Insights:
@@ -79,9 +103,6 @@ template_sections:
 
     Notable Sources:
     {source_notes}
-
-    Available Citations:
-    {available_citations}
 
   event_notes_reminder: |
     IMPORTANT: Pay special attention to event notes (marked "NOTE:" in Timeline Highlights) as they often contain
@@ -155,10 +176,11 @@ provider_overrides:
 
       citation_instructions: |
         IMPORTANT CITATION FORMAT:
-        - When you mention a fact, add {{{{cite:NUMBER}}}} at the end
+        - Timeline events already have citation markers like {{{{cite:123}}}}
+        - When you mention a fact, copy the citation marker from the timeline
         - Example: "John was born in 1850{{{{cite:123}}}}."
-        - Use citation IDs from the "Available Citations" list below
-        - Do NOT write footnotes yourself - just add the {{{{cite:NUMBER}}}} markers
+        - Do NOT write footnotes yourself - just copy the {{{{cite:NUMBER}}}} markers
+        - Cite every fact that comes from records (names, dates, places, relationships)
 
       closing: |
         Write in clear, direct language. Use event notes for rich detail. If information is missing, note what additional research is needed.

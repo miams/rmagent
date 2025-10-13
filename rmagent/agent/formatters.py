@@ -38,18 +38,37 @@ class GenealogyFormatters:
         return f"{name}{span} • Style: {style}"
 
     @staticmethod
-    def format_events(events) -> str:
-        """Format events list with notes for LLM context."""
+    def format_events(events, event_citations: dict[int, list[int]] | None = None) -> str:
+        """Format events list with notes and inline citation IDs for LLM context.
+
+        Args:
+            events: List of event dicts with EventID, EventType, Date, Place, Details, Note
+            event_citations: Optional dict mapping EventID -> list of CitationIDs
+
+        Returns:
+            Formatted string with events, notes, and inline {{cite:ID}} markers
+        """
         lines = []
         for event in events or []:
+            event_id = event.get("EventID")
             event_type = event.get("EventType")
             date = GenealogyFormatters.format_rm_date(event.get("Date")) or ""
             place = event.get("Place") or ""
             details = event.get("Details") or ""
             note = event.get("Note") or ""
 
-            # Format main event line
+            # Get citation IDs for this event
+            citation_ids = []
+            if event_citations and event_id in event_citations:
+                citation_ids = event_citations[event_id]
+
+            # Format citation markers (e.g., "{{cite:123}}")
+            citation_markers = " ".join(f"{{{{cite:{cid}}}}}" for cid in citation_ids)
+
+            # Format main event line with inline citations
             event_line = f"- {event_type}: {date} {place} {details}".strip()
+            if citation_markers:
+                event_line += f" {citation_markers}"
             lines.append(event_line)
 
             # Add note if present (often contains full article transcriptions)
@@ -59,7 +78,11 @@ class GenealogyFormatters:
                 for idx, note_line in enumerate(note_lines):
                     if note_line.strip():
                         if idx == 0:
-                            lines.append(f"    NOTE: {note_line.strip()}")
+                            note_text = f"    NOTE: {note_line.strip()}"
+                            # Add citation markers to first line of note too
+                            if citation_markers:
+                                note_text += f" {citation_markers}"
+                            lines.append(note_text)
                         else:
                             lines.append(f"    {note_line.strip()}")
 
