@@ -130,7 +130,7 @@ class BiographyRenderer:
                 sections.append('<div style="width:100%;">')
                 sections.append('    <div style="float:right;width:35%;padding-left:15px;">')
                 sections.append(f'        <img src="{image_path}" alt="{alt_text}" style="width:100%;max-width:300px;" />')
-                sections.append(f'        <p style="margin-top:5px;font-size:90%;font-style:italic;text-align:center;">{caption}</p>')
+                sections.append(f'        <p style="width:100%;max-width:300px;margin-top:5px;font-size:90%;font-style:italic;text-align:center;box-sizing:border-box;">{caption}</p>')
                 sections.append('    </div>')
                 sections.append('    <div style="float:none;">')
                 sections.append(f'        {bio.introduction}')
