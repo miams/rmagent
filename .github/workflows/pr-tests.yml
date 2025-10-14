@@ -37,6 +37,13 @@ jobs:
         uv run ruff check .
         uv run black --check .
 
+    - name: Debug CLI command
+      run: uv run python debug_test.py
+      env:
+        RM_DATABASE_PATH: data/Iiams.rmtree
+        DEFAULT_LLM_PROVIDER: anthropic
+        LOG_LEVEL: DEBUG
+
     - name: Run tests with coverage
       run: uv run pytest -v -s --tb=short --cov=rmagent --cov-report=term-missing --cov-fail-under=80
       env:
