@@ -100,9 +100,7 @@ def hugo(
             # Get all person IDs
             from rmagent.rmlib.database import RMDatabase
 
-            with RMDatabase(
-                config.database.database_path, extension_path=config.database.sqlite_extension_path
-            ) as db:
+            with RMDatabase(config.database.database_path, extension_path=config.database.sqlite_extension_path) as db:
                 all_persons = db.query("SELECT PersonID FROM PersonTable")
                 person_ids = [p["PersonID"] for p in all_persons]
 

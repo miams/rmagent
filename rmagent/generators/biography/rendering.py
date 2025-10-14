@@ -55,26 +55,26 @@ class BiographyRenderer:
         tz_str = bio.generated_at.strftime("%z")
         tz_formatted = f"{tz_str[:3]}:{tz_str[3:]}" if tz_str else ""
         date_str = bio.generated_at.strftime("%Y-%m-%dT%H:%M:%S") + tz_formatted
-        lines.append(f'Date: {date_str}')
+        lines.append(f"Date: {date_str}")
 
         # Person ID
-        lines.append(f'PersonID: {bio.person_id}')
+        lines.append(f"PersonID: {bio.person_id}")
 
         # LLM Metadata (if available)
         if bio.llm_metadata:
-            lines.append(f'TokensIn: {self.format_tokens(bio.llm_metadata.prompt_tokens)}')
-            lines.append(f'TokensOut: {self.format_tokens(bio.llm_metadata.completion_tokens)}')
-            lines.append(f'TotalTokens: {self.format_tokens(bio.llm_metadata.total_tokens)}')
-            lines.append(f'LLM: {bio.llm_metadata.provider.capitalize()}')
-            lines.append(f'Model: {bio.llm_metadata.model}')
-            lines.append(f'PromptTime: {self.format_duration(bio.llm_metadata.prompt_time)}')
-            lines.append(f'LLMTime: {self.format_duration(bio.llm_metadata.llm_time)}')
+            lines.append(f"TokensIn: {self.format_tokens(bio.llm_metadata.prompt_tokens)}")
+            lines.append(f"TokensOut: {self.format_tokens(bio.llm_metadata.completion_tokens)}")
+            lines.append(f"TotalTokens: {self.format_tokens(bio.llm_metadata.total_tokens)}")
+            lines.append(f"LLM: {bio.llm_metadata.provider.capitalize()}")
+            lines.append(f"Model: {bio.llm_metadata.model}")
+            lines.append(f"PromptTime: {self.format_duration(bio.llm_metadata.prompt_time)}")
+            lines.append(f"LLMTime: {self.format_duration(bio.llm_metadata.llm_time)}")
 
         # Biography stats (calculate word count dynamically)
         word_count = bio.calculate_word_count()
-        lines.append(f'Words: {word_count:,}')
-        lines.append(f'Citations: {bio.citation_count}')
-        lines.append(f'Sources: {bio.source_count}')
+        lines.append(f"Words: {word_count:,}")
+        lines.append(f"Citations: {bio.citation_count}")
+        lines.append(f"Sources: {bio.source_count}")
 
         lines.append("---\n")
         return "\n".join(lines)
@@ -124,18 +124,28 @@ class BiographyRenderer:
                     db_caption = primary_image["Caption"] if "Caption" in primary_image.keys() else ""
                 except (AttributeError, TypeError):
                     db_caption = ""
-                caption = db_caption if db_caption else self._format_image_caption(bio.full_name, bio.birth_year, bio.death_year)
-                alt_text = self._format_image_caption(bio.full_name, bio.birth_year, bio.death_year)  # Always use name/dates for alt text
+                if db_caption:
+                    caption = db_caption
+                else:
+                    caption = self._format_image_caption(bio.full_name, bio.birth_year, bio.death_year)
+                # Always use name/dates for alt text
+                alt_text = self._format_image_caption(bio.full_name, bio.birth_year, bio.death_year)
 
                 sections.append('<div style="width:100%;">')
                 sections.append('    <div style="float:right;width:35%;padding-left:15px;">')
-                sections.append(f'        <img src="{image_path}" alt="{alt_text}" style="width:100%;max-width:300px;" />')
-                sections.append(f'        <p style="width:100%;max-width:300px;margin-top:5px;font-size:90%;font-style:italic;text-align:center;box-sizing:border-box;">{caption}</p>')
-                sections.append('    </div>')
+                sections.append(
+                    f'        <img src="{image_path}" alt="{alt_text}" ' f'style="width:100%;max-width:300px;" />'
+                )
+                sections.append(
+                    f'        <p style="width:100%;max-width:300px;margin-top:5px;'
+                    f"font-size:90%;font-style:italic;text-align:center;"
+                    f'box-sizing:border-box;">{caption}</p>'
+                )
+                sections.append("    </div>")
                 sections.append('    <div style="float:none;">')
-                sections.append(f'        {bio.introduction}')
-                sections.append('    </div>')
-                sections.append('</div>\n')
+                sections.append(f"        {bio.introduction}")
+                sections.append("    </div>")
+                sections.append("</div>\n")
             else:
                 sections.append(bio.introduction)
 

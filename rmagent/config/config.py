@@ -90,9 +90,7 @@ class LLMSettings(BaseModel):
     def check_provider(cls, provider: str) -> str:
         provider_lower = provider.lower()
         if provider_lower not in cls.allowed_providers:
-            raise ValueError(
-                f"Unknown provider '{provider}'. Allowed: {sorted(cls.allowed_providers)}"
-            )
+            raise ValueError(f"Unknown provider '{provider}'. Allowed: {sorted(cls.allowed_providers)}")
         return provider_lower
 
     def ensure_credentials(self) -> None:
@@ -173,9 +171,7 @@ class CitationSettings(BaseModel):
     def check_style(cls, style: str) -> str:
         style_lower = style.lower()
         if style_lower not in cls.allowed_styles:
-            raise ValueError(
-                f"Invalid citation style '{style}'. Allowed: {sorted(cls.allowed_styles)}"
-            )
+            raise ValueError(f"Invalid citation style '{style}'. Allowed: {sorted(cls.allowed_styles)}")
         return style_lower
 
 
@@ -336,9 +332,7 @@ def load_app_config(
         media_root = _env("RM_MEDIA_ROOT_DIRECTORY")
         database_settings = DatabaseSettings(
             database_path=Path(_env("RM_DATABASE_PATH", "data/Iiams.rmtree")),
-            sqlite_extension_path=Path(
-                _env("SQLITE_ICU_EXTENSION", "./sqlite-extension/icu.dylib")
-            ),
+            sqlite_extension_path=Path(_env("SQLITE_ICU_EXTENSION", "./sqlite-extension/icu.dylib")),
             media_root_directory=Path(media_root) if media_root else None,
         )
 
@@ -361,9 +355,7 @@ def load_app_config(
         )
 
         search_settings = SearchSettings(
-            surname_variants_all=_env(
-                "SURNAME_VARIANTS_ALL", "Iams,Iames,Iiams,Iiames,Ijams,Ijames,Imes,Eimes"
-            ),
+            surname_variants_all=_env("SURNAME_VARIANTS_ALL", "Iams,Iames,Iiams,Iiames,Ijams,Ijames,Imes,Eimes"),
         )
 
         logging_settings = LoggingSettings(

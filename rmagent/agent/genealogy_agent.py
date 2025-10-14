@@ -63,9 +63,7 @@ class GenealogyAgent:
 
     # ---- Public API -----------------------------------------------------
 
-    def generate_biography(
-        self, person_id: int, style: str = "standard", max_tokens: int | None = None
-    ) -> LLMResult:
+    def generate_biography(self, person_id: int, style: str = "standard", max_tokens: int | None = None) -> LLMResult:
         """Generate a narrative biography using the configured prompts/LLM."""
 
         context = self._build_biography_context(person_id, style)
@@ -84,9 +82,7 @@ class GenealogyAgent:
 
         return self._with_database(_run_validator)
 
-    def ask(
-        self, question: str, person_id: int | None = None, max_tokens: int | None = None
-    ) -> LLMResult:
+    def ask(self, question: str, person_id: int | None = None, max_tokens: int | None = None) -> LLMResult:
         """Answer ad-hoc questions with light context and persistent memory."""
 
         context = self._build_qa_context(question, person_id)
@@ -138,15 +134,11 @@ class GenealogyAgent:
                 life_span, parents, spouses, siblings, children
             )
             sibling_lines = GenealogyFormatters.format_siblings(siblings)
-            sibling_summary = (
-                "\n".join(sibling_lines) if sibling_lines else "No sibling records available."
-            )
+            sibling_summary = "\n".join(sibling_lines) if sibling_lines else "No sibling records available."
 
             # Extract person-level notes
             person_notes = person.get("Note") or ""
-            person_notes_formatted = (
-                person_notes if person_notes else "No person-level notes available."
-            )
+            person_notes_formatted = person_notes if person_notes else "No person-level notes available."
 
             # Generate style-specific length guidance
             length_guidance = self._get_length_guidance_for_style(style)
@@ -185,9 +177,7 @@ class GenealogyAgent:
                     snippets.append(GenealogyFormatters.format_family_overview(spouses, children, siblings))
                     snippets.append(GenealogyFormatters.format_early_life(person, parents, siblings, life_span))
 
-            history_snippets = [
-                f"Q: {turn.question}\nA: {turn.answer}" for turn in self._memory[-3:]
-            ]
+            history_snippets = [f"Q: {turn.question}\nA: {turn.answer}" for turn in self._memory[-3:]]
             snippets.extend(history_snippets)
 
             return {
@@ -297,9 +287,7 @@ class GenealogyAgent:
         )
         return siblings
 
-    def _build_event_citations_map(
-        self, query: QueryService, events: list[dict]
-    ) -> dict[int, list[int]]:
+    def _build_event_citations_map(self, query: QueryService, events: list[dict]) -> dict[int, list[int]]:
         """
         Build mapping of EventID -> list of CitationIDs for inline citation markers.
 
@@ -333,9 +321,7 @@ class GenealogyAgent:
 
         return event_citations_map
 
-    def _collect_all_citations_for_person(
-        self, query: QueryService, person_id: int
-    ) -> list[dict]:
+    def _collect_all_citations_for_person(self, query: QueryService, person_id: int) -> list[dict]:
         """
         Collect all citations for a person's events using QueryService.
         Returns list of citation dicts with CitationID, SourceID, SourceName, CitationName, EventType.

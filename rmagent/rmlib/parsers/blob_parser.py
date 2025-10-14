@@ -170,9 +170,7 @@ def parse_template_field_defs(blob_data: bytes | None) -> list[TemplateField]:
 
             hint = hint_elem.text if hint_elem is not None else None
             long_hint = long_hint_elem.text if long_hint_elem is not None else None
-            citation_field = (
-                citation_field_elem.text == "True" if citation_field_elem is not None else False
-            )
+            citation_field = citation_field_elem.text == "True" if citation_field_elem is not None else False
 
             field_defs.append(
                 TemplateField(
@@ -242,12 +240,7 @@ def is_freeform_source(fields: dict[str, str]) -> bool:
     Returns:
         True if this appears to be a free-form source
     """
-    return (
-        len(fields) == 3
-        and "Footnote" in fields
-        and "ShortFootnote" in fields
-        and "Bibliography" in fields
-    )
+    return len(fields) == 3 and "Footnote" in fields and "ShortFootnote" in fields and "Bibliography" in fields
 
 
 def get_citation_level_fields(template_fields: list[TemplateField]) -> list[str]:

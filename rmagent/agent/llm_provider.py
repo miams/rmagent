@@ -86,9 +86,7 @@ class LLMProvider(ABC):
         self.model = model
         self.default_max_tokens = default_max_tokens
         self.retry_config = retry_config or RetryConfig()
-        self.prompt_cost_per_1k, self.completion_cost_per_1k = (
-            pricing_per_1k if pricing_per_1k else (0.0, 0.0)
-        )
+        self.prompt_cost_per_1k, self.completion_cost_per_1k = pricing_per_1k if pricing_per_1k else (0.0, 0.0)
 
     def generate(self, prompt: str, **kwargs: Any) -> LLMResult:
         """Invoke provider with retry semantics."""
@@ -135,9 +133,7 @@ class LLMProvider(ABC):
     def _invoke(self, prompt: str, **kwargs: Any) -> LLMResult:
         """Concrete providers implement this call."""
 
-    def _log_debug(
-        self, prompt: str, result: LLMResult, elapsed: float, kwargs: dict[str, Any]
-    ) -> None:
+    def _log_debug(self, prompt: str, result: LLMResult, elapsed: float, kwargs: dict[str, Any]) -> None:
         debug_logger = logging.getLogger("rmagent.llm_debug")
         if not debug_logger.isEnabledFor(logging.DEBUG):
             return

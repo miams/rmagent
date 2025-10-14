@@ -225,9 +225,7 @@ def format_place_medium(place_name: str | None) -> str:
         return place_name
 
 
-def convert_coordinates(
-    lat_int: int | None, lon_int: int | None
-) -> tuple[float | None, float | None]:
+def convert_coordinates(lat_int: int | None, lon_int: int | None) -> tuple[float | None, float | None]:
     """
     Convert integer coordinates to decimal degrees.
 

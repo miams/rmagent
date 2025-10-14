@@ -145,9 +145,7 @@ class RMDatabase:
             #   - caseLevel=off: Ignore case differences
             #   - normalization=on: Normalize Unicode characters
             self._conn.execute(
-                "SELECT icu_load_collation("
-                "'en_US@colStrength=primary;caseLevel=off;normalization=on',"
-                "'RMNOCASE')"
+                "SELECT icu_load_collation(" "'en_US@colStrength=primary;caseLevel=off;normalization=on'," "'RMNOCASE')"
             )
             logger.debug("RMNOCASE collation registered successfully")
         finally:
@@ -173,9 +171,7 @@ class RMDatabase:
             DatabaseError: If no active connection
         """
         if self._conn is None:
-            raise DatabaseError(
-                "No active connection - use 'with RMDatabase(...)' or call connect()"
-            )
+            raise DatabaseError("No active connection - use 'with RMDatabase(...)' or call connect()")
         return self._conn
 
     def execute(self, query: str, params: tuple | None = None) -> sqlite3.Cursor:

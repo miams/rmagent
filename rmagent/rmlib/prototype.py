@@ -388,9 +388,7 @@ def format_family(person_id: int, query_service: QueryService) -> str:
     if children:
         lines.append(f"\nChildren ({len(children)}):")
         for child in children:
-            child_name = format_full_name(
-                given=get_row_value(child, "Given"), surname=get_row_value(child, "Surname")
-            )
+            child_name = format_full_name(given=get_row_value(child, "Given"), surname=get_row_value(child, "Surname"))
             birth_year = get_row_value(child, "BirthYear", "")
             year_str = f" (b. {birth_year})" if birth_year else ""
             lines.append(f"  - {child_name} (ID: {child['PersonID']}){year_str}")

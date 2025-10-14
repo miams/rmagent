@@ -1,6 +1,7 @@
 """Search command - Search database by name or place."""
 
 import re
+
 import click
 from rich.console import Console
 from rich.table import Table
@@ -22,9 +23,7 @@ def _get_value(row, key, default=""):
 def _get_surname_metaphone(db, surname: str) -> str | None:
     """Get Metaphone encoding for a surname from the database."""
     # Query a sample name to get the Metaphone encoding
-    result = db.query_one(
-        "SELECT SurnameMP FROM NameTable WHERE Surname = ? COLLATE RMNOCASE LIMIT 1", (surname,)
-    )
+    result = db.query_one("SELECT SurnameMP FROM NameTable WHERE Surname = ? COLLATE RMNOCASE LIMIT 1", (surname,))
     return result["SurnameMP"] if result else None
 
 
@@ -49,9 +48,9 @@ def _parse_name_variations(name: str, all_variants: list[str]) -> list[str]:
         return [name]
 
     # Extract brackets and base name (everything before first bracket)
-    bracket_pattern = r'\[([^\]]+)\]'
+    bracket_pattern = r"\[([^\]]+)\]"
     brackets = re.findall(bracket_pattern, name)
-    base_name = re.sub(bracket_pattern, '', name).strip()
+    base_name = re.sub(bracket_pattern, "", name).strip()
 
     if not brackets:
         return [name]
@@ -200,9 +199,7 @@ def search(
 
         # Validate radius search options
         if kilometers is not None and miles is not None:
-            console.print(
-                "[red]Error:[/red] Cannot specify both --kilometers and --miles. Choose one."
-            )
+            console.print("[red]Error:[/red] Cannot specify both --kilometers and --miles. Choose one.")
             raise click.Abort()
 
         radius_km = None
@@ -221,9 +218,7 @@ def search(
             radius_unit = "mi"
 
         if radius_km is not None and not place:
-            console.print(
-                "[red]Error:[/red] Radius search requires --place to be specified"
-            )
+            console.print("[red]Error:[/red] Radius search requires --place to be specified")
             raise click.Abort()
 
         with ctx.get_database() as db:
@@ -240,9 +235,7 @@ def search(
 
                 # Show which variations are being searched
                 if len(name_variations) > 1:
-                    console.print(
-                        f"[dim]Searching {len(name_variations)} name variations...[/dim]"
-                    )
+                    console.print(f"[dim]Searching {len(name_variations)} name variations...[/dim]")
 
                 # Collect results from all variations
                 all_results = []
@@ -257,9 +250,7 @@ def search(
                             # Single word - could be surname or given name
                             # Try both
                             try:
-                                surname_results = queries.search_primary_names(
-                                    surname=name_parts[0], limit=limit
-                                )
+                                surname_results = queries.search_primary_names(surname=name_parts[0], limit=limit)
                                 for r in surname_results:
                                     if r["PersonID"] not in seen_person_ids:
                                         all_results.append(r)
@@ -267,9 +258,7 @@ def search(
                             except ValueError:
                                 pass
                             try:
-                                given_results = queries.search_primary_names(
-                                    given=name_parts[0], limit=limit
-                                )
+                                given_results = queries.search_primary_names(given=name_parts[0], limit=limit)
                                 for r in given_results:
                                     if r["PersonID"] not in seen_person_ids:
                                         all_results.append(r)
@@ -313,15 +302,11 @@ def search(
                             if len(variation.strip().split()) > 1:
                                 # Multi-word: Use word-based search (more precise)
                                 # This finds people where ALL words appear across name fields
-                                variation_results = queries.search_names_by_words(
-                                    search_text=variation, limit=limit
-                                )
+                                variation_results = queries.search_names_by_words(search_text=variation, limit=limit)
                             else:
                                 # Single word: Use flexible search
                                 # This finds people where word appears in surname OR given name
-                                variation_results = queries.search_names_flexible(
-                                    search_text=variation, limit=limit
-                                )
+                                variation_results = queries.search_names_flexible(search_text=variation, limit=limit)
 
                         # Add unique results
                         for r in variation_results:
@@ -347,9 +332,7 @@ def search(
 
                 # Display name search results
                 if results:
-                    console.print(
-                        f"\n[bold]🔍 Found {len(results)} person(s) matching '{name}':[/bold]"
-                    )
+                    console.print(f"\n[bold]🔍 Found {len(results)} person(s) matching '{name}':[/bold]")
                     console.print("─" * 60)
 
                     table = Table(show_header=True, header_style="bold cyan")
@@ -420,9 +403,7 @@ def search(
                         )
 
                         if radius_results:
-                            console.print(
-                                f"\n[bold]🌍 Found {len(radius_results)} place(s) within radius:[/bold]"
-                            )
+                            console.print(f"\n[bold]🌍 Found {len(radius_results)} place(s) within radius:[/bold]")
 
                             table = Table(show_header=True, header_style="bold cyan")
                             table.add_column("ID", style="dim", width=8)
@@ -461,9 +442,7 @@ def search(
                 else:
                     # Standard place search (no radius)
                     if place_results:
-                        console.print(
-                            f"\n[bold]📍 Found {len(place_results)} place(s) matching '{place}':[/bold]"
-                        )
+                        console.print(f"\n[bold]📍 Found {len(place_results)} place(s) matching '{place}':[/bold]")
                         console.print("─" * 60)
 
                         table = Table(show_header=True, header_style="bold cyan")

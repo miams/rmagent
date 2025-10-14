@@ -176,13 +176,7 @@ class RMDate:
         - Date is BC
         - Date is a range
         """
-        if (
-            self.is_null
-            or self.date_type == DateType.TEXT
-            or self.is_partial
-            or self.is_bc
-            or self.is_range
-        ):
+        if self.is_null or self.date_type == DateType.TEXT or self.is_partial or self.is_bc or self.is_range:
             return None
 
         try:
@@ -329,9 +323,7 @@ def parse_rm_date(date_str: str | None) -> RMDate:
     year, month, day, is_bc, is_double_date, qualifier = _parse_date_components(date_str[2:13])
 
     # Parse second date (for ranges)
-    year2, month2, day2, is_bc2, is_double_date2, qualifier2 = _parse_date_components(
-        date_str[13:24]
-    )
+    year2, month2, day2, is_bc2, is_double_date2, qualifier2 = _parse_date_components(date_str[13:24])
 
     return RMDate(
         date_type=date_type,

@@ -6,9 +6,10 @@ Provides simple template-based biographies when AI is not available.
 
 from __future__ import annotations
 
-from .models import PersonContext, get_row_value
 from rmagent.rmlib.parsers.date_parser import is_unknown_date, parse_rm_date
 from rmagent.rmlib.parsers.name_parser import format_full_name
+
+from .models import PersonContext, get_row_value
 
 
 class BiographyTemplates:

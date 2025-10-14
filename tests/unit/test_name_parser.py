@@ -179,9 +179,7 @@ class TestName:
 
     def test_full_name_surname_only(self):
         """Test full name with surname only."""
-        name = Name(
-            name_id=1, person_id=1, is_primary=True, name_type=NameType.BIRTH, surname="Smith"
-        )
+        name = Name(name_id=1, person_id=1, is_primary=True, name_type=NameType.BIRTH, surname="Smith")
 
         assert name.full_name() == "Smith"
 
@@ -457,9 +455,7 @@ class TestFormatFullName:
 
     def test_format_no_nickname(self):
         """Test formatting without nickname."""
-        full = format_full_name(
-            surname="Smith", given="John", nickname="Jack", include_nickname=False
-        )
+        full = format_full_name(surname="Smith", given="John", nickname="Jack", include_nickname=False)
 
         assert full == "John Smith"
 

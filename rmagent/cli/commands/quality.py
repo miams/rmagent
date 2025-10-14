@@ -141,9 +141,7 @@ def quality(
                 console.print()
                 console.print(report_output)
             else:
-                console.print(
-                    "[yellow]Warning:[/yellow] HTML and CSV formats require --output option"
-                )
+                console.print("[yellow]Warning:[/yellow] HTML and CSV formats require --output option")
 
     except Exception as e:
         console.print(f"\n[red]Error:[/red] {e}")

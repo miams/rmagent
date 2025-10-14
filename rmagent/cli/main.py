@@ -154,11 +154,11 @@ def completion(shell: str):
         # For fish
         rmagent completion fish
     """
-    shell_upper = shell.upper()
     prog_name = "rmagent"
 
     if shell == "zsh":
-        click.echo(f"""# Add this to your ~/.zshrc:
+        click.echo(
+            f"""# Add this to your ~/.zshrc:
 eval "$(_RMAGENT_COMPLETE=zsh_source {prog_name})"
 
 # Or generate and save the completion script:
@@ -166,23 +166,29 @@ _RMAGENT_COMPLETE=zsh_source {prog_name} > ~/.zfunc/_{prog_name}
 # Then add this to ~/.zshrc:
 fpath=(~/.zfunc $fpath)
 autoload -Uz compinit && compinit
-""")
+"""
+        )
     elif shell == "bash":
-        click.echo(f"""# Add this to your ~/.bashrc:
+        click.echo(
+            f"""# Add this to your ~/.bashrc:
 eval "$(_RMAGENT_COMPLETE=bash_source {prog_name})"
 
 # Or generate and save the completion script:
 _RMAGENT_COMPLETE=bash_source {prog_name} > ~/.bash_completion.d/{prog_name}
 # Then add this to ~/.bashrc:
 source ~/.bash_completion.d/{prog_name}
-""")
+"""
+        )
     elif shell == "fish":
-        click.echo(f"""# Add this to ~/.config/fish/completions/{prog_name}.fish:
+        click.echo(
+            f"""# Add this to ~/.config/fish/completions/{prog_name}.fish:
 _RMAGENT_COMPLETE=fish_source {prog_name} | source
 
 # Or generate and save the completion script:
 _RMAGENT_COMPLETE=fish_source {prog_name} > ~/.config/fish/completions/{prog_name}.fish
-""")
+"""
+        )
+
 
 cli.add_command(person.person)
 cli.add_command(bio.bio)

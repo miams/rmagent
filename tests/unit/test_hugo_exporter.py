@@ -112,9 +112,7 @@ class TestHugoExporter:
         with pytest.raises(ValueError, match="No database provided"):
             exporter.export_person(person_id=1, output_dir=tmp_path)
 
-    def test_export_person_raises_error_for_nonexistent_person(
-        self, tmp_path, real_db_path, extension_path
-    ):
+    def test_export_person_raises_error_for_nonexistent_person(self, tmp_path, real_db_path, extension_path):
         """Test that export_person raises ValueError for nonexistent person."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -276,9 +274,7 @@ class TestHugoExporter:
         assert "Family Biographies" in content
         assert "---" in content  # Has front matter
 
-    def test_export_batch_handles_invalid_person_gracefully(
-        self, tmp_path, real_db_path, extension_path
-    ):
+    def test_export_batch_handles_invalid_person_gracefully(self, tmp_path, real_db_path, extension_path):
         """Test batch export continues when one person fails."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -351,9 +347,7 @@ class TestHugoExporterIntegration:
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
 
-        exporter = HugoExporter(
-            db=real_db_path, extension_path=extension_path, media_base_path="/media/"
-        )
+        exporter = HugoExporter(db=real_db_path, extension_path=extension_path, media_base_path="/media/")
 
         # Create Hugo directory structure
         content_dir = tmp_path / "content" / "people"
@@ -403,9 +397,7 @@ class TestHugoExporterIntegration:
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
 
-        exporter = HugoExporter(
-            db=real_db_path, extension_path=extension_path, media_base_path="/media/"
-        )
+        exporter = HugoExporter(db=real_db_path, extension_path=extension_path, media_base_path="/media/")
 
         result = exporter.export_person(
             person_id=1,

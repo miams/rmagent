@@ -87,9 +87,7 @@ class TestBioCommand:
     def test_bio_no_ai_template_based(self, runner, test_db_path, tmp_path):
         """Test bio command with --no-ai flag (template-based generation)."""
         output_file = tmp_path / "bio_test.md"
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--output", str(output_file)]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--output", str(output_file)])
         # Should succeed with template-based generation
         assert result.exit_code == 0
         assert output_file.exists()
@@ -119,26 +117,20 @@ class TestBioCommand:
     def test_bio_citation_styles(self, runner, test_db_path):
         """Test bio with different citation styles."""
         for style in ["footnote", "parenthetical", "narrative"]:
-            result = runner.invoke(
-                cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--citation-style", style]
-            )
+            result = runner.invoke(cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--citation-style", style])
             assert result.exit_code == 0
 
     def test_bio_with_file_output(self, runner, test_db_path, tmp_path):
         """Test bio with file output."""
         output_file = tmp_path / "biography.md"
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--output", str(output_file)]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--output", str(output_file)])
         assert result.exit_code == 0
         assert "Biography written to" in result.output
         assert output_file.exists()
 
     def test_bio_no_sources(self, runner, test_db_path):
         """Test bio with --no-sources flag."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--no-sources"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--no-sources"])
         assert result.exit_code == 0
         # Biography should not include sources section when --no-sources is used
         # (We can't easily verify this without parsing output, but command should succeed)
@@ -165,9 +157,7 @@ class TestQualityCommand:
     def test_quality_basic(self, runner, test_db_path, tmp_path):
         """Test basic quality report generation."""
         output_file = tmp_path / "quality.md"
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "quality", "--output", str(output_file)]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "quality", "--output", str(output_file)])
         assert result.exit_code == 0
         assert output_file.exists()
         assert "📊 Data Quality Summary" in result.output
@@ -397,9 +387,7 @@ class TestTimelineCommand:
 
     def test_timeline_invalid_format(self, runner, test_db_path):
         """Test timeline with invalid format option."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "timeline", "1", "--format", "invalid"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "timeline", "1", "--format", "invalid"])
         assert result.exit_code != 0
 
 
@@ -573,9 +561,7 @@ class TestSearchCommand:
 
     def test_search_by_full_name(self, runner, test_db_path):
         """Test search by full name (given and surname)."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "search", "--name", "Michael Iams"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "Michael Iams"])
         assert result.exit_code == 0
 
     def test_search_by_place(self, runner, test_db_path):
@@ -587,40 +573,30 @@ class TestSearchCommand:
 
     def test_search_with_limit(self, runner, test_db_path):
         """Test search with custom limit."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "search", "--name", "Smith", "--limit", "10"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "Smith", "--limit", "10"])
         assert result.exit_code == 0
 
     def test_search_exact_mode(self, runner, test_db_path):
         """Test search with --exact flag (no phonetic matching)."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "search", "--name", "Iams", "--exact"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "Iams", "--exact"])
         assert result.exit_code == 0
 
     def test_search_name_and_place(self, runner, test_db_path):
         """Test search with both name and place criteria."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "search", "--name", "Iams", "--place", "Maryland"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "Iams", "--place", "Maryland"])
         # Should show results for both searches
         assert result.exit_code == 0
 
     def test_search_with_surname_variation(self, runner, test_db_path):
         """Test search with surname variation syntax [variant]."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "search", "--name", "John Iiams [Ijams]"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "John Iiams [Ijams]"])
         assert result.exit_code == 0
         # Should show that it's searching multiple variations
         assert "Searching 2 name variations" in result.output or "Found" in result.output
 
     def test_search_with_multiple_variations(self, runner, test_db_path):
         """Test search with multiple surname variations."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "search", "--name", "John Iams [Ijams] [Imes]"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "John Iams [Ijams] [Imes]"])
         assert result.exit_code == 0
         # Should search 3 variations (base + 2 variants)
         assert "Searching 3 name variations" in result.output or "Found" in result.output

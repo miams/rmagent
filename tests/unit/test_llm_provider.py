@@ -41,9 +41,7 @@ class DummyProvider(LLMProvider):
         return LLMResult(
             text=text,
             model=self.model,
-            usage=TokenUsage(
-                prompt_tokens=len(prompt.split()), completion_tokens=len(text.split())
-            ),
+            usage=TokenUsage(prompt_tokens=len(prompt.split()), completion_tokens=len(text.split())),
         )
 
 
@@ -64,9 +62,7 @@ def test_retry_logic_retries_then_succeeds():
             self.invocations += 1
             if self.invocations < 2:
                 raise LLMError("temporary failure")
-            return LLMResult(
-                text="ok", model=self.model, usage=TokenUsage(prompt_tokens=1, completion_tokens=1)
-            )
+            return LLMResult(text="ok", model=self.model, usage=TokenUsage(prompt_tokens=1, completion_tokens=1))
 
     provider = FlakyProvider()
     result = provider.generate("prompt")

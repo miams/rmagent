@@ -128,9 +128,7 @@ class TestTimelineGenerator:
         assert place == "Tulsa, Oklahoma"
 
         # International place
-        place = generator._format_place_for_timeline(
-            "London, Greater London, England, United Kingdom"
-        )
+        place = generator._format_place_for_timeline("London, Greater London, England, United Kingdom")
         assert place == "London, England"
 
         # Simple place
@@ -347,9 +345,7 @@ class TestTimelineGenerator:
         generator = TimelineGenerator(db=real_db_path, extension_path=extension_path)
         output_file = tmp_path / "timeline.json"
 
-        json_output = generator.generate(
-            person_id=1, format=TimelineFormat.JSON, output_path=output_file
-        )
+        json_output = generator.generate(person_id=1, format=TimelineFormat.JSON, output_path=output_file)
 
         # Verify file was created
         assert output_file.exists()
@@ -395,9 +391,7 @@ class TestTimelineIntegration:
         generator = TimelineGenerator(db=real_db_path, extension_path=extension_path)
 
         # Generate JSON
-        json_output = generator.generate(
-            person_id=1, format=TimelineFormat.JSON, group_by_phase=True
-        )
+        json_output = generator.generate(person_id=1, format=TimelineFormat.JSON, group_by_phase=True)
 
         # Parse and verify
         timeline = json.loads(json_output)
@@ -476,9 +470,7 @@ class TestTimelineIntegration:
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
 
-        generator = TimelineGenerator(
-            db=real_db_path, extension_path=extension_path, include_private=False
-        )
+        generator = TimelineGenerator(db=real_db_path, extension_path=extension_path, include_private=False)
 
         json_output = generator.generate(person_id=1, format=TimelineFormat.JSON)
         timeline = json.loads(json_output)

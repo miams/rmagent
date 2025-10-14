@@ -20,7 +20,7 @@ from .parsers.blob_parser import (
     parse_source_fields,
     parse_template_field_defs,
 )
-from .parsers.date_parser import UNKNOWN_SORT_DATE, parse_rm_date
+from .parsers.date_parser import UNKNOWN_SORT_DATE
 
 # Numeric constants
 YEAR_SECONDS = 31557600
@@ -688,11 +688,7 @@ class DataQualityValidator:
                 continue
 
             required = [field.name for field in template_fields if not field.citation_field]
-            missing = [
-                field_name
-                for field_name in required
-                if not actual_fields.get(field_name, "").strip()
-            ]
+            missing = [field_name for field_name in required if not actual_fields.get(field_name, "").strip()]
             if missing:
                 issues.append(
                     {
@@ -753,9 +749,7 @@ class DataQualityValidator:
                     AND LENGTH(CAST(ABS(CAST(SortDate AS INTEGER)) AS TEXT)) NOT IN (18, 19))
               )
         """
-        rows = self.db.query(
-            sql, (UNKNOWN_SORT_DATE, UNKNOWN_SORT_DATE, UNKNOWN_SORT_DATE, UNKNOWN_SORT_DATE)
-        )
+        rows = self.db.query(sql, (UNKNOWN_SORT_DATE, UNKNOWN_SORT_DATE, UNKNOWN_SORT_DATE, UNKNOWN_SORT_DATE))
 
         if not rows:
             return []
