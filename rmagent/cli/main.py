@@ -54,7 +54,8 @@ class CLIContext:
     def get_database(self) -> RMDatabase:
         """Get database connection (creates if needed)."""
         if not self.db:
-            config = self.load_config()
+            # Database access doesn't require LLM credentials
+            config = self.load_config(require_llm_credentials=False)
             db_path = config.database.database_path
             if not db_path:
                 raise click.UsageError(
