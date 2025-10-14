@@ -110,15 +110,22 @@ class BiographyRenderer:
         if bio.introduction:
             sections.append("## Introduction\n")
 
-            # Add primary portrait image (if available)
-            # Note: Typora doesn't support text wrapping around images
-            # Image will display on right but text won't wrap
+            # Add primary portrait image with text wrapping (if available)
+            # Using Typora-recommended approach with nested divs
             if primary_image:
                 image_path = self._format_image_path(primary_image)
                 caption = self._format_image_caption(bio.full_name, bio.birth_year, bio.death_year)
-                sections.append(f'<img src="{image_path}" alt="{caption}" align="right" width="300" />\n')
+                sections.append('<div style="width:100%;">')
+                sections.append('    <div style="float:right;width:35%;padding-left:15px;">')
+                sections.append(f'        <img src="{image_path}" alt="{caption}" style="width:100%;max-width:300px;" />')
+                sections.append('    </div>')
+                sections.append('    <div style="float:none;">')
+                sections.append(f'        {bio.introduction}')
+                sections.append('    </div>')
+                sections.append('</div>\n')
+            else:
+                sections.append(bio.introduction)
 
-            sections.append(bio.introduction)
             sections.append("")
 
         # Early Life & Family Background
