@@ -185,7 +185,12 @@ class BiographyRenderer:
         return content
 
     def _format_image_path(self, media: dict) -> str:
-        """Format media path for Markdown, using media_root_directory if configured."""
+        """
+        Format media path for Markdown using relative path to reports/images/ symlink.
+
+        Biography files are in reports/biographies/, so we use ../images/ as the base.
+        The reports/images/ directory should be a symlink to the media root directory.
+        """
         media_path = media.get("MediaPath", "") if hasattr(media, 'get') else media["MediaPath"]
         media_file = media.get("MediaFile", "") if hasattr(media, 'get') else media["MediaFile"]
 
@@ -193,12 +198,11 @@ class BiographyRenderer:
         if media_path.startswith("?\\") or media_path.startswith("?/"):
             relative_path = media_path[2:]  # Strip ? and \ or /
 
-            # If media_root_directory is configured, prepend it
-            if self.media_root_directory:
-                full_path = self.media_root_directory / relative_path / media_file
-            else:
-                # Fallback: use relative path (original behavior)
-                full_path = Path(relative_path) / media_file
+            # Use relative path from reports/biographies/ to reports/images/
+            # Biography files are at: reports/biographies/filename.md
+            # Symlink is at: reports/images -> /path/to/media/root
+            # So we use: ../images/relative_path/file
+            full_path = Path("../images") / relative_path / media_file
         else:
             # No ? prefix - use path as-is
             if media_path:

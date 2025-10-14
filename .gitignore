@@ -65,6 +65,8 @@ logs/
 # Output
 output/
 exports/
+reports/
+!reports/images
 *.html
 *.pdf
 
