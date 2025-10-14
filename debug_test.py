@@ -6,6 +6,7 @@ from click.testing import CliRunner
 
 from rmagent.cli.main import cli
 
+
 def main():
     runner = CliRunner()
     result = runner.invoke(cli, ["--database", "data/Iiams.rmtree", "bio", "1", "--no-ai"])
