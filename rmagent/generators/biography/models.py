@@ -141,7 +141,11 @@ class Biography:
     media_root_directory: "Path | None" = None  # Root directory for media files (replaces ? in MediaPath)
 
     def calculate_word_count(self) -> int:
-        """Calculate word count from all biography sections."""
+        """
+        Calculate word count from biography narrative content only.
+
+        Excludes front matter, footnotes, and sources sections.
+        """
         all_text = "\n".join([
             self.introduction,
             self.early_life,
@@ -150,8 +154,6 @@ class Biography:
             self.marriage_family,
             self.later_life,
             self.death_legacy,
-            self.footnotes,
-            self.sources,
         ])
         return len(all_text.split())
 
