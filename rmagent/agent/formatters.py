@@ -8,7 +8,6 @@ Separated from agent orchestration for better testability and maintainability.
 from __future__ import annotations
 
 from rmagent.rmlib.parsers.date_parser import parse_rm_date
-from rmagent.rmlib.queries import QueryService
 
 
 class GenealogyFormatters:

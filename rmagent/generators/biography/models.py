@@ -7,7 +7,7 @@ Contains all dataclasses and enums used throughout the biography module.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 
 
@@ -129,7 +129,7 @@ class Biography:
     sources: str
 
     # Metadata
-    generated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc).astimezone())
+    generated_at: datetime = field(default_factory=lambda: datetime.now(UTC).astimezone())
     word_count: int = 0
     privacy_applied: bool = False
     birth_year: int | None = None
@@ -138,7 +138,7 @@ class Biography:
     citation_count: int = 0
     source_count: int = 0
     media_files: list[dict] = field(default_factory=list)  # Media files for images
-    media_root_directory: "Path | None" = None  # Root directory for media files (replaces ? in MediaPath)
+    media_root_directory: Path | None = None  # Root directory for media files (replaces ? in MediaPath)
 
     def calculate_word_count(self) -> int:
         """

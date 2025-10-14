@@ -162,7 +162,6 @@ class CitationProcessor:
         First checks for pre-formatted Bibliography field, then constructs from individual fields.
         Returns source name with WARNING only if all approaches fail.
         """
-        source_id = get_row_value(citation, "SourceID", 0)
         source_name = get_row_value(citation, "SourceName", "[Unknown Source]")
         fields_blob = get_row_value(citation, "SourceFields")
 

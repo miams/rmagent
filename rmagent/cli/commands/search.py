@@ -1,6 +1,7 @@
 """Search command - Search database by name or place."""
 
 import re
+
 import click
 from rich.console import Console
 from rich.table import Table

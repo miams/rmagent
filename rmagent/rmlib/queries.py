@@ -562,7 +562,7 @@ def _haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> f
     import math
 
     # Earth radius in kilometers
-    R = 6371.0
+    earth_radius_km = 6371.0
 
     # Convert degrees to radians
     lat1_rad = math.radians(lat1)
@@ -577,5 +577,5 @@ def _haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> f
     )
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
-    distance = R * c
+    distance = earth_radius_km * c
     return distance

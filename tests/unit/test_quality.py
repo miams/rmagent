@@ -7,10 +7,7 @@ against the sanitized sample RootsMagic database bundled with the repo.
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from pathlib import Path
-
-import pytest
 
 # Ensure repository root is available on sys.path when running with pytest -o addopts=''
 PROJECT_ROOT = Path(__file__).resolve().parents[2]

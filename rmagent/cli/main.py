@@ -154,7 +154,6 @@ def completion(shell: str):
         # For fish
         rmagent completion fish
     """
-    shell_upper = shell.upper()
     prog_name = "rmagent"
 
     if shell == "zsh":

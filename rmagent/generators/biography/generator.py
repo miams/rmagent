@@ -6,9 +6,9 @@ Handles data extraction, context building, and biography generation.
 
 from __future__ import annotations
 
+import time
 from datetime import datetime
 from pathlib import Path
-import time
 
 from rmagent.agent.genealogy_agent import GenealogyAgent
 from rmagent.rmlib.database import RMDatabase
@@ -18,6 +18,7 @@ from rmagent.rmlib.parsers.name_parser import format_full_name
 from rmagent.rmlib.parsers.place_parser import format_place_medium, format_place_short
 from rmagent.rmlib.queries import QueryService
 
+from .citations import CitationProcessor
 from .models import (
     Biography,
     BiographyLength,
@@ -27,7 +28,6 @@ from .models import (
     PersonContext,
     get_row_value,
 )
-from .citations import CitationProcessor
 from .templates import BiographyTemplates
 
 

@@ -8,11 +8,11 @@ and length variations (short/standard/comprehensive).
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-import time
 
 from rmagent.agent.genealogy_agent import GenealogyAgent
 from rmagent.rmlib.database import RMDatabase
@@ -141,7 +141,7 @@ class Biography:
     sources: str
 
     # Metadata
-    generated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc).astimezone())
+    generated_at: datetime = field(default_factory=lambda: datetime.now(UTC).astimezone())
     word_count: int = 0
     privacy_applied: bool = False
     birth_year: int | None = None
@@ -1436,7 +1436,6 @@ class BiographyGenerator:
         First checks for pre-formatted Bibliography field, then constructs from individual fields.
         Returns source name with WARNING only if all approaches fail.
         """
-        source_id = _get_row_value(citation, "SourceID", 0)
         source_name = _get_row_value(citation, "SourceName", "[Unknown Source]")
         fields_blob = _get_row_value(citation, "SourceFields")
 

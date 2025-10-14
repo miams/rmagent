@@ -20,7 +20,7 @@ from .parsers.blob_parser import (
     parse_source_fields,
     parse_template_field_defs,
 )
-from .parsers.date_parser import UNKNOWN_SORT_DATE, parse_rm_date
+from .parsers.date_parser import UNKNOWN_SORT_DATE
 
 # Numeric constants
 YEAR_SECONDS = 31557600
