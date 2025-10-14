@@ -16,9 +16,11 @@ def main():
     if result.exception:
         print(f"Exception: {result.exception}")
         import traceback
+
         traceback.print_exception(type(result.exception), result.exception, result.exception.__traceback__)
 
     return result.exit_code
+
 
 if __name__ == "__main__":
     sys.exit(main())
