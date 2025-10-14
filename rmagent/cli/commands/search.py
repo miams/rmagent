@@ -227,7 +227,7 @@ def search(
             # Search by name
             if name:
                 # Load config to get surname variants for [ALL] keyword
-                config = load_app_config(configure_logger=False)
+                config = load_app_config(configure_logger=False, require_llm_credentials=False)
                 all_variants = config.search.surname_variants_all
 
                 # Parse name variations (supports [variant] and [ALL] syntax)
