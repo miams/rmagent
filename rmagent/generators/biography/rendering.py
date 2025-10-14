@@ -100,7 +100,11 @@ class BiographyRenderer:
         additional_images = []
         if bio.length != BiographyLength.SHORT and bio.media_files:
             for media in bio.media_files:
-                is_primary = media.get("IsPrimary", 0) == 1 if hasattr(media, 'get') else media["IsPrimary"] == 1
+                # Handle both dict and sqlite3.Row objects
+                try:
+                    is_primary = media["IsPrimary"] == 1
+                except (KeyError, TypeError):
+                    is_primary = False
                 if is_primary and primary_image is None:
                     primary_image = media
                 elif not is_primary:
@@ -115,7 +119,11 @@ class BiographyRenderer:
             if primary_image:
                 image_path = self._format_image_path(primary_image)
                 # Use database Caption if available, otherwise generate from name/dates
-                db_caption = primary_image.get("Caption", "") if hasattr(primary_image, 'get') else primary_image.get("Caption", "")
+                # Handle both dict and sqlite3.Row objects
+                try:
+                    db_caption = primary_image["Caption"] if "Caption" in primary_image.keys() else ""
+                except (AttributeError, TypeError):
+                    db_caption = ""
                 caption = db_caption if db_caption else self._format_image_caption(bio.full_name, bio.birth_year, bio.death_year)
                 alt_text = self._format_image_caption(bio.full_name, bio.birth_year, bio.death_year)  # Always use name/dates for alt text
 
@@ -204,8 +212,15 @@ class BiographyRenderer:
         Biography files are in reports/biographies/, so we use ../images/ as the base.
         The reports/images/ directory should be a symlink to the media root directory.
         """
-        media_path = media.get("MediaPath", "") if hasattr(media, 'get') else media["MediaPath"]
-        media_file = media.get("MediaFile", "") if hasattr(media, 'get') else media["MediaFile"]
+        # Handle both dict and sqlite3.Row objects
+        try:
+            media_path = media["MediaPath"] if media["MediaPath"] else ""
+        except (KeyError, TypeError):
+            media_path = ""
+        try:
+            media_file = media["MediaFile"] if media["MediaFile"] else ""
+        except (KeyError, TypeError):
+            media_file = ""
 
         # Handle RootsMagic's ?\ or ?/ prefix (placeholder for media root)
         if media_path.startswith("?\\") or media_path.startswith("?/"):
