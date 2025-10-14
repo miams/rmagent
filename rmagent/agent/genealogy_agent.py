@@ -217,14 +217,16 @@ class GenealogyAgent:
 
         if style_lower == "short":
             return """**SHORT (250-500 words):**
+- REQUIRED: Begin with ## Introduction section (birth, parents, death if applicable)
 - Focus on essential life events only: birth, death, marriage, key career milestones
-- 2-3 concise paragraphs covering introduction, major life events, and death
+- 2-3 concise paragraphs minimum
 - Minimal family details - just mention parents' names and spouse
 - Omit detailed historical context and analysis
 - Use brief, factual sentences"""
 
         elif style_lower == "standard":
             return """**STANDARD (500-1500 words):**
+- REQUIRED: Begin with ## Introduction section (birth, parents, death if applicable)
 - Balanced narrative covering all major life sections
 - 5-8 paragraphs with moderate detail
 - Include: birth, early life, education, career, marriage, children (names only), later life, death
@@ -234,6 +236,7 @@ class GenealogyAgent:
 
         elif style_lower == "comprehensive":
             return """**COMPREHENSIVE (1500+ words):**
+- REQUIRED: Begin with ## Introduction section (birth, parents, death if applicable)
 - Detailed multi-section biography with rich historical and family context
 - 10+ paragraphs covering all aspects of life with extensive detail
 - CRITICAL: Expand significantly on family relationships:

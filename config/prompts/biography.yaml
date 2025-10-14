@@ -30,6 +30,37 @@ template_sections:
     Follow the standard ten-section outline from RM11_Biography_Best_Practices.md.
     Respond in Markdown with section headings and cite supporting Rootsmagic sources.
 
+  section_structure: |
+    REQUIRED BIOGRAPHY STRUCTURE:
+
+    You MUST include the following sections in this exact order:
+
+    1. ## Introduction (REQUIRED FOR ALL LENGTHS)
+       - Subject's birth (date, place, parents)
+       - Brief identity statement
+       - Death information (if applicable)
+
+    2. ## Early Life & Family Background
+       - Childhood, family context, sibling relationships
+
+    3. ## Education (if data available)
+       - Schools, training, academic achievements
+
+    4. ## Career & Accomplishments
+       - Occupations, professional life, achievements
+
+    5. ## Marriage & Family (if applicable)
+       - Spouse(s), marriage details, children
+
+    6. ## Later Life & Activities (if applicable)
+       - Post-career activities, community involvement
+
+    7. ## Death & Legacy
+       - Death circumstances, burial, impact, descendants
+
+    ⚠️ CRITICAL: The Introduction section is MANDATORY for all biography lengths (short, standard, comprehensive).
+    Do NOT skip it or merge it with Early Life. The Introduction establishes basic identity; Early Life provides context.
+
   general_guidance: |
     GENERAL BIOGRAPHY GUIDANCE:
     - Children that die very young (within the first month of life), generally are not listed or counted as offspring. As these are personal and heartbreaking events, they can still be mentioned as part of the biography.
@@ -115,6 +146,8 @@ template_sections:
 # Default template (composes sections)
 template: |
   {intro}
+
+  {section_structure}
 
   {general_guidance}
 
