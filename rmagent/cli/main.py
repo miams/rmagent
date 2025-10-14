@@ -36,10 +36,14 @@ class CLIContext:
         self.config = None
         self.db = None
 
-    def load_config(self):
-        """Load application configuration."""
+    def load_config(self, require_llm_credentials: bool = True):
+        """Load application configuration.
+
+        Args:
+            require_llm_credentials: When True, validate LLM provider credentials.
+        """
         if not self.config:
-            self.config = load_app_config()
+            self.config = load_app_config(require_llm_credentials=require_llm_credentials)
             # Override with CLI options if provided
             if self.database_path:
                 self.config.database.database_path = self.database_path

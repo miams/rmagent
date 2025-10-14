@@ -302,6 +302,7 @@ def load_app_config(
     env_path: Path | None = None,
     auto_create_dirs: bool = True,
     configure_logger: bool = True,
+    require_llm_credentials: bool = True,
 ) -> AppConfig:
     """
     Load application configuration.
@@ -310,6 +311,7 @@ def load_app_config(
         env_path: Optional path to a .env file. Defaults to config/.env when not provided.
         auto_create_dirs: When True, create output/export directories.
         configure_logger: When True, configure global logging handlers.
+        require_llm_credentials: When True, validate LLM provider credentials.
     """
     if env_path is None:
         env_path = DEFAULT_ENV_PATH
@@ -383,10 +385,11 @@ def load_app_config(
     if configure_logger:
         configure_logging(config.logging)
 
-    try:
-        config.llm.ensure_credentials()
-    except ValueError as exc:
-        raise LLMError(str(exc)) from exc
+    if require_llm_credentials:
+        try:
+            config.llm.ensure_credentials()
+        except ValueError as exc:
+            raise LLMError(str(exc)) from exc
     return config
 
 

@@ -87,7 +87,7 @@ def hugo(
         }[bio_length.lower()]
 
         # Create exporter
-        config = ctx.load_config()
+        config = ctx.load_config(require_llm_credentials=False)
         exporter = HugoExporter(
             db=config.database.database_path,
             extension_path=config.database.sqlite_extension_path,

@@ -70,7 +70,7 @@ def timeline(
             task = progress.add_task(f"Generating timeline for person {person_id}...", total=None)
 
             # Create generator
-            config = ctx.load_config()
+            config = ctx.load_config(require_llm_credentials=False)
             generator = TimelineGenerator(
                 db=config.database.database_path,
                 extension_path=config.database.sqlite_extension_path,
