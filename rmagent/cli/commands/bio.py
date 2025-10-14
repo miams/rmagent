@@ -114,6 +114,7 @@ def bio(
             db=config.database.database_path,
             extension_path=config.database.sqlite_extension_path,
             agent=agent,
+            media_root_directory=config.database.media_root_directory,
         )
 
         # Show prompt if requested

@@ -127,10 +127,18 @@ class DatabaseSettings(BaseModel):
 
     database_path: Path = Field(default=Path("data/Iiams.rmtree"))
     sqlite_extension_path: Path = Field(default=Path("./sqlite-extension/icu.dylib"))
+    media_root_directory: Path | None = Field(default=None)
 
     @field_validator("database_path", "sqlite_extension_path")
     @classmethod
     def expand_path(cls, value: Path) -> Path:
+        return value.expanduser().resolve()
+
+    @field_validator("media_root_directory")
+    @classmethod
+    def expand_media_path(cls, value: Path | None) -> Path | None:
+        if value is None:
+            return None
         return value.expanduser().resolve()
 
 
@@ -325,11 +333,13 @@ def load_app_config(
             ollama_model=_env("OLLAMA_MODEL", "llama3.1"),
         )
 
+        media_root = _env("RM_MEDIA_ROOT_DIRECTORY")
         database_settings = DatabaseSettings(
             database_path=Path(_env("RM_DATABASE_PATH", "data/Iiams.rmtree")),
             sqlite_extension_path=Path(
                 _env("SQLITE_ICU_EXTENSION", "./sqlite-extension/icu.dylib")
             ),
+            media_root_directory=Path(media_root) if media_root else None,
         )
 
         output_settings = OutputSettings(

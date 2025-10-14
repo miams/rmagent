@@ -76,6 +76,7 @@ class BiographyGenerator:
         agent: GenealogyAgent | None = None,
         extension_path: Path | str = Path("./sqlite-extension/icu.dylib"),
         current_year: int | None = None,
+        media_root_directory: Path | str | None = None,
     ):
         # Handle db parameter
         if isinstance(db, (Path, str)):
@@ -94,6 +95,7 @@ class BiographyGenerator:
         self.agent = agent
         self.extension_path = Path(extension_path)
         self.current_year = current_year or datetime.now().year
+        self.media_root_directory = Path(media_root_directory) if media_root_directory else None
 
         # Initialize helper classes
         self.citation_processor = CitationProcessor()
@@ -550,6 +552,7 @@ class BiographyGenerator:
             citation_count=citation_count,
             source_count=source_count,
             media_files=context.media_files,
+            media_root_directory=self.media_root_directory,
         )
 
     def _generate_template_based(
@@ -604,4 +607,5 @@ class BiographyGenerator:
             citation_count=citation_count,
             source_count=source_count,
             media_files=context.media_files,
+            media_root_directory=self.media_root_directory,
         )

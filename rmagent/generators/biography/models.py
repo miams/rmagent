@@ -138,6 +138,7 @@ class Biography:
     citation_count: int = 0
     source_count: int = 0
     media_files: list[dict] = field(default_factory=list)  # Media files for images
+    media_root_directory: "Path | None" = None  # Root directory for media files (replaces ? in MediaPath)
 
     def calculate_word_count(self) -> int:
         """Calculate word count from all biography sections."""
@@ -158,14 +159,14 @@ class Biography:
         """Render complete biography as Markdown with optional front matter."""
         # Import here to avoid circular dependency
         from .rendering import BiographyRenderer
-        renderer = BiographyRenderer()
+        renderer = BiographyRenderer(media_root_directory=self.media_root_directory)
         return renderer.render_markdown(self, include_metadata)
 
     def render_metadata(self) -> str:
         """Render Hugo-style front matter metadata."""
         # Import here to avoid circular dependency
         from .rendering import BiographyRenderer
-        renderer = BiographyRenderer()
+        renderer = BiographyRenderer(media_root_directory=self.media_root_directory)
         return renderer.render_metadata(self)
 
     def __str__(self) -> str:

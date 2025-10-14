@@ -14,6 +14,15 @@ from .models import Biography, BiographyLength, CitationStyle
 class BiographyRenderer:
     """Handles rendering Biography objects to various formats."""
 
+    def __init__(self, media_root_directory: Path | None = None):
+        """
+        Initialize renderer with optional media root directory.
+
+        Args:
+            media_root_directory: Root directory for media files (replaces ? in MediaPath)
+        """
+        self.media_root_directory = media_root_directory
+
     @staticmethod
     def format_tokens(count: int) -> str:
         """Format token count with k suffix."""
@@ -175,23 +184,27 @@ class BiographyRenderer:
         bio.word_count = bio.calculate_word_count()
         return content
 
-    @staticmethod
-    def _format_image_path(media: dict) -> str:
-        """Format media path for Markdown."""
+    def _format_image_path(self, media: dict) -> str:
+        """Format media path for Markdown, using media_root_directory if configured."""
         media_path = media.get("MediaPath", "") if hasattr(media, 'get') else media["MediaPath"]
         media_file = media.get("MediaFile", "") if hasattr(media, 'get') else media["MediaFile"]
 
-        # Strip RootsMagic's ?\ or ?/ prefix if present
-        if media_path.startswith("?\\"):
-            media_path = media_path[2:]
-        elif media_path.startswith("?/"):
-            media_path = media_path[2:]
+        # Handle RootsMagic's ?\ or ?/ prefix (placeholder for media root)
+        if media_path.startswith("?\\") or media_path.startswith("?/"):
+            relative_path = media_path[2:]  # Strip ? and \ or /
 
-        # Combine path components
-        if media_path:
-            full_path = Path(media_path) / media_file
+            # If media_root_directory is configured, prepend it
+            if self.media_root_directory:
+                full_path = self.media_root_directory / relative_path / media_file
+            else:
+                # Fallback: use relative path (original behavior)
+                full_path = Path(relative_path) / media_file
         else:
-            full_path = Path(media_file)
+            # No ? prefix - use path as-is
+            if media_path:
+                full_path = Path(media_path) / media_file
+            else:
+                full_path = Path(media_file)
 
         # Convert to POSIX-style path for Markdown
         return full_path.as_posix()
