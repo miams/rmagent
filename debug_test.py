@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Debug script to test CLI commands."""
 import sys
+
 from click.testing import CliRunner
+
 from rmagent.cli.main import cli
 
 def main():
