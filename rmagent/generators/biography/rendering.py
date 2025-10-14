@@ -114,10 +114,15 @@ class BiographyRenderer:
             # Using Typora-recommended approach with nested divs
             if primary_image:
                 image_path = self._format_image_path(primary_image)
-                caption = self._format_image_caption(bio.full_name, bio.birth_year, bio.death_year)
+                # Use database Caption if available, otherwise generate from name/dates
+                db_caption = primary_image.get("Caption", "") if hasattr(primary_image, 'get') else primary_image.get("Caption", "")
+                caption = db_caption if db_caption else self._format_image_caption(bio.full_name, bio.birth_year, bio.death_year)
+                alt_text = self._format_image_caption(bio.full_name, bio.birth_year, bio.death_year)  # Always use name/dates for alt text
+
                 sections.append('<div style="width:100%;">')
                 sections.append('    <div style="float:right;width:35%;padding-left:15px;">')
-                sections.append(f'        <img src="{image_path}" alt="{caption}" style="width:100%;max-width:300px;" />')
+                sections.append(f'        <img src="{image_path}" alt="{alt_text}" style="width:100%;max-width:300px;" />')
+                sections.append(f'        <p style="margin-top:5px;font-size:90%;font-style:italic;text-align:center;">{caption}</p>')
                 sections.append('    </div>')
                 sections.append('    <div style="float:none;">')
                 sections.append(f'        {bio.introduction}')
