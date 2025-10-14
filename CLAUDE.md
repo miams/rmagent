@@ -165,12 +165,47 @@ All commands use `uv run rmagent [command]`:
 
 ## Git Workflow
 
+**RMAgent uses a gitflow workflow with automated testing on all PRs.**
+
+### Branch Structure
+- **main** - Production-ready code only (protected, PR-only)
+- **develop** - Default integration branch (all work starts here)
+- **feature/** - Individual features (branch from develop, PR back to develop)
+
+### Quick Start
 ```bash
+# Clone and setup
 git clone git@github.com:miams/rmagent.git && ssh-add ~/.ssh/miams-github
-git commit -m "feat: description"  # Use: feat|fix|docs|test|refactor
+
+# Start new feature
+git checkout develop && git pull
+git checkout -b feature/description
+git push -u origin feature/description
+
+# Make changes and commit
+git add . && git commit -m "feat: description"
+git push
+
+# Create PR to develop (squash merge)
+gh pr create --base develop
+
+# Merge when tests pass
+gh pr merge --squash --delete-branch
 ```
 
-**Branches:** main (production), develop (integration), feature/* (new work)
+### Commit Convention
+Use: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:`
+
+### Release Process
+When milestone complete: Create PR from `develop` → `main` (merge commit, not squash)
+
+### CI/CD
+All PRs automatically run:
+- Linting (black, ruff)
+- Full test suite with coverage (must maintain 80%+)
+- See `.github/workflows/pr-tests.yml`
+
+**For detailed workflow instructions, see `docs/GIT_WORKFLOW_GUIDE.md`**
 
 ## Quick Reference
 
