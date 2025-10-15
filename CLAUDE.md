@@ -24,40 +24,45 @@ rmagent/
 │   └── rmlib/                # Core library (database, parsers, queries)
 ├── config/                   # Runtime config (config/.env)
 ├── data/                     # Database files (*.rmtree, NOT tracked in git)
-├── data_reference/           # 18 schema/format docs (RM11_*.md)
-├── docs/                     # Project docs (AI_AGENT_TODO.md, USER_GUIDE.md, MVP_CHECKPOINT.md)
+├── docs/                     # **📚 START HERE: docs/INDEX.md** - Complete documentation
+│   ├── INDEX.md             # Master table of contents
+│   ├── getting-started/     # Installation, quickstart, configuration
+│   ├── guides/              # User & developer guides
+│   ├── reference/           # Schema, formats, query patterns
+│   ├── projects/            # Active feature development
+│   └── archive/             # Completed milestones & summaries
 ├── sqlite-extension/         # ICU extension for RMNOCASE collation
-└── tests/unit/               # Test suite (245+ tests, pytest)
+└── tests/unit/               # Test suite (490+ tests, pytest)
 ```
 
-## Essential Documentation (data_reference/)
+## 📚 Essential Documentation
 
-**Schema & Structure:**
-- **RM11_Schema_Reference.md** - START HERE: tables, fields, relationships, query patterns
-- **RM11_schema_annotated.sql** - SQL with comments for query writing
-- **RM11_DataDef.yaml** - Field enumerations and constraints
+**For complete documentation, see [`docs/INDEX.md`](docs/INDEX.md)**
 
-**Core Formats:**
-- **RM11_Date_Format.md** - CRITICAL: 24-char date encoding (ranges, qualifiers, BC/AD)
-- **RM11_Place_Format.md** - Comma-delimited hierarchy (City, County, State, Country)
-- **RM11_FactTypes.md** - 65 built-in event types
+### Quick Reference (Most Important Files)
 
-**BLOB Structures (UTF-8 XML with BOM):**
-- **RM11_BLOB_SourceFields.md** - SourceTable.Fields extraction
-- **RM11_BLOB_SourceTemplateFieldDefs.md** - Template definitions (433 templates)
-- **RM11_BLOB_CitationFields.md** - CitationTable.Fields extraction
+**Schema & Database:**
+- **[schema-reference.md](docs/reference/schema/schema-reference.md)** - START HERE: tables, fields, relationships
+- **[annotated-schema.sql](docs/reference/schema/annotated-schema.sql)** - SQL with comments
+- **[data-definitions.yaml](docs/reference/schema/data-definitions.yaml)** - Field enumerations
 
-**Data Quality & Output:**
-- **RM11_Data_Quality_Rules.md** - 24 validation rules across 6 categories
-- **RM11_Query_Patterns.md** - 15 optimized SQL patterns
-- **RM11_Biography_Best_Practices.md** - 9-section structure, citation styles
-- **RM11_Timeline_Construction.md** - TimelineJS3 JSON generation
+**Critical Data Formats:**
+- **[date-format.md](docs/reference/data-formats/date-format.md)** - ⚠️ CRITICAL: 24-char date encoding
+- **[place-format.md](docs/reference/data-formats/place-format.md)** - Comma-delimited hierarchy
+- **[fact-types.md](docs/reference/data-formats/fact-types.md)** - 65 built-in event types
 
-**Additional References:**
-- RM11_Relationships.md (Relate1/Relate2 calculations)
-- RM11_Name_Display_Logic.md (context-aware name selection)
-- RM11_EventTable_Details.md (Details field patterns)
-- RM11_Sentence_Templates.md (reference only - AI generates text natively)
+**BLOB Parsing (UTF-8 XML with BOM):**
+- **[blob-source-fields.md](docs/reference/data-formats/blob-source-fields.md)** - SourceTable.Fields
+- **[blob-citation-fields.md](docs/reference/data-formats/blob-citation-fields.md)** - CitationTable.Fields
+- **[blob-template-field-defs.md](docs/reference/data-formats/blob-template-field-defs.md)** - Template definitions
+
+**Query & Quality:**
+- **[query-patterns.md](docs/reference/query-patterns/query-patterns.md)** - 15 optimized SQL patterns
+- **[data-quality-rules.md](docs/reference/query-patterns/data-quality-rules.md)** - 24 validation rules
+
+**Biography & Output:**
+- **[biography-best-practices.md](docs/reference/biography/biography-best-practices.md)** - 9-section structure
+- **[timeline-construction.md](docs/reference/biography/timeline-construction.md)** - TimelineJS3 format
 
 ## Critical Schema Patterns
 
@@ -106,6 +111,26 @@ RM_DATABASE_PATH=data/Iiams.rmtree
 LOG_LEVEL=DEBUG                      # Enable LLM logging
 ```
 
+### Claude Code Integration
+
+RMAgent includes 12 custom slash commands and automated hooks for Claude Code:
+
+**Quick Commands:**
+- `/rm-bio <id>` - Generate biography with AI
+- `/rm-person <id>` - Query person from database
+- `/rm-quality` - Run data quality checks
+- `/doc-review [brief|deep]` - Review documentation for accuracy with AI
+- `/test` - Run pytest suite
+- `/coverage` - Run tests with coverage
+- `/check-db` - Verify database connection
+
+**Automated Hooks:**
+- Coverage reminders after pytest runs
+- Commit preview before git push
+- Documentation review reminder (pre-commit)
+
+**See [`docs/guides/claude-code-setup.md`](docs/guides/claude-code-setup.md) for complete setup and usage guide.**
+
 ## Project Status (2025-10-12)
 
 🎉 **Milestone 2: MVP ACHIEVED** - All foundation phases complete (33/33 tasks)
@@ -129,11 +154,11 @@ LOG_LEVEL=DEBUG                      # Enable LLM logging
 - Source formatting improvements (italic rendering, type prefix removal)
 - Biography collision handling with sequential numbering
 
-**Test Coverage:** 418 tests, 82% overall coverage (97% database, 96% parsers, 91% quality)
+**Test Coverage:** 490 tests, 88% overall coverage (97% database, 96% parsers, 94% rendering)
 
 **Next Phase:** Phase 7 - Production Polish (performance optimization, advanced features)
 
-See `docs/AI_AGENT_TODO.md` for complete roadmap.
+See [`docs/projects/ai-agent/roadmap.md`](docs/projects/ai-agent/roadmap.md) for complete roadmap.
 
 ## CLI Commands
 
@@ -159,7 +184,7 @@ All commands use `uv run rmagent [command]`:
 
 ## LangChain v1.0 Integration (Future)
 
-**Status:** Zero active LangChain imports. v1.0 upgrade planned for Phase 7. See `docs/RM11_LangChain_Upgrade.md` and `AGENTS.md` for patterns.
+**Status:** Zero active LangChain imports. v1.0 upgrade planned for Phase 7. See [`docs/projects/ai-agent/langchain-upgrade.md`](docs/projects/ai-agent/langchain-upgrade.md) for detailed plan.
 
 **v1.0 Requirements:** `create_agent()`, `system_prompt="string"`, TypedDict state only. New code goes in `rmagent/agent/lc/` directory.
 
@@ -205,7 +230,7 @@ All PRs automatically run:
 - Full test suite with coverage (must maintain 80%+)
 - See `.github/workflows/pr-tests.yml`
 
-**For detailed workflow instructions, see `docs/GIT_WORKFLOW_GUIDE.md`**
+**For detailed workflow instructions, see [`docs/guides/git-workflow.md`](docs/guides/git-workflow.md)**
 
 ## Quick Reference
 
