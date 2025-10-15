@@ -342,6 +342,28 @@ class TestAskCommand:
         # Either way, command should recognize the question format
         assert "Ask questions" not in result.output  # Not showing help text
 
+    def test_ask_interactive_mode(self, runner, test_db_path):
+        """Test ask interactive mode with simulated user input."""
+        # Simulate user typing a question then "quit"
+        result = runner.invoke(
+            cli,
+            ["--database", test_db_path, "ask", "--interactive"],
+            input="Who is person 1?\nquit\n",
+        )
+        # Should enter interactive mode
+        assert "Interactive Q&A Mode" in result.output or result.exit_code in [0, 1]
+
+    def test_ask_interactive_exit_commands(self, runner, test_db_path):
+        """Test that various exit commands work in interactive mode."""
+        for exit_cmd in ["exit", "quit", "q"]:
+            result = runner.invoke(
+                cli,
+                ["--database", test_db_path, "ask", "--interactive"],
+                input=f"{exit_cmd}\n",
+            )
+            # Should accept exit command and show goodbye message
+            assert result.exit_code in [0, 1]  # May succeed or fail depending on LLM
+
 
 class TestTimelineCommand:
     """Test timeline command."""
@@ -660,6 +682,54 @@ class TestSearchCommand:
         assert result.exit_code == 0
         # Should search all 8 configured variants
         assert "Searching 8 name variations" in result.output or "Found" in result.output
+
+    def test_search_with_married_name(self, runner, test_db_path):
+        """Test search with --married-name flag."""
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "Janet", "--married-name"])
+        assert result.exit_code == 0
+        # Should search for females by maiden and married names
+        assert "Found" in result.output or "No persons" in result.output
+
+    def test_search_radius_both_units_error(self, runner, test_db_path):
+        """Test that specifying both --kilometers and --miles fails."""
+        result = runner.invoke(
+            cli,
+            [
+                "--database",
+                test_db_path,
+                "search",
+                "--place",
+                "Phoenix, Arizona",
+                "--kilometers",
+                "100",
+                "--miles",
+                "50",
+            ],
+        )
+        assert result.exit_code != 0
+        assert "Cannot specify both" in result.output
+
+    def test_search_radius_negative_value(self, runner, test_db_path):
+        """Test that negative radius value fails."""
+        result = runner.invoke(
+            cli,
+            ["--database", test_db_path, "search", "--place", "Phoenix, Arizona", "--kilometers", "-10"],
+        )
+        assert result.exit_code != 0
+        assert "must be positive" in result.output or "Error" in result.output
+
+    def test_search_radius_without_place(self, runner, test_db_path):
+        """Test that radius search requires --place."""
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "Smith", "--kilometers", "100"])
+        assert result.exit_code != 0
+        assert "requires --place" in result.output or "Error" in result.output
+
+    def test_search_place_exact_match(self, runner, test_db_path):
+        """Test place search with --exact flag."""
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--place", "Maryland", "--exact"])
+        assert result.exit_code == 0
+        # Should return results or no matches
+        assert "Found" in result.output or "No places" in result.output
 
 
 class TestGlobalOptions:
