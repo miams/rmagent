@@ -18,18 +18,21 @@ Python tooling stack for RootsMagic 11 (RM11) SQLite databases. Provides AI agen
 rmagent/
 ├── rmagent/                   # Main Python package
 │   ├── agent/                # AI agent (LLM providers, prompts, tools)
-│   ├── cli/                  # CLI commands (8 commands)
+│   ├── census/               # Census extraction (OCR, parsing, review UI) **[NEW]**
+│   ├── cli/                  # CLI commands (9 commands - added census)
 │   ├── config/               # Configuration (Pydantic settings)
 │   ├── generators/           # Biography, timeline, Hugo export
 │   └── rmlib/                # Core library (database, parsers, queries)
 ├── config/                   # Runtime config (config/.env)
 ├── data/                     # Database files (*.rmtree, NOT tracked in git)
+│   └── census/               # Census sidecar DB and processed images **[NEW]**
 ├── docs/                     # **📚 START HERE: docs/INDEX.md** - Complete documentation
 │   ├── INDEX.md             # Master table of contents
 │   ├── getting-started/     # Installation, quickstart, configuration
 │   ├── guides/              # User & developer guides
 │   ├── reference/           # Schema, formats, query patterns
 │   ├── projects/            # Active feature development
+│   │   └── census-extraction/ # Census extraction architecture & plan **[NEW]**
 │   └── archive/             # Completed milestones & summaries
 ├── sqlite-extension/         # ICU extension for RMNOCASE collation
 └── tests/unit/               # Test suite (490+ tests, pytest)
@@ -171,6 +174,75 @@ All commands use `uv run rmagent [command]`:
 - **timeline** `<id>` - Generate timeline (--format json/html, --group-by-phase, --include-family)
 - **export hugo** `<id>` - Hugo blog export (--output-dir, --batch-ids, --all, --include-timeline)
 - **search** - Search by name/place (--name, --place, --limit, --exact)
+- **census** - Census extraction and processing (catalog, stats) **[NEW - In Development]**
+
+## Census Extraction Feature (In Development)
+
+**Status:** M0 Foundation Complete - See [`docs/projects/census-extraction/`](docs/projects/census-extraction/)
+
+### Overview
+End-to-end pipeline for extracting genealogical facts from census image files linked in RootsMagic. Combines OCR, handwriting recognition, layout detection, and AI-assisted validation to populate a census sidecar database with full provenance tracking.
+
+### Architecture
+
+**Package:** `rmagent/census/`
+- `catalog.py` - Media cataloging from RootsMagic
+- `sidecar.py` - Sidecar database management
+- `models/schema.py` - Pydantic models & SQL schema
+- `config/census_years.py` - Year-specific column configs (1850, 1900, 1940)
+- `pipelines/` - Preprocessing, OCR, parsing, matching (future)
+- `review/` - Human-in-the-loop review UI (future)
+
+**Sidecar Database:** 5 tables with provenance tracking
+- `census_page` - Image metadata and layout
+- `census_household` - Household groups with cross-page tracking
+- `census_entry` - Individual person entries (links to PersonID)
+- `census_field_provenance` - OCR metadata per field
+- `census_review_log` - Audit trail for reviewer actions
+
+See [`sidecar-schema-diagram.md`](docs/projects/census-extraction/sidecar-schema-diagram.md) for ER diagram.
+
+### Census Commands
+
+```bash
+# Catalog census media from RootsMagic
+uv run rmagent census catalog
+
+# Show sidecar statistics
+uv run rmagent census stats
+```
+
+### Roadmap
+
+- **M0: Foundation (Weeks 0-2)** ✅ COMPLETE
+  - ✅ Catalog census media from RootsMagic
+  - ✅ Sidecar SQLite schema with ER diagram
+  - ✅ Census year configurations (1850, 1900, 1940)
+
+- **M1: Working Prototype (Weeks 3-6)** 🔄 NEXT
+  - Preprocessing pipeline (OpenCV deskew, denoise, CLAHE)
+  - Layout detection (doctr/layoutparser)
+  - OCR pilot (Tesseract + kraken on 10 images)
+  - Person matching (RapidFuzz fuzzy matching)
+  - Review UI MVP (FastAPI + HTMX)
+
+- **M2: MVP Release (Weeks 7-12)**
+  - Full batch processing (1,400 images)
+  - AI-assisted validation (LLM for difficult handwriting)
+  - Enhanced review UI with keyboard shortcuts
+  - Export and reporting scripts
+  - LangChain tool integration
+
+See [`implementation-plan.md`](docs/projects/census-extraction/implementation-plan.md) for full roadmap.
+
+### Data Directory
+
+```
+data/census/
+├── sidecar/          # Census sidecar SQLite database
+├── images/processed/ # Preprocessed image derivatives
+└── cache/           # Cell crops and OCR cache
+```
 
 ## ⚠️ Database File Policy
 

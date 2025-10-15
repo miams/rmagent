@@ -133,6 +133,7 @@ def cli(ctx, database: Path | None, llm_provider: str | None, verbose: bool):
 
 
 # Import and register command modules
+from rmagent.cli import census
 from rmagent.cli.commands import ask, bio, export, person, quality, search, timeline
 
 
@@ -202,6 +203,7 @@ cli.add_command(ask.ask)
 cli.add_command(timeline.timeline)
 cli.add_command(export.export)
 cli.add_command(search.search)
+cli.add_command(census.census)
 
 
 def main():
