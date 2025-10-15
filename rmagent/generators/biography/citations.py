@@ -49,7 +49,7 @@ class CitationProcessor:
 
         for prefix in prefixes:
             if source_name.startswith(prefix):
-                return source_name[len(prefix):]
+                return source_name[len(prefix) :]
 
         return source_name
 
@@ -162,7 +162,6 @@ class CitationProcessor:
         First checks for pre-formatted Bibliography field, then constructs from individual fields.
         Returns source name with WARNING only if all approaches fail.
         """
-        source_id = get_row_value(citation, "SourceID", 0)
         source_name = get_row_value(citation, "SourceName", "[Unknown Source]")
         fields_blob = get_row_value(citation, "SourceFields")
 
@@ -259,9 +258,7 @@ class CitationProcessor:
 
         return modified_text, footnotes, tracker
 
-    def generate_footnotes_section(
-        self, footnotes: list[tuple[int, CitationInfo]], tracker: CitationTracker
-    ) -> str:
+    def generate_footnotes_section(self, footnotes: list[tuple[int, CitationInfo]], tracker: CitationTracker) -> str:
         """
         Generate footnotes section with numbered entries and 3-character indent.
         First citation per source uses full footnote, subsequent use short.

@@ -24,6 +24,7 @@ _env_path = Path(__file__).parents[2] / "config" / ".env"
 if _env_path.exists():
     load_dotenv(_env_path)
 
+
 # Environment checks - detect placeholder vs real keys
 def _is_real_key(key_value: str | None) -> bool:
     """Check if API key is real (not placeholder like sk-xxxxx)."""
@@ -68,9 +69,7 @@ class TestAnthropicRealAPI:
         assert result.usage.total_tokens > 0
         # Check for genealogy keywords
         text_lower = result.text.lower()
-        assert any(
-            word in text_lower for word in ["census", "vital", "records", "birth", "death", "marriage"]
-        )
+        assert any(word in text_lower for word in ["census", "vital", "records", "birth", "death", "marriage"])
 
 
 @pytest.mark.real_api

@@ -46,9 +46,7 @@ def person(ctx, person_id: int, events: bool, ancestors: bool, descendants: bool
                 raise click.Abort()
 
             # Display person header
-            name = (
-                f"{_get_value(person_data, 'Given')} {_get_value(person_data, 'Surname')}".strip()
-            )
+            name = f"{_get_value(person_data, 'Given')} {_get_value(person_data, 'Surname')}".strip()
             birth_year = _get_value(person_data, "BirthYear", "?")
             death_year = _get_value(person_data, "DeathYear", "?")
             console.print(f"\n[bold]📋 Person: {name}[/bold] ({birth_year}–{death_year})")
@@ -68,9 +66,7 @@ def person(ctx, person_id: int, events: bool, ancestors: bool, descendants: bool
                         from rmagent.rmlib.parsers.date_parser import parse_rm_date
 
                         date_str = _get_value(event, "Date")
-                        formatted_date = (
-                            parse_rm_date(date_str).format_display() if date_str else ""
-                        )
+                        formatted_date = parse_rm_date(date_str).format_display() if date_str else ""
                         table.add_row(
                             formatted_date,
                             _get_value(event, "EventType"),
@@ -89,15 +85,13 @@ def person(ctx, person_id: int, events: bool, ancestors: bool, descendants: bool
                     # Check for father
                     if _get_value(parents_row, "FatherID"):
                         father_name = (
-                            f"{_get_value(parents_row, 'FatherGiven')} "
-                            f"{_get_value(parents_row, 'FatherSurname')}"
+                            f"{_get_value(parents_row, 'FatherGiven')} " f"{_get_value(parents_row, 'FatherSurname')}"
                         ).strip()
                         console.print(f"  • Father: {father_name}")
                     # Check for mother
                     if _get_value(parents_row, "MotherID"):
                         mother_name = (
-                            f"{_get_value(parents_row, 'MotherGiven')} "
-                            f"{_get_value(parents_row, 'MotherSurname')}"
+                            f"{_get_value(parents_row, 'MotherGiven')} " f"{_get_value(parents_row, 'MotherSurname')}"
                         ).strip()
                         console.print(f"  • Mother: {mother_name}")
 
@@ -106,9 +100,7 @@ def person(ctx, person_id: int, events: bool, ancestors: bool, descendants: bool
                 if spouses:
                     console.print("\n[bold]Spouses:[/bold]")
                     for spouse in spouses:
-                        spouse_name = (
-                            f"{_get_value(spouse, 'Given')} {_get_value(spouse, 'Surname')}".strip()
-                        )
+                        spouse_name = f"{_get_value(spouse, 'Given')} {_get_value(spouse, 'Surname')}".strip()
                         console.print(f"  • {spouse_name}")
 
                 # Get children
@@ -116,9 +108,7 @@ def person(ctx, person_id: int, events: bool, ancestors: bool, descendants: bool
                 if children:
                     console.print("\n[bold]Children:[/bold]")
                     for child in children:
-                        child_name = (
-                            f"{_get_value(child, 'Given')} {_get_value(child, 'Surname')}".strip()
-                        )
+                        child_name = f"{_get_value(child, 'Given')} {_get_value(child, 'Surname')}".strip()
                         console.print(f"  • {child_name}")
 
             # Show ancestors if requested
@@ -141,8 +131,7 @@ def person(ctx, person_id: int, events: bool, ancestors: bool, descendants: bool
                     console.print("\n[bold]Descendants:[/bold] (4 generations)")
                     for descendant in descendant_rows:
                         descendant_name = (
-                            f"{_get_value(descendant, 'Given')} "
-                            f"{_get_value(descendant, 'Surname')}"
+                            f"{_get_value(descendant, 'Given')} " f"{_get_value(descendant, 'Surname')}"
                         ).strip()
                         gen = _get_value(descendant, "Generation", 1)
                         indent = "  " * gen

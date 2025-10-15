@@ -8,11 +8,11 @@ and length variations (short/standard/comprehensive).
 
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 from pathlib import Path
-import time
 
 from rmagent.agent.genealogy_agent import GenealogyAgent
 from rmagent.rmlib.database import RMDatabase
@@ -141,7 +141,7 @@ class Biography:
     sources: str
 
     # Metadata
-    generated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc).astimezone())
+    generated_at: datetime = field(default_factory=lambda: datetime.now(UTC).astimezone())
     word_count: int = 0
     privacy_applied: bool = False
     birth_year: int | None = None
@@ -153,17 +153,19 @@ class Biography:
 
     def _calculate_word_count(self) -> int:
         """Calculate word count from all biography sections."""
-        all_text = "\n".join([
-            self.introduction,
-            self.early_life,
-            self.education,
-            self.career,
-            self.marriage_family,
-            self.later_life,
-            self.death_legacy,
-            self.footnotes,
-            self.sources,
-        ])
+        all_text = "\n".join(
+            [
+                self.introduction,
+                self.early_life,
+                self.education,
+                self.career,
+                self.marriage_family,
+                self.later_life,
+                self.death_legacy,
+                self.footnotes,
+                self.sources,
+            ]
+        )
         return len(all_text.split())
 
     @staticmethod
@@ -198,26 +200,26 @@ class Biography:
         tz_str = self.generated_at.strftime("%z")
         tz_formatted = f"{tz_str[:3]}:{tz_str[3:]}" if tz_str else ""
         date_str = self.generated_at.strftime("%Y-%m-%dT%H:%M:%S") + tz_formatted
-        lines.append(f'Date: {date_str}')
+        lines.append(f"Date: {date_str}")
 
         # Person ID
-        lines.append(f'PersonID: {self.person_id}')
+        lines.append(f"PersonID: {self.person_id}")
 
         # LLM Metadata (if available)
         if self.llm_metadata:
-            lines.append(f'TokensIn: {self._format_tokens(self.llm_metadata.prompt_tokens)}')
-            lines.append(f'TokensOut: {self._format_tokens(self.llm_metadata.completion_tokens)}')
-            lines.append(f'TotalTokens: {self._format_tokens(self.llm_metadata.total_tokens)}')
-            lines.append(f'LLM: {self.llm_metadata.provider.capitalize()}')
-            lines.append(f'Model: {self.llm_metadata.model}')
-            lines.append(f'PromptTime: {self._format_duration(self.llm_metadata.prompt_time)}')
-            lines.append(f'LLMTime: {self._format_duration(self.llm_metadata.llm_time)}')
+            lines.append(f"TokensIn: {self._format_tokens(self.llm_metadata.prompt_tokens)}")
+            lines.append(f"TokensOut: {self._format_tokens(self.llm_metadata.completion_tokens)}")
+            lines.append(f"TotalTokens: {self._format_tokens(self.llm_metadata.total_tokens)}")
+            lines.append(f"LLM: {self.llm_metadata.provider.capitalize()}")
+            lines.append(f"Model: {self.llm_metadata.model}")
+            lines.append(f"PromptTime: {self._format_duration(self.llm_metadata.prompt_time)}")
+            lines.append(f"LLMTime: {self._format_duration(self.llm_metadata.llm_time)}")
 
         # Biography stats (calculate word count dynamically)
         word_count = self._calculate_word_count()
-        lines.append(f'Words: {word_count:,}')
-        lines.append(f'Citations: {self.citation_count}')
-        lines.append(f'Sources: {self.source_count}')
+        lines.append(f"Words: {word_count:,}")
+        lines.append(f"Citations: {self.citation_count}")
+        lines.append(f"Sources: {self.source_count}")
 
         lines.append("---\n")
         return "\n".join(lines)
@@ -243,7 +245,7 @@ class Biography:
         additional_images = []
         if self.length != BiographyLength.SHORT and self.media_files:
             for media in self.media_files:
-                is_primary = media.get("IsPrimary", 0) == 1 if hasattr(media, 'get') else media["IsPrimary"] == 1
+                is_primary = media.get("IsPrimary", 0) == 1 if hasattr(media, "get") else media["IsPrimary"] == 1
                 if is_primary and primary_image is None:
                     primary_image = media
                 elif not is_primary:
@@ -256,9 +258,14 @@ class Biography:
             # Add primary portrait image with text wrapping (if available)
             if primary_image:
                 from pathlib import Path
+
                 # Format the media path
-                media_path = primary_image.get("MediaPath", "") if hasattr(primary_image, 'get') else primary_image["MediaPath"]
-                media_file = primary_image.get("MediaFile", "") if hasattr(primary_image, 'get') else primary_image["MediaFile"]
+                if hasattr(primary_image, "get"):
+                    media_path = primary_image.get("MediaPath", "")
+                    media_file = primary_image.get("MediaFile", "")
+                else:
+                    media_path = primary_image["MediaPath"]
+                    media_file = primary_image["MediaFile"]
 
                 # Strip RootsMagic's ?\ or ?/ prefix if present
                 if media_path.startswith("?\\"):
@@ -329,9 +336,10 @@ class Biography:
             sections.append("## Photos\n")
             for media in additional_images:
                 from pathlib import Path
+
                 # Format the media path
-                media_path = media.get("MediaPath", "") if hasattr(media, 'get') else media["MediaPath"]
-                media_file = media.get("MediaFile", "") if hasattr(media, 'get') else media["MediaFile"]
+                media_path = media.get("MediaPath", "") if hasattr(media, "get") else media["MediaPath"]
+                media_file = media.get("MediaFile", "") if hasattr(media, "get") else media["MediaFile"]
 
                 # Strip RootsMagic's ?\ or ?/ prefix if present
                 if media_path.startswith("?\\"):
@@ -545,9 +553,7 @@ class BiographyGenerator:
         if use_ai and self.agent:
             biography = self._generate_with_ai(context, length, citation_style, include_sources)
         else:
-            biography = self._generate_template_based(
-                context, length, citation_style, include_sources
-            )
+            biography = self._generate_template_based(context, length, citation_style, include_sources)
 
         return biography
 
@@ -580,12 +586,8 @@ class BiographyGenerator:
                 is_living = age < 110
 
             # Extract birth/death information
-            birth_date_str, birth_place = self._extract_vital_info(
-                db, person_id, fact_type_id=1
-            )  # Birth
-            death_date_str, death_place = self._extract_vital_info(
-                db, person_id, fact_type_id=2
-            )  # Death
+            birth_date_str, birth_place = self._extract_vital_info(db, person_id, fact_type_id=1)  # Birth
+            death_date_str, death_place = self._extract_vital_info(db, person_id, fact_type_id=2)  # Death
 
             # Get relationships
             parents = query.get_parents(person_id)
@@ -677,9 +679,7 @@ class BiographyGenerator:
         else:
             raise ValueError("No database provided")
 
-    def _extract_vital_info(
-        self, db: RMDatabase, person_id: int, fact_type_id: int
-    ) -> tuple[str | None, str | None]:
+    def _extract_vital_info(self, db: RMDatabase, person_id: int, fact_type_id: int) -> tuple[str | None, str | None]:
         """Extract date and place for a vital event (birth/death)."""
         query = QueryService(db)
         vital_events = query.get_vital_events(person_id)
@@ -709,9 +709,7 @@ class BiographyGenerator:
 
         return None, None
 
-    def _categorize_events(
-        self, db: RMDatabase, events: list[dict]
-    ) -> tuple[list[EventContext], ...]:
+    def _categorize_events(self, db: RMDatabase, events: list[dict]) -> tuple[list[EventContext], ...]:
         """Categorize events into vital, education, occupation, military, residence, and other."""
         vital = []
         education = []
@@ -910,8 +908,8 @@ class BiographyGenerator:
 
         # Extract LLM metadata from result
         llm_metadata = None
-        if hasattr(self.agent, 'llm_provider'):
-            provider_name = self.agent.llm_provider.__class__.__name__.replace('Provider', '').lower()
+        if hasattr(self.agent, "llm_provider"):
+            provider_name = self.agent.llm_provider.__class__.__name__.replace("Provider", "").lower()
             llm_metadata = LLMMetadata(
                 provider=provider_name,
                 model=result.model,
@@ -919,7 +917,7 @@ class BiographyGenerator:
                 completion_tokens=result.usage.completion_tokens,
                 total_tokens=result.usage.total_tokens,
                 prompt_time=total_time * 0.1,  # Estimate ~10% for prompt building
-                llm_time=total_time * 0.9,      # Estimate ~90% for LLM
+                llm_time=total_time * 0.9,  # Estimate ~90% for LLM
                 cost=result.cost,
             )
 
@@ -932,9 +930,7 @@ class BiographyGenerator:
 
         if citation_style == CitationStyle.FOOTNOTE:
             # Process {cite:ID} markers in full response (preserves section headers)
-            modified_text, footnotes, tracker = self._process_citations_in_text(
-                response_text, context.all_citations
-            )
+            modified_text, footnotes, tracker = self._process_citations_in_text(response_text, context.all_citations)
 
             # Use modified text for section parsing
             response_text = modified_text
@@ -1267,7 +1263,7 @@ class BiographyGenerator:
 
         for prefix in prefixes:
             if source_name.startswith(prefix):
-                return source_name[len(prefix):]
+                return source_name[len(prefix) :]
 
         return source_name
 
@@ -1436,7 +1432,6 @@ class BiographyGenerator:
         First checks for pre-formatted Bibliography field, then constructs from individual fields.
         Returns source name with WARNING only if all approaches fail.
         """
-        source_id = _get_row_value(citation, "SourceID", 0)
         source_name = _get_row_value(citation, "SourceName", "[Unknown Source]")
         fields_blob = _get_row_value(citation, "SourceFields")
 
@@ -1535,9 +1530,7 @@ class BiographyGenerator:
 
         return modified_text, footnotes, tracker
 
-    def _generate_footnotes_section(
-        self, footnotes: list[tuple[int, CitationInfo]], tracker: CitationTracker
-    ) -> str:
+    def _generate_footnotes_section(self, footnotes: list[tuple[int, CitationInfo]], tracker: CitationTracker) -> str:
         """
         Generate footnotes section with numbered entries.
         First citation per source uses full footnote, subsequent use short.

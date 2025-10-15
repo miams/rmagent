@@ -261,9 +261,7 @@ class TestQualityReportGenerator:
         with pytest.raises(ValueError, match="No database provided"):
             generator.generate(format=ReportFormat.MARKDOWN)
 
-    def test_generate_markdown_with_mock_validation(
-        self, real_db_path, extension_path, mock_quality_report
-    ):
+    def test_generate_markdown_with_mock_validation(self, real_db_path, extension_path, mock_quality_report):
         """Test generate with mocked validation."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -278,9 +276,7 @@ class TestQualityReportGenerator:
             assert "Total People:** 10,000" in report
             assert "Total Issues Found:** 185" in report
 
-    def test_generate_html_with_mock_validation(
-        self, real_db_path, extension_path, mock_quality_report
-    ):
+    def test_generate_html_with_mock_validation(self, real_db_path, extension_path, mock_quality_report):
         """Test HTML generation with mocked validation."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -293,9 +289,7 @@ class TestQualityReportGenerator:
             assert "<!DOCTYPE html>" in report
             assert "<h1>Data Quality Report</h1>" in report
 
-    def test_generate_csv_with_mock_validation(
-        self, real_db_path, extension_path, mock_quality_report
-    ):
+    def test_generate_csv_with_mock_validation(self, real_db_path, extension_path, mock_quality_report):
         """Test CSV generation with mocked validation."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -309,9 +303,7 @@ class TestQualityReportGenerator:
             assert "Rule Name" in report
             assert "1.1" in report
 
-    def test_generate_with_output_path(
-        self, tmp_path, real_db_path, extension_path, mock_quality_report
-    ):
+    def test_generate_with_output_path(self, tmp_path, real_db_path, extension_path, mock_quality_report):
         """Test writing report to file."""
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
@@ -363,9 +355,7 @@ class TestQualityReportIntegration:
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
 
-        generator = QualityReportGenerator(
-            db=real_db_path, extension_path=extension_path, sample_limit=5
-        )
+        generator = QualityReportGenerator(db=real_db_path, extension_path=extension_path, sample_limit=5)
 
         report = generator.generate(format=ReportFormat.MARKDOWN)
 
@@ -394,9 +384,7 @@ class TestQualityReportIntegration:
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
 
-        generator = QualityReportGenerator(
-            db=real_db_path, extension_path=extension_path, sample_limit=5
-        )
+        generator = QualityReportGenerator(db=real_db_path, extension_path=extension_path, sample_limit=5)
 
         report = generator.generate(format=ReportFormat.HTML)
 
@@ -419,9 +407,7 @@ class TestQualityReportIntegration:
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
 
-        generator = QualityReportGenerator(
-            db=real_db_path, extension_path=extension_path, sample_limit=5
-        )
+        generator = QualityReportGenerator(db=real_db_path, extension_path=extension_path, sample_limit=5)
 
         report = generator.generate(format=ReportFormat.CSV)
 
@@ -441,9 +427,7 @@ class TestQualityReportIntegration:
         if not real_db_path.exists() or not extension_path.exists():
             pytest.skip("Real database or ICU extension not available")
 
-        generator = QualityReportGenerator(
-            db=real_db_path, extension_path=extension_path, sample_limit=3
-        )
+        generator = QualityReportGenerator(db=real_db_path, extension_path=extension_path, sample_limit=3)
 
         # Generate all three formats
         markdown_report = generator.generate(format=ReportFormat.MARKDOWN)

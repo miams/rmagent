@@ -99,7 +99,8 @@ def bio(
         }[citation_style.lower()]
 
         # Create generator and agent
-        config = ctx.load_config()
+        # Skip LLM credential validation if using template-based generation
+        config = ctx.load_config(require_llm_credentials=not no_ai)
         agent = (
             None
             if no_ai

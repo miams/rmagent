@@ -7,8 +7,9 @@ Contains all dataclasses and enums used throughout the biography module.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
+from pathlib import Path
 
 
 class BiographyLength(str, Enum):
@@ -129,7 +130,7 @@ class Biography:
     sources: str
 
     # Metadata
-    generated_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc).astimezone())
+    generated_at: datetime = field(default_factory=lambda: datetime.now(UTC).astimezone())
     word_count: int = 0
     privacy_applied: bool = False
     birth_year: int | None = None
@@ -138,7 +139,7 @@ class Biography:
     citation_count: int = 0
     source_count: int = 0
     media_files: list[dict] = field(default_factory=list)  # Media files for images
-    media_root_directory: "Path | None" = None  # Root directory for media files (replaces ? in MediaPath)
+    media_root_directory: Path | None = None  # Root directory for media files (replaces ? in MediaPath)
 
     def calculate_word_count(self) -> int:
         """
@@ -146,21 +147,24 @@ class Biography:
 
         Excludes front matter, footnotes, and sources sections.
         """
-        all_text = "\n".join([
-            self.introduction,
-            self.early_life,
-            self.education,
-            self.career,
-            self.marriage_family,
-            self.later_life,
-            self.death_legacy,
-        ])
+        all_text = "\n".join(
+            [
+                self.introduction,
+                self.early_life,
+                self.education,
+                self.career,
+                self.marriage_family,
+                self.later_life,
+                self.death_legacy,
+            ]
+        )
         return len(all_text.split())
 
     def render_markdown(self, include_metadata: bool = True) -> str:
         """Render complete biography as Markdown with optional front matter."""
         # Import here to avoid circular dependency
         from .rendering import BiographyRenderer
+
         renderer = BiographyRenderer(media_root_directory=self.media_root_directory)
         return renderer.render_markdown(self, include_metadata)
 
@@ -168,6 +172,7 @@ class Biography:
         """Render Hugo-style front matter metadata."""
         # Import here to avoid circular dependency
         from .rendering import BiographyRenderer
+
         renderer = BiographyRenderer(media_root_directory=self.media_root_directory)
         return renderer.render_metadata(self)
 

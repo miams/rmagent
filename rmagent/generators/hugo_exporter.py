@@ -529,9 +529,7 @@ class HugoExporter:
                 lines.append(f"- [{person['name']}]({person['slug']}/){lifespan}")
 
             lines.append("")
-            lines.append(
-                f"*{len(people)} biographies • Generated {datetime.now().strftime('%Y-%m-%d')}*"
-            )
+            lines.append(f"*{len(people)} biographies • Generated {datetime.now().strftime('%Y-%m-%d')}*")
 
             return "\n".join(lines)
 
