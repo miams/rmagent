@@ -36,6 +36,7 @@ jobs:
         # Set test environment variables
         RM_DATABASE_PATH: data/Iiams.rmtree
         DEFAULT_LLM_PROVIDER: anthropic
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         LOG_LEVEL: WARNING
 
     - name: Upload coverage reports
