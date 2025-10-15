@@ -37,6 +37,8 @@ jobs:
         RM_DATABASE_PATH: data/Iiams.rmtree
         DEFAULT_LLM_PROVIDER: anthropic
         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        OLLAMA_BASE_URL: ${{ secrets.OLLAMA_BASE_URL }}
         LOG_LEVEL: WARNING
 
     - name: Upload coverage reports
