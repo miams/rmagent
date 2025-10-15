@@ -31,7 +31,7 @@ jobs:
         uv run black --check .
 
     - name: Run tests with coverage
-      run: uv run pytest --cov=rmagent --cov-report=term-missing --cov-fail-under=65
+      run: uv run pytest --cov=rmagent --cov-report=term-missing --cov-fail-under=66
       env:
         # Set test environment variables
         RM_DATABASE_PATH: data/Iiams.rmtree
