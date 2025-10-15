@@ -4,11 +4,6 @@ Unit tests for biography rendering and markdown generation.
 Tests biography rendering, metadata formatting, and image handling.
 """
 
-from datetime import UTC, datetime
-from pathlib import Path
-
-import pytest
-
 from rmagent.generators.biography.models import Biography, BiographyLength, CitationStyle, LLMMetadata
 from rmagent.generators.biography.rendering import BiographyRenderer
 

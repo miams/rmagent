@@ -4,8 +4,6 @@ Unit tests for biography citation processing and formatting.
 Tests citation formatting, footnote generation, and bibliography creation.
 """
 
-import pytest
-
 from rmagent.generators.biography.citations import CitationProcessor
 from rmagent.generators.biography.models import CitationInfo, CitationStyle, CitationTracker
 
