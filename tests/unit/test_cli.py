@@ -62,6 +62,59 @@ class TestPersonCommand:
         # Should succeed even if person not found (graceful error)
         assert "Person" in result.output or "Error" in result.output
 
+    def test_person_with_events(self, runner, test_db_path):
+        """Test person command with --events flag."""
+        result = runner.invoke(cli, ["--database", test_db_path, "person", "1", "--events"])
+        assert result.exit_code == 0
+        # Should show events section
+        assert "Events" in result.output or "Birth" in result.output
+
+    def test_person_with_family(self, runner, test_db_path):
+        """Test person command with --family flag."""
+        result = runner.invoke(cli, ["--database", test_db_path, "person", "1", "--family"])
+        assert result.exit_code == 0
+        # Should show family information
+        assert "Family" in result.output or "Parents" in result.output or "Children" in result.output
+
+    def test_person_with_ancestors(self, runner, test_db_path):
+        """Test person command with --ancestors flag."""
+        result = runner.invoke(cli, ["--database", test_db_path, "person", "1", "--ancestors"])
+        assert result.exit_code == 0
+        # Should show ancestors
+        assert "Ancestors" in result.output or "Generation" in result.output
+
+    def test_person_with_descendants(self, runner, test_db_path):
+        """Test person command with --descendants flag."""
+        result = runner.invoke(cli, ["--database", test_db_path, "person", "1", "--descendants"])
+        assert result.exit_code == 0
+        # Should show descendants
+        assert "Descendants" in result.output or "Generation" in result.output
+
+    def test_person_with_all_flags(self, runner, test_db_path):
+        """Test person command with all information flags."""
+        result = runner.invoke(
+            cli,
+            [
+                "--database",
+                test_db_path,
+                "person",
+                "1",
+                "--events",
+                "--family",
+                "--ancestors",
+                "--descendants",
+            ],
+        )
+        assert result.exit_code == 0
+        # Should contain comprehensive information
+        assert "Person" in result.output
+
+    def test_person_invalid_id(self, runner, test_db_path):
+        """Test person command with invalid person ID."""
+        result = runner.invoke(cli, ["--database", test_db_path, "person", "999999"])
+        # Should handle gracefully - either show error or empty result
+        assert result.exit_code in [0, 1]
+
 
 class TestBioCommand:
     """Test bio command."""
