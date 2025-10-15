@@ -237,6 +237,32 @@ All PRs automatically run:
 - Feature branch relationships
 - Multi-developer sync strategies
 
+### ⚠️ GitHub CLI: Common Mistakes to Avoid
+
+**CRITICAL:** The `gh pr view` command does NOT have a `merged` field!
+
+**❌ WRONG (This will error):**
+```bash
+gh pr view 7 --json merged,state  # Error: Unknown JSON field: "merged"
+```
+
+**✅ CORRECT:**
+```bash
+# Check if PR is merged
+gh pr view 7 --json state,mergedAt --jq '{state: .state, mergedAt: .mergedAt}'
+
+# Check merge status
+gh pr view 7 --json state --jq .state  # Returns: "MERGED", "OPEN", or "CLOSED"
+```
+
+**Available PR fields:**
+- `mergedAt` (timestamp when merged)
+- `mergedBy` (who merged it)
+- `state` (OPEN, MERGED, CLOSED)
+- `mergeCommit` (merge commit SHA)
+
+**Never use `--admin` flag unless absolutely necessary** - it bypasses branch protection and should only be used for genuine emergencies, not convenience.
+
 ## Quick Reference
 
 **Sample Database:** `data/Iiams.rmtree` (11,571 persons, 29,543 events, 114 sources, 10,838 citations)
