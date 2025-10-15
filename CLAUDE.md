@@ -111,6 +111,25 @@ RM_DATABASE_PATH=data/Iiams.rmtree
 LOG_LEVEL=DEBUG                      # Enable LLM logging
 ```
 
+### Claude Code Integration
+
+RMAgent includes 11 custom slash commands and automated hooks for Claude Code:
+
+**Quick Commands:**
+- `/rm-bio <id>` - Generate biography with AI
+- `/rm-person <id>` - Query person from database
+- `/rm-quality` - Run data quality checks
+- `/test` - Run pytest suite
+- `/coverage` - Run tests with coverage
+- `/check-db` - Verify database connection
+
+**Automated Hooks:**
+- Coverage reminders after pytest runs
+- Commit preview before git push
+- Documentation review reminder (pre-commit)
+
+**See [`docs/guides/claude-code-setup.md`](docs/guides/claude-code-setup.md) for complete setup and usage guide.**
+
 ## Project Status (2025-10-12)
 
 🎉 **Milestone 2: MVP ACHIEVED** - All foundation phases complete (33/33 tasks)

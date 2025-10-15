@@ -41,6 +41,7 @@ For contributors and developers:
 - **[developer-guide.md](guides/developer-guide.md)** - Architecture, coding standards, development setup
 - **[testing-guide.md](guides/testing-guide.md)** - Running tests, writing tests, coverage
 - **[git-workflow.md](guides/git-workflow.md)** - Branching strategy, commit conventions, PR process
+- **[claude-code-setup.md](guides/claude-code-setup.md)** - Claude Code slash commands and hooks configuration
 
 ### Reference Documentation
 
@@ -104,6 +105,16 @@ Completed milestones and historical documentation:
   - `integration-testing-summary.md` - Integration test implementation
   - `optimization-summary.md` - Performance optimization work
   - `test-coverage-analysis.md` - Coverage improvement analysis
+
+### Root Documentation
+
+Key files in the repository root (not in docs/):
+
+- **[CLAUDE.md](../CLAUDE.md)** - AI assistant context and project guide
+- **[AGENTS.md](../AGENTS.md)** - LangChain patterns and multi-agent architecture
+- **[README.md](../README.md)** - Repository entry point and quick start
+- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines
+- **[CHANGELOG.md](../CHANGELOG.md)** - Version history and release notes
 
 ---
 
