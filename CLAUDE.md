@@ -232,6 +232,11 @@ All PRs automatically run:
 
 **For detailed workflow instructions, see [`docs/guides/git-workflow.md`](docs/guides/git-workflow.md)**
 
+**New to git collaboration?** See [`docs/guides/git-for-newbies.md`](docs/guides/git-for-newbies.md) for fundamentals:
+- `git pull` vs `git fetch` explained
+- Feature branch relationships
+- Multi-developer sync strategies
+
 ## Quick Reference
 
 **Sample Database:** `data/Iiams.rmtree` (11,571 persons, 29,543 events, 114 sources, 10,838 citations)

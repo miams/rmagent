@@ -41,6 +41,7 @@ For contributors and developers:
 - **[developer-guide.md](guides/developer-guide.md)** - Architecture, coding standards, development setup
 - **[testing-guide.md](guides/testing-guide.md)** - Running tests, writing tests, coverage
 - **[git-workflow.md](guides/git-workflow.md)** - Branching strategy, commit conventions, PR process
+- **[git-for-newbies.md](guides/git-for-newbies.md)** - Git collaboration fundamentals for new developers
 - **[claude-code-setup.md](guides/claude-code-setup.md)** - Claude Code slash commands and hooks configuration
 
 ### Reference Documentation

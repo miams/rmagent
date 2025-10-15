@@ -4,6 +4,12 @@
 
 RMAgent uses a **gitflow** workflow to manage development. This guide will walk you through the daily workflow, from starting a new feature to merging it into production.
 
+**📚 New to git or team collaboration?** See **[git-for-newbies.md](git-for-newbies.md)** for:
+- `git pull` vs `git fetch` explained
+- How feature branches relate to develop
+- Multi-developer sync strategies
+- Common collaboration scenarios
+
 ## Branch Structure
 
 ```
@@ -406,6 +412,12 @@ uv run pytest -vv -s
 
 ## Resources
 
+### RMAgent Documentation
+- **[git-for-newbies.md](git-for-newbies.md)** - Git collaboration fundamentals (pull vs fetch, branch relationships, sync strategies)
+- **[developer-guide.md](developer-guide.md)** - Complete developer documentation
+- **[claude-code-setup.md](claude-code-setup.md)** - Slash commands and hooks
+
+### External Resources
 - [Understanding Git Branching](https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell)
 - [Conventional Commits](https://www.conventionalcommits.org/)
 - [GitHub CLI Manual](https://cli.github.com/manual/)
