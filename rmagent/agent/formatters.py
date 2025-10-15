@@ -8,7 +8,6 @@ Separated from agent orchestration for better testability and maintainability.
 from __future__ import annotations
 
 from rmagent.rmlib.parsers.date_parser import parse_rm_date
-from rmagent.rmlib.queries import QueryService
 
 
 class GenealogyFormatters:
@@ -74,7 +73,7 @@ class GenealogyFormatters:
             # Add note if present (often contains full article transcriptions)
             if note:
                 # Show "NOTE: " prefix only once, then indent subsequent lines
-                note_lines = note.split('\n')
+                note_lines = note.split("\n")
                 for idx, note_line in enumerate(note_lines):
                     if note_line.strip():
                         if idx == 0:
@@ -233,9 +232,7 @@ class GenealogyFormatters:
         return lines
 
     @staticmethod
-    def format_early_life(
-        person, parents, siblings, life_span: dict[str, int | None]
-    ) -> str:
+    def format_early_life(person, parents, siblings, life_span: dict[str, int | None]) -> str:
         """Format early life narrative with birth order, parental ages, migration notes."""
         person_name = GenealogyFormatters.format_person_name(person)
         birth_year = life_span.get("birth_year")
@@ -322,16 +319,10 @@ class GenealogyFormatters:
             name = GenealogyFormatters.format_person_name(data)
             losses.append(f"- {name} ({relation}) died in {death_year_value}.")
 
-        return (
-            "\n".join(losses)
-            if losses
-            else "No recorded family deaths occurred during the subject's lifetime."
-        )
+        return "\n".join(losses) if losses else "No recorded family deaths occurred during the subject's lifetime."
 
     @staticmethod
-    def calculate_parent_age(
-        parents, birth_year_key: str, child_birth_year: int | None
-    ) -> int | None:
+    def calculate_parent_age(parents, birth_year_key: str, child_birth_year: int | None) -> int | None:
         """Calculate parent's age at child's birth."""
         if not parents or child_birth_year is None:
             return None

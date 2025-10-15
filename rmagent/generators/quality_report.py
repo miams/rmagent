@@ -153,15 +153,11 @@ class QualityReportGenerator:
 
         # Apply category filter
         if category_filter:
-            filtered_issues = [
-                issue for issue in filtered_issues if issue.category == category_filter
-            ]
+            filtered_issues = [issue for issue in filtered_issues if issue.category == category_filter]
 
         # Apply severity filter
         if severity_filter:
-            filtered_issues = [
-                issue for issue in filtered_issues if issue.severity == severity_filter
-            ]
+            filtered_issues = [issue for issue in filtered_issues if issue.severity == severity_filter]
 
         # Recalculate totals for filtered issues
         totals_by_severity = {
@@ -320,10 +316,7 @@ class QualityReportGenerator:
             "        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, "
             "sans-serif; margin: 40px; }"
         )
-        lines.append(
-            "        h1 { color: #333; border-bottom: 2px solid #4CAF50; "
-            "padding-bottom: 10px; }"
-        )
+        lines.append("        h1 { color: #333; border-bottom: 2px solid #4CAF50; " "padding-bottom: 10px; }")
         lines.append("        h2 { color: #555; margin-top: 30px; }")
         lines.append("        h3 { color: #666; }")
         lines.append(
@@ -338,10 +331,7 @@ class QualityReportGenerator:
             "        .issue { background-color: #fff; border: 1px solid #ddd; padding: 15px; "
             "margin: 15px 0; border-radius: 4px; }"
         )
-        lines.append(
-            "        .issue-header { font-weight: bold; font-size: 1.1em; "
-            "margin-bottom: 10px; }"
-        )
+        lines.append("        .issue-header { font-weight: bold; font-size: 1.1em; " "margin-bottom: 10px; }")
         lines.append("        .metadata { color: #666; font-size: 0.9em; }")
         lines.append("        .samples { margin-top: 10px; }")
         lines.append("        .sample { margin: 5px 0; padding-left: 20px; }")
@@ -354,24 +344,16 @@ class QualityReportGenerator:
 
         # Content
         lines.append("    <h1>Data Quality Report</h1>")
-        lines.append(
-            f"    <p><strong>Generated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>"
-        )
+        lines.append(f"    <p><strong>Generated:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>")
 
         # Summary
         lines.append("    <div class='summary'>")
         lines.append("        <h2>Summary Statistics</h2>")
         lines.append("        <table>")
         lines.append("            <tr><th>Metric</th><th>Count</th></tr>")
-        lines.append(
-            f"            <tr><td>Total People</td><td>{report.summary.get('total_people', 0):,}</td></tr>"
-        )
-        lines.append(
-            f"            <tr><td>Total Events</td><td>{report.summary.get('total_events', 0):,}</td></tr>"
-        )
-        lines.append(
-            f"            <tr><td>Total Sources</td><td>{report.summary.get('total_sources', 0):,}</td></tr>"
-        )
+        lines.append(f"            <tr><td>Total People</td><td>{report.summary.get('total_people', 0):,}</td></tr>")
+        lines.append(f"            <tr><td>Total Events</td><td>{report.summary.get('total_events', 0):,}</td></tr>")
+        lines.append(f"            <tr><td>Total Sources</td><td>{report.summary.get('total_sources', 0):,}</td></tr>")
         lines.append(
             f"            <tr><td>Total Citations</td><td>{report.summary.get('total_citations', 0):,}</td></tr>"
         )
@@ -409,9 +391,7 @@ class QualityReportGenerator:
             severity_issues = [issue for issue in report.issues if issue.severity == severity]
             if severity_issues:
                 css_class = severity.value
-                lines.append(
-                    f"    <h2 class='{css_class}'>{severity.value.capitalize()} Issues</h2>"
-                )
+                lines.append(f"    <h2 class='{css_class}'>{severity.value.capitalize()} Issues</h2>")
 
                 for issue in severity_issues:
                     lines.append("    <div class='issue'>")
@@ -423,9 +403,7 @@ class QualityReportGenerator:
                     lines.append(f"        <p>{issue.description}</p>")
 
                     if issue.samples:
-                        lines.append(
-                            "        <div class='samples'><strong>Sample Issues:</strong><ul>"
-                        )
+                        lines.append("        <div class='samples'><strong>Sample Issues:</strong><ul>")
                         for sample in issue.samples[: self.sample_limit]:
                             sample_text = self._format_sample_html(sample)
                             lines.append(f"            <li>{sample_text}</li>")

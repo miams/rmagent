@@ -78,10 +78,7 @@ class GetAncestorsTool(BaseTool):
         self.query_service = query_service
 
     def run(self, person_id: int, generations: int = 3):
-        return [
-            dict(row)
-            for row in self.query_service.get_direct_ancestors(person_id, generations=generations)
-        ]
+        return [dict(row) for row in self.query_service.get_direct_ancestors(person_id, generations=generations)]
 
 
 @dataclass
@@ -99,14 +96,8 @@ class FindRelationshipTool(BaseTool):
         if person_a == person_b:
             return {"relationship": "Same person"}
 
-        ancestors_a = {
-            row["PersonID"]: row
-            for row in self.query_service.get_direct_ancestors(person_a, generations=5)
-        }
-        ancestors_b = {
-            row["PersonID"]: row
-            for row in self.query_service.get_direct_ancestors(person_b, generations=5)
-        }
+        ancestors_a = {row["PersonID"]: row for row in self.query_service.get_direct_ancestors(person_a, generations=5)}
+        ancestors_b = {row["PersonID"]: row for row in self.query_service.get_direct_ancestors(person_b, generations=5)}
 
         shared = set(ancestors_a).intersection(ancestors_b)
         if not shared:
@@ -137,8 +128,7 @@ class ValidateDataTool(BaseTool):
         report = validator.run_all_checks()
         return {
             "totals_by_severity": {
-                k.value if hasattr(k, "value") else str(k): v
-                for k, v in report.totals_by_severity.items()
+                k.value if hasattr(k, "value") else str(k): v for k, v in report.totals_by_severity.items()
             },
             "totals_by_category": report.totals_by_category,
             "issue_count": report.summary.get("issue_total", 0),

@@ -6,9 +6,9 @@ Handles data extraction, context building, and biography generation.
 
 from __future__ import annotations
 
+import time
 from datetime import datetime
 from pathlib import Path
-import time
 
 from rmagent.agent.genealogy_agent import GenealogyAgent
 from rmagent.rmlib.database import RMDatabase
@@ -18,6 +18,7 @@ from rmagent.rmlib.parsers.name_parser import format_full_name
 from rmagent.rmlib.parsers.place_parser import format_place_medium, format_place_short
 from rmagent.rmlib.queries import QueryService
 
+from .citations import CitationProcessor
 from .models import (
     Biography,
     BiographyLength,
@@ -27,7 +28,6 @@ from .models import (
     PersonContext,
     get_row_value,
 )
-from .citations import CitationProcessor
 from .templates import BiographyTemplates
 
 
@@ -141,9 +141,7 @@ class BiographyGenerator:
         if use_ai and self.agent:
             biography = self._generate_with_ai(context, length, citation_style, include_sources)
         else:
-            biography = self._generate_template_based(
-                context, length, citation_style, include_sources
-            )
+            biography = self._generate_template_based(context, length, citation_style, include_sources)
 
         return biography
 
@@ -176,12 +174,8 @@ class BiographyGenerator:
                 is_living = age < 110
 
             # Extract birth/death information
-            birth_date_str, birth_place = self._extract_vital_info(
-                db, person_id, fact_type_id=1
-            )  # Birth
-            death_date_str, death_place = self._extract_vital_info(
-                db, person_id, fact_type_id=2
-            )  # Death
+            birth_date_str, birth_place = self._extract_vital_info(db, person_id, fact_type_id=1)  # Birth
+            death_date_str, death_place = self._extract_vital_info(db, person_id, fact_type_id=2)  # Death
 
             # Get relationships
             parents = query.get_parents(person_id)
@@ -273,9 +267,7 @@ class BiographyGenerator:
         else:
             raise ValueError("No database provided")
 
-    def _extract_vital_info(
-        self, db: RMDatabase, person_id: int, fact_type_id: int
-    ) -> tuple[str | None, str | None]:
+    def _extract_vital_info(self, db: RMDatabase, person_id: int, fact_type_id: int) -> tuple[str | None, str | None]:
         """Extract date and place for a vital event (birth/death)."""
         query = QueryService(db)
         vital_events = query.get_vital_events(person_id)
@@ -305,9 +297,7 @@ class BiographyGenerator:
 
         return None, None
 
-    def _categorize_events(
-        self, db: RMDatabase, events: list[dict]
-    ) -> tuple[list[EventContext], ...]:
+    def _categorize_events(self, db: RMDatabase, events: list[dict]) -> tuple[list[EventContext], ...]:
         """Categorize events into vital, education, occupation, military, residence, and other."""
         vital = []
         education = []
@@ -471,8 +461,8 @@ class BiographyGenerator:
 
         # Extract LLM metadata from result
         llm_metadata = None
-        if hasattr(self.agent, 'llm_provider'):
-            provider_name = self.agent.llm_provider.__class__.__name__.replace('Provider', '').lower()
+        if hasattr(self.agent, "llm_provider"):
+            provider_name = self.agent.llm_provider.__class__.__name__.replace("Provider", "").lower()
             llm_metadata = LLMMetadata(
                 provider=provider_name,
                 model=result.model,
@@ -480,7 +470,7 @@ class BiographyGenerator:
                 completion_tokens=result.usage.completion_tokens,
                 total_tokens=result.usage.total_tokens,
                 prompt_time=total_time * 0.1,  # Estimate ~10% for prompt building
-                llm_time=total_time * 0.9,      # Estimate ~90% for LLM
+                llm_time=total_time * 0.9,  # Estimate ~90% for LLM
                 cost=result.cost,
             )
 

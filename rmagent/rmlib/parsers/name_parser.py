@@ -284,9 +284,7 @@ def get_all_names(person_id: int, db_connection: sqlite3.Connection) -> list[Nam
     return names
 
 
-def get_name_at_date(
-    person_id: int, event_sort_date: int | None, db_connection: sqlite3.Connection
-) -> Name | None:
+def get_name_at_date(person_id: int, event_sort_date: int | None, db_connection: sqlite3.Connection) -> Name | None:
     """
     Get appropriate name for a specific date (context-aware).
 

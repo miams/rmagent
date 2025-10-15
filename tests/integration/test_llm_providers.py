@@ -176,9 +176,7 @@ class TestProviderInterfaceCompliance:
             ),
             (
                 OllamaProvider,
-                lambda m: setattr(
-                    m, "generate", lambda **kw: {"response": "Text", "eval_count": 10}
-                ),
+                lambda m: setattr(m, "generate", lambda **kw: {"response": "Text", "eval_count": 10}),
             ),
         ],
     )

@@ -112,7 +112,7 @@ def quality(
             task = progress.add_task("Running data quality validation...", total=None)
 
             # Create generator
-            config = ctx.load_config()
+            config = ctx.load_config(require_llm_credentials=False)
             generator = QualityReportGenerator(
                 db=config.database.database_path,
                 extension_path=config.database.sqlite_extension_path,
@@ -141,9 +141,7 @@ def quality(
                 console.print()
                 console.print(report_output)
             else:
-                console.print(
-                    "[yellow]Warning:[/yellow] HTML and CSV formats require --output option"
-                )
+                console.print("[yellow]Warning:[/yellow] HTML and CSV formats require --output option")
 
     except Exception as e:
         console.print(f"\n[red]Error:[/red] {e}")

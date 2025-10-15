@@ -36,10 +36,14 @@ class CLIContext:
         self.config = None
         self.db = None
 
-    def load_config(self):
-        """Load application configuration."""
+    def load_config(self, require_llm_credentials: bool = True):
+        """Load application configuration.
+
+        Args:
+            require_llm_credentials: When True, validate LLM provider credentials.
+        """
         if not self.config:
-            self.config = load_app_config()
+            self.config = load_app_config(require_llm_credentials=require_llm_credentials)
             # Override with CLI options if provided
             if self.database_path:
                 self.config.database.database_path = self.database_path
@@ -50,7 +54,8 @@ class CLIContext:
     def get_database(self) -> RMDatabase:
         """Get database connection (creates if needed)."""
         if not self.db:
-            config = self.load_config()
+            # Database access doesn't require LLM credentials
+            config = self.load_config(require_llm_credentials=False)
             db_path = config.database.database_path
             if not db_path:
                 raise click.UsageError(
@@ -154,11 +159,11 @@ def completion(shell: str):
         # For fish
         rmagent completion fish
     """
-    shell_upper = shell.upper()
     prog_name = "rmagent"
 
     if shell == "zsh":
-        click.echo(f"""# Add this to your ~/.zshrc:
+        click.echo(
+            f"""# Add this to your ~/.zshrc:
 eval "$(_RMAGENT_COMPLETE=zsh_source {prog_name})"
 
 # Or generate and save the completion script:
@@ -166,23 +171,29 @@ _RMAGENT_COMPLETE=zsh_source {prog_name} > ~/.zfunc/_{prog_name}
 # Then add this to ~/.zshrc:
 fpath=(~/.zfunc $fpath)
 autoload -Uz compinit && compinit
-""")
+"""
+        )
     elif shell == "bash":
-        click.echo(f"""# Add this to your ~/.bashrc:
+        click.echo(
+            f"""# Add this to your ~/.bashrc:
 eval "$(_RMAGENT_COMPLETE=bash_source {prog_name})"
 
 # Or generate and save the completion script:
 _RMAGENT_COMPLETE=bash_source {prog_name} > ~/.bash_completion.d/{prog_name}
 # Then add this to ~/.bashrc:
 source ~/.bash_completion.d/{prog_name}
-""")
+"""
+        )
     elif shell == "fish":
-        click.echo(f"""# Add this to ~/.config/fish/completions/{prog_name}.fish:
+        click.echo(
+            f"""# Add this to ~/.config/fish/completions/{prog_name}.fish:
 _RMAGENT_COMPLETE=fish_source {prog_name} | source
 
 # Or generate and save the completion script:
 _RMAGENT_COMPLETE=fish_source {prog_name} > ~/.config/fish/completions/{prog_name}.fish
-""")
+"""
+        )
+
 
 cli.add_command(person.person)
 cli.add_command(bio.bio)

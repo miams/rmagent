@@ -234,9 +234,7 @@ class TimelineGenerator:
                     continue
 
                 # Build timeline event
-                timeline_event = self._build_timeline_event(
-                    db, event, person_id, birth_year, group_by_phase
-                )
+                timeline_event = self._build_timeline_event(db, event, person_id, birth_year, group_by_phase)
                 if timeline_event:
                     timeline_events.append(timeline_event)
 
@@ -286,9 +284,7 @@ class TimelineGenerator:
         place_formatted = self._format_place_for_timeline(place_str)
 
         # Build narrative text
-        narrative = self._build_event_narrative(
-            event_type_name, display_date, place_formatted, details
-        )
+        narrative = self._build_event_narrative(event_type_name, display_date, place_formatted, details)
 
         # Get media
         media = self._get_event_media(db, event_id)
@@ -330,9 +326,7 @@ class TimelineGenerator:
 
         return timeline_event
 
-    def _parse_date_to_timelinejs(
-        self, rm_date: str
-    ) -> tuple[dict | None, dict | None, str | None]:
+    def _parse_date_to_timelinejs(self, rm_date: str) -> tuple[dict | None, dict | None, str | None]:
         """Parse RM11 date to TimelineJS3 format."""
         # Check if date string is null/unknown (empty or starts with ".")
         if not rm_date or rm_date.startswith("."):
@@ -425,11 +419,7 @@ class TimelineGenerator:
         """Get event type name from FactTypeTable."""
         cursor = db.execute("SELECT Name FROM FactTypeTable WHERE FactTypeID = ?", (event_type_id,))
         row = cursor.fetchone()
-        return (
-            _get_row_value(row, "Name", f"Event {event_type_id}")
-            if row
-            else f"Event {event_type_id}"
-        )
+        return _get_row_value(row, "Name", f"Event {event_type_id}") if row else f"Event {event_type_id}"
 
     def _get_event_media(self, db: RMDatabase, event_id: int) -> dict | None:
         """Get primary media for an event."""

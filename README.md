@@ -132,7 +132,7 @@ quality_summary = agent.analyze_data_quality()
 ### CLI Setup Options
 
 **Option 1: Direct Access (Recommended)**
-Run `./setup_cli.sh` to enable direct CLI access and tab completion. See [docs/CLI_SETUP.md](docs/CLI_SETUP.md) for details.
+Run `./setup_cli.sh` to enable direct CLI access and tab completion.
 
 After setup, use commands directly:
 ```bash
@@ -377,13 +377,12 @@ When LangChain v1.0 stable releases, use these patterns:
 
 ### Migration Plan
 
-See `docs/RM11_LangChain_Upgrade.md` for complete upgrade strategy and timeline.
+See [`docs/projects/ai-agent/langchain-upgrade.md`](docs/projects/ai-agent/langchain-upgrade.md) for complete upgrade strategy and timeline.
 
 **Key Points:**
 - New LangChain code goes in `rmagent/agent/lc/` directory
 - Use v1.0 patterns from day one (no migration needed)
 - Maintain 80%+ test coverage for all LangChain features
-- See `AGENTS.md` for comprehensive best practices
 
 ## Development
 
@@ -414,33 +413,34 @@ uv run pytest --cov=rmagent --cov-report=html
 
 ## Documentation
 
-**📚 Complete Documentation Index:** [docs/README.md](docs/README.md)
+**📚 Complete Documentation Index:** **[docs/INDEX.md](docs/INDEX.md)** ← START HERE
 
 ### For New Users
 
-Start here to get up and running:
+Get up and running quickly:
 
-1. **[INSTALL.md](INSTALL.md)** - Installation guide (macOS, Linux, Windows/WSL2)
-2. **[CONFIGURATION.md](CONFIGURATION.md)** - Configuration, LLM providers, prompt customization
-3. **[USAGE.md](USAGE.md)** - Complete CLI reference with 50+ examples
-4. **[FAQ.md](FAQ.md)** - Common questions and troubleshooting
-
-**Comprehensive Guide:** [docs/USER_GUIDE.md](docs/USER_GUIDE.md) (31KB, all-in-one)
+1. **[Installation Guide](docs/getting-started/installation.md)** - Install RMAgent and dependencies
+2. **[Quick Start](docs/getting-started/quickstart.md)** - 5-minute tutorial
+3. **[Configuration Guide](docs/getting-started/configuration.md)** - Set up API keys and database
+4. **[User Guide](docs/guides/user-guide.md)** - Complete CLI reference with examples
+5. **[FAQ](docs/faq.md)** - Troubleshooting and common questions
 
 ### For Developers
 
-Start here to contribute or extend RMAgent:
+Contribute or extend RMAgent:
 
-1. **[DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)** - Architecture, design patterns, API reference
+1. **[Developer Guide](docs/guides/developer-guide.md)** - Architecture, design patterns, API reference
 2. **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution workflow and coding standards
-3. **[TESTING.md](TESTING.md)** - Testing guide (279 tests, coverage analysis)
-4. **[CHANGELOG.md](CHANGELOG.md)** - Complete version history
+3. **[Testing Guide](docs/guides/testing-guide.md)** - Testing guide (490 tests, 88% coverage)
+4. **[Git Workflow](docs/guides/git-workflow.md)** - Branching strategy and PR process
+5. **[CHANGELOG.md](CHANGELOG.md)** - Version history
 
-### Additional Documentation
+### Technical Reference
 
-- **[AGENTS.md](AGENTS.md)** - Agent design patterns
-- **[data_reference/](data_reference/)** - RootsMagic 11 schema (18 reference docs)
-- **[docs/](docs/)** - Project documentation and completion reports
+- **[Schema Reference](docs/reference/schema/)** - RootsMagic 11 database schema
+- **[Data Formats](docs/reference/data-formats/)** - Date/place/BLOB formats
+- **[Query Patterns](docs/reference/query-patterns/)** - Optimized SQL patterns
+- **[Biography Reference](docs/reference/biography/)** - Biography generation guidelines
 
 ## Status
 
@@ -450,7 +450,7 @@ Start here to contribute or extend RMAgent:
 **Completion:** All 26 foundation tasks complete (Phases 1-4)
 **Next Focus:** Testing & Quality improvements (Phase 5)
 
-See [docs/MVP_CHECKPOINT.md](docs/MVP_CHECKPOINT.md) for complete verification report.
+See [docs/archive/checkpoints/mvp-checkpoint.md](docs/archive/checkpoints/mvp-checkpoint.md) for complete verification report.
 
 ---
 
@@ -501,9 +501,9 @@ See [docs/MVP_CHECKPOINT.md](docs/MVP_CHECKPOINT.md) for complete verification r
 - ✅ Export Command (Hugo blog export with batch support, 8 tests, 74% coverage)
 - ✅ Search Command (name/place search with phonetic matching, 8 tests, 88% coverage)
 
-**⏭️ Next Tasks:** Phase 5 - Testing & Quality (comprehensive integration testing)
+**⏭️ Next Tasks:** Phase 7 - Production Polish (performance optimization, advanced features)
 
-See `docs/AI_AGENT_TODO.md` for detailed progress and roadmap.
+See [`docs/projects/ai-agent/roadmap.md`](docs/projects/ai-agent/roadmap.md) for detailed progress and roadmap.
 
 ## Repository
 

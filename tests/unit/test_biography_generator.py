@@ -336,6 +336,7 @@ class TestBiographyGenerator:
     def test_generate_introduction(self):
         """Test generating introduction section."""
         from rmagent.generators.biography import BiographyTemplates
+
         templates = BiographyTemplates()
 
         context = PersonContext(
@@ -370,6 +371,7 @@ class TestBiographyGenerator:
     def test_generate_early_life(self):
         """Test generating early life section."""
         from rmagent.generators.biography import BiographyTemplates
+
         templates = BiographyTemplates()
 
         # Test with siblings
@@ -399,6 +401,7 @@ class TestBiographyGenerator:
     def test_format_sources_footnote_style(self):
         """Test formatting sources in footnote style."""
         from rmagent.generators.biography import CitationProcessor
+
         citation_processor = CitationProcessor()
 
         context = PersonContext(
@@ -438,6 +441,7 @@ class TestBiographyGenerator:
     def test_format_sources_parenthetical_style(self):
         """Test formatting sources in parenthetical style."""
         from rmagent.generators.biography import CitationProcessor
+
         citation_processor = CitationProcessor()
 
         context = PersonContext(
@@ -470,6 +474,7 @@ class TestBiographyGenerator:
     def test_parse_ai_response(self):
         """Test parsing AI-generated biography."""
         from rmagent.generators.biography import BiographyTemplates
+
         templates = BiographyTemplates()
 
         ai_response = """
@@ -641,9 +646,7 @@ Michael became a genealogist and researcher.
                 },  # Residence
             ]
 
-            vital, education, occupation, military, residence, other = generator._categorize_events(
-                db, events
-            )
+            vital, education, occupation, military, residence, other = generator._categorize_events(db, events)
 
             assert len(vital) == 1
             assert len(education) == 1

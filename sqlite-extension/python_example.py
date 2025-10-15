@@ -49,9 +49,7 @@ def connect_rmtree(db_path, extension_path="./sqlite-extension/icu.dylib"):
         #   - caseLevel=off: Ignore case differences
         #   - normalization=on: Normalize Unicode characters
         conn.execute(
-            "SELECT icu_load_collation("
-            "'en_US@colStrength=primary;caseLevel=off;normalization=on',"
-            "'RMNOCASE')"
+            "SELECT icu_load_collation(" "'en_US@colStrength=primary;caseLevel=off;normalization=on'," "'RMNOCASE')"
         )
     finally:
         # Disable extension loading (security best practice)

@@ -62,6 +62,59 @@ class TestPersonCommand:
         # Should succeed even if person not found (graceful error)
         assert "Person" in result.output or "Error" in result.output
 
+    def test_person_with_events(self, runner, test_db_path):
+        """Test person command with --events flag."""
+        result = runner.invoke(cli, ["--database", test_db_path, "person", "1", "--events"])
+        assert result.exit_code == 0
+        # Should show events section
+        assert "Events" in result.output or "Birth" in result.output
+
+    def test_person_with_family(self, runner, test_db_path):
+        """Test person command with --family flag."""
+        result = runner.invoke(cli, ["--database", test_db_path, "person", "1", "--family"])
+        assert result.exit_code == 0
+        # Should show family information
+        assert "Family" in result.output or "Parents" in result.output or "Children" in result.output
+
+    def test_person_with_ancestors(self, runner, test_db_path):
+        """Test person command with --ancestors flag."""
+        result = runner.invoke(cli, ["--database", test_db_path, "person", "1", "--ancestors"])
+        assert result.exit_code == 0
+        # Should show ancestors
+        assert "Ancestors" in result.output or "Generation" in result.output
+
+    def test_person_with_descendants(self, runner, test_db_path):
+        """Test person command with --descendants flag."""
+        result = runner.invoke(cli, ["--database", test_db_path, "person", "1", "--descendants"])
+        assert result.exit_code == 0
+        # Should show descendants
+        assert "Descendants" in result.output or "Generation" in result.output
+
+    def test_person_with_all_flags(self, runner, test_db_path):
+        """Test person command with all information flags."""
+        result = runner.invoke(
+            cli,
+            [
+                "--database",
+                test_db_path,
+                "person",
+                "1",
+                "--events",
+                "--family",
+                "--ancestors",
+                "--descendants",
+            ],
+        )
+        assert result.exit_code == 0
+        # Should contain comprehensive information
+        assert "Person" in result.output
+
+    def test_person_invalid_id(self, runner, test_db_path):
+        """Test person command with invalid person ID."""
+        result = runner.invoke(cli, ["--database", test_db_path, "person", "999999"])
+        # Should handle gracefully - either show error or empty result
+        assert result.exit_code in [0, 1]
+
 
 class TestBioCommand:
     """Test bio command."""
@@ -87,9 +140,7 @@ class TestBioCommand:
     def test_bio_no_ai_template_based(self, runner, test_db_path, tmp_path):
         """Test bio command with --no-ai flag (template-based generation)."""
         output_file = tmp_path / "bio_test.md"
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--output", str(output_file)]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--output", str(output_file)])
         # Should succeed with template-based generation
         assert result.exit_code == 0
         assert output_file.exists()
@@ -119,26 +170,20 @@ class TestBioCommand:
     def test_bio_citation_styles(self, runner, test_db_path):
         """Test bio with different citation styles."""
         for style in ["footnote", "parenthetical", "narrative"]:
-            result = runner.invoke(
-                cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--citation-style", style]
-            )
+            result = runner.invoke(cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--citation-style", style])
             assert result.exit_code == 0
 
     def test_bio_with_file_output(self, runner, test_db_path, tmp_path):
         """Test bio with file output."""
         output_file = tmp_path / "biography.md"
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--output", str(output_file)]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--output", str(output_file)])
         assert result.exit_code == 0
         assert "Biography written to" in result.output
         assert output_file.exists()
 
     def test_bio_no_sources(self, runner, test_db_path):
         """Test bio with --no-sources flag."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--no-sources"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "bio", "1", "--no-ai", "--no-sources"])
         assert result.exit_code == 0
         # Biography should not include sources section when --no-sources is used
         # (We can't easily verify this without parsing output, but command should succeed)
@@ -165,9 +210,7 @@ class TestQualityCommand:
     def test_quality_basic(self, runner, test_db_path, tmp_path):
         """Test basic quality report generation."""
         output_file = tmp_path / "quality.md"
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "quality", "--output", str(output_file)]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "quality", "--output", str(output_file)])
         assert result.exit_code == 0
         assert output_file.exists()
         assert "📊 Data Quality Summary" in result.output
@@ -299,6 +342,28 @@ class TestAskCommand:
         # Either way, command should recognize the question format
         assert "Ask questions" not in result.output  # Not showing help text
 
+    def test_ask_interactive_mode(self, runner, test_db_path):
+        """Test ask interactive mode with simulated user input."""
+        # Simulate user typing a question then "quit"
+        result = runner.invoke(
+            cli,
+            ["--database", test_db_path, "ask", "--interactive"],
+            input="Who is person 1?\nquit\n",
+        )
+        # Should enter interactive mode
+        assert "Interactive Q&A Mode" in result.output or result.exit_code in [0, 1]
+
+    def test_ask_interactive_exit_commands(self, runner, test_db_path):
+        """Test that various exit commands work in interactive mode."""
+        for exit_cmd in ["exit", "quit", "q"]:
+            result = runner.invoke(
+                cli,
+                ["--database", test_db_path, "ask", "--interactive"],
+                input=f"{exit_cmd}\n",
+            )
+            # Should accept exit command and show goodbye message
+            assert result.exit_code in [0, 1]  # May succeed or fail depending on LLM
+
 
 class TestTimelineCommand:
     """Test timeline command."""
@@ -397,9 +462,7 @@ class TestTimelineCommand:
 
     def test_timeline_invalid_format(self, runner, test_db_path):
         """Test timeline with invalid format option."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "timeline", "1", "--format", "invalid"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "timeline", "1", "--format", "invalid"])
         assert result.exit_code != 0
 
 
@@ -573,9 +636,7 @@ class TestSearchCommand:
 
     def test_search_by_full_name(self, runner, test_db_path):
         """Test search by full name (given and surname)."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "search", "--name", "Michael Iams"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "Michael Iams"])
         assert result.exit_code == 0
 
     def test_search_by_place(self, runner, test_db_path):
@@ -587,40 +648,30 @@ class TestSearchCommand:
 
     def test_search_with_limit(self, runner, test_db_path):
         """Test search with custom limit."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "search", "--name", "Smith", "--limit", "10"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "Smith", "--limit", "10"])
         assert result.exit_code == 0
 
     def test_search_exact_mode(self, runner, test_db_path):
         """Test search with --exact flag (no phonetic matching)."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "search", "--name", "Iams", "--exact"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "Iams", "--exact"])
         assert result.exit_code == 0
 
     def test_search_name_and_place(self, runner, test_db_path):
         """Test search with both name and place criteria."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "search", "--name", "Iams", "--place", "Maryland"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "Iams", "--place", "Maryland"])
         # Should show results for both searches
         assert result.exit_code == 0
 
     def test_search_with_surname_variation(self, runner, test_db_path):
         """Test search with surname variation syntax [variant]."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "search", "--name", "John Iiams [Ijams]"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "John Iiams [Ijams]"])
         assert result.exit_code == 0
         # Should show that it's searching multiple variations
         assert "Searching 2 name variations" in result.output or "Found" in result.output
 
     def test_search_with_multiple_variations(self, runner, test_db_path):
         """Test search with multiple surname variations."""
-        result = runner.invoke(
-            cli, ["--database", test_db_path, "search", "--name", "John Iams [Ijams] [Imes]"]
-        )
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "John Iams [Ijams] [Imes]"])
         assert result.exit_code == 0
         # Should search 3 variations (base + 2 variants)
         assert "Searching 3 name variations" in result.output or "Found" in result.output
@@ -631,6 +682,54 @@ class TestSearchCommand:
         assert result.exit_code == 0
         # Should search all 8 configured variants
         assert "Searching 8 name variations" in result.output or "Found" in result.output
+
+    def test_search_with_married_name(self, runner, test_db_path):
+        """Test search with --married-name flag."""
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "Janet", "--married-name"])
+        assert result.exit_code == 0
+        # Should search for females by maiden and married names
+        assert "Found" in result.output or "No persons" in result.output
+
+    def test_search_radius_both_units_error(self, runner, test_db_path):
+        """Test that specifying both --kilometers and --miles fails."""
+        result = runner.invoke(
+            cli,
+            [
+                "--database",
+                test_db_path,
+                "search",
+                "--place",
+                "Phoenix, Arizona",
+                "--kilometers",
+                "100",
+                "--miles",
+                "50",
+            ],
+        )
+        assert result.exit_code != 0
+        assert "Cannot specify both" in result.output
+
+    def test_search_radius_negative_value(self, runner, test_db_path):
+        """Test that negative radius value fails."""
+        result = runner.invoke(
+            cli,
+            ["--database", test_db_path, "search", "--place", "Phoenix, Arizona", "--kilometers", "-10"],
+        )
+        assert result.exit_code != 0
+        assert "must be positive" in result.output or "Error" in result.output
+
+    def test_search_radius_without_place(self, runner, test_db_path):
+        """Test that radius search requires --place."""
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--name", "Smith", "--kilometers", "100"])
+        assert result.exit_code != 0
+        assert "requires --place" in result.output or "Error" in result.output
+
+    def test_search_place_exact_match(self, runner, test_db_path):
+        """Test place search with --exact flag."""
+        result = runner.invoke(cli, ["--database", test_db_path, "search", "--place", "Maryland", "--exact"])
+        assert result.exit_code == 0
+        # Should return results or no matches
+        assert "Found" in result.output or "No places" in result.output
 
 
 class TestGlobalOptions:

@@ -337,9 +337,7 @@ ORDER BY n.Surname,
         return self.db.query(sql, tuple(params))
 
     # Pattern 13
-    def find_places_by_name(
-        self, pattern: str, limit: int = DEFAULT_RESULT_LIMIT, exact: bool = False
-    ):
+    def find_places_by_name(self, pattern: str, limit: int = DEFAULT_RESULT_LIMIT, exact: bool = False):
         """
         Find places by name with flexible or exact matching.
 
@@ -382,7 +380,7 @@ LIMIT ?
         else:
             # Flexible matching (original behavior)
             # Split pattern by comma-space to get hierarchy parts
-            parts = [p.strip() for p in pattern.split(',') if p.strip()]
+            parts = [p.strip() for p in pattern.split(",") if p.strip()]
 
             if len(parts) == 1:
                 # Simple case: single search term
@@ -453,9 +451,7 @@ LIMIT ?
         center_lon = center["Longitude"] if center["Longitude"] is not None else 0
 
         if not center_lat or not center_lon or center_lat == 0 or center_lon == 0:
-            raise ValueError(
-                f"Place '{center['Name']}' (ID {center_place_id}) has no GPS coordinates"
-            )
+            raise ValueError(f"Place '{center['Name']}' (ID {center_place_id}) has no GPS coordinates")
 
         # Convert integer coordinates to degrees
         center_lat_deg = center_lat / 10_000_000.0
@@ -481,9 +477,7 @@ WHERE Latitude IS NOT NULL
             place_lat_deg = place["Latitude"] / 10_000_000.0
             place_lon_deg = place["Longitude"] / 10_000_000.0
 
-            distance_km = _haversine_distance(
-                center_lat_deg, center_lon_deg, place_lat_deg, place_lon_deg
-            )
+            distance_km = _haversine_distance(center_lat_deg, center_lon_deg, place_lat_deg, place_lon_deg)
 
             if distance_km <= radius_km:
                 results.append(
@@ -562,7 +556,7 @@ def _haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> f
     import math
 
     # Earth radius in kilometers
-    R = 6371.0
+    earth_radius_km = 6371.0
 
     # Convert degrees to radians
     lat1_rad = math.radians(lat1)
@@ -571,11 +565,8 @@ def _haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> f
     delta_lon = math.radians(lon2 - lon1)
 
     # Haversine formula
-    a = (
-        math.sin(delta_lat / 2) ** 2
-        + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon / 2) ** 2
-    )
+    a = math.sin(delta_lat / 2) ** 2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(delta_lon / 2) ** 2
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
-    distance = R * c
+    distance = earth_radius_km * c
     return distance
