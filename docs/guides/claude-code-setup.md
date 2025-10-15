@@ -6,6 +6,8 @@ This guide documents the slash commands and hooks configured for the RMAgent pro
 
 All slash commands are defined in `.claude/commands/`. RMAgent-specific commands use the `rm-` prefix.
 
+**Total Commands: 12** (6 RMAgent-specific, 3 development, 3 utility)
+
 ### RMAgent Commands (AI & Data)
 
 Commands that interact with RootsMagic database and AI features:
@@ -174,6 +176,34 @@ Generic development and testing commands (no `rm-` prefix):
 
 ---
 
+#### `/doc-review [mode]`
+**Description:** Review documentation for accuracy and completeness using AI
+
+**Options:**
+- `show-prompt: true` - Shows the AI prompt
+- `meta: true` - Shows token usage and timing
+
+**Usage:**
+```
+/doc-review          # Brief mode: review root docs + INDEX.md
+/doc-review brief    # Same as above
+/doc-review deep     # Deep mode: review ALL documentation files
+```
+
+**Brief Mode Reviews:**
+- CLAUDE.md, README.md, AGENTS.md, CONTRIBUTING.md, CHANGELOG.md
+- docs/INDEX.md
+- Verifies INDEX.md accurately references all docs
+
+**Deep Mode Reviews:**
+- All files from brief mode
+- All documentation in docs/ directory
+- Cross-references and consistency checks
+
+**Output:** AI assessment with critical issues, recommendations, and specific fixes
+
+---
+
 #### `/check-db`
 **Description:** Verify database file exists and is accessible
 
@@ -288,6 +318,9 @@ Continue with commit? (y/n)
 
 **For Documentation:**
 - Use `/docs` to quickly reference schema or data formats
+- Use `/doc-review` regularly to ensure docs stay accurate and current
+- Use `/doc-review brief` before major commits or PRs
+- Use `/doc-review deep` after significant feature additions
 - Keep CLAUDE.md, README.md, and AGENTS.md updated (hooks will remind you)
 
 ### show-prompt and meta Flags
@@ -295,6 +328,7 @@ Continue with commit? (y/n)
 Only use `show-prompt` and `meta` in commands that interact with LLMs:
 - ✅ `/rm-bio` - Generates biography with AI
 - ✅ `/rm-ask` - Uses AI to answer questions
+- ✅ `/doc-review` - Uses AI to review documentation
 - ❌ `/rm-person` - Pure database query
 - ❌ `/rm-search` - Pure database query
 - ❌ `/rm-quality` - Rule-based validation
@@ -317,12 +351,17 @@ After configuring slash commands and hooks:
    /check-db
    ```
 
-2. **Test a hook:** Run pytest with coverage to see PostToolUse hook:
+2. **Test an AI command:**
+   ```
+   /doc-review brief
+   ```
+
+3. **Test a hook:** Run pytest with coverage to see PostToolUse hook:
    ```bash
    uv run pytest --cov=rmagent
    ```
 
-3. **Test git hook:** Make a change to tests and try to commit:
+4. **Test git hook:** Make a change to tests and try to commit:
    ```bash
    # Modify a test file
    git add tests/
@@ -330,7 +369,7 @@ After configuring slash commands and hooks:
    # You should see the documentation review reminder
    ```
 
-4. **View all commands:**
+5. **View all commands:**
    ```
    /help
    ```

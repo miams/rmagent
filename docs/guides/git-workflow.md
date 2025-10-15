@@ -20,9 +20,22 @@ feature/*         Individual features
 
 ### Branches Explained
 
-- **main**: Production-ready code only. Protected - no direct commits allowed.
-- **develop**: Default working branch. All features merge here first.
+- **main**: Production-ready code only. **Protected** - no direct commits allowed.
+  - Requires PR with 1 approving review
+  - Requires all status checks to pass (linting + tests)
+  - Requires branch to be up-to-date before merge
+  - No force pushes or deletions allowed
+  - Enforced for administrators
+
+- **develop**: Default working branch. **Protected** - all features merge here first.
+  - Requires PR (self-merge allowed for solo dev)
+  - Requires all status checks to pass (linting + tests)
+  - No force pushes or deletions allowed
+  - Admins can bypass in emergencies
+
 - **feature/**: Individual features. Branch from develop, PR back to develop.
+  - No protection - you can commit directly and force push if needed
+  - Still requires PR to merge into develop
 
 ## Daily Workflow
 
@@ -75,6 +88,26 @@ git push
 - `refactor:` - Code refactoring
 - `chore:` - Maintenance tasks
 
+**Pre-Commit Hook** (Automatic):
+
+When you commit, a pre-commit hook automatically checks if key documentation files need updating:
+
+```
+⚠️  DOCUMENTATION REVIEW REMINDER
+
+This commit may require updates to key documentation files:
+
+  • Documentation structure changed
+
+Please review and update if necessary:
+
+  📄 CLAUDE.md     - Project overview, structure, key patterns
+  📄 README.md     - User-facing docs, badges, quick start
+  ✓ AGENTS.md     - Already modified
+```
+
+The hook will ask you to confirm before proceeding. This ensures CLAUDE.md, README.md, and AGENTS.md stay current.
+
 ### 3. Creating a Pull Request
 
 When your feature is ready:
@@ -91,10 +124,12 @@ gh pr create --base develop --title "feat: add census extraction" --body "Descri
 Or create the PR through GitHub web interface.
 
 **PR Checklist**:
-- [ ] All tests pass locally (`uv run pytest`)
-- [ ] Code is formatted (`uv run black .`)
-- [ ] No linting errors (`uv run ruff check .`)
+- [ ] All tests pass locally (`uv run pytest` or `/test`)
+- [ ] Code is formatted (`uv run black .` or `/lint fix`)
+- [ ] No linting errors (`uv run ruff check .` or `/lint`)
 - [ ] Changes are documented (if needed)
+- [ ] Pre-commit hook reviewed (auto-runs on commit)
+- [ ] CLAUDE.md, README.md, AGENTS.md updated if needed
 
 ### 4. Merging Your PR
 
@@ -193,12 +228,70 @@ git commit --amend --no-edit
 git push --force
 ```
 
-## GitHub Actions CI/CD
+## Automated Checks & Hooks
+
+RMAgent has three layers of automated checks:
+
+### 1. Git Pre-Commit Hook (Local)
+
+**Location:** `.git/hooks/pre-commit`
+
+**Triggers when:**
+- Documentation structure changes → Reminds to check CLAUDE.md
+- Test modifications → Reminds to check README.md for coverage stats
+- Core code changes → Reminds to check CLAUDE.md
+- Dependency updates → Reminds to check README.md
+
+**What it does:**
+- Detects changes that might affect key documentation
+- Shows which docs need review (with checkmarks for already-modified files)
+- Prompts to confirm before allowing commit
+- Prevents accidental outdated documentation
+
+**Example:**
+```
+⚠️  DOCUMENTATION REVIEW REMINDER
+
+  • Tests modified (check if coverage stats need updating)
+
+Please review and update if necessary:
+
+  ✓ CLAUDE.md     - Already modified
+  📄 README.md     - User-facing docs, badges, quick start
+  📄 AGENTS.md     - LangChain patterns, agent architecture
+
+Continue with commit? (y/n)
+```
+
+### 2. Claude Code Hooks (Development)
+
+**Location:** `.claude/settings.local.json`
+
+**PostToolUse Hook** - After running pytest with coverage:
+```
+📊 Test coverage: 88%
+💡 Reminder: Update coverage stats in CLAUDE.md and README.md if significantly changed
+```
+
+**PreToolUse Hook** - Before git push:
+```
+⚠️  Pushing to remote. Recent commits:
+66a29ca docs: reorganize documentation structure
+e3937b5 feat: add Claude Code slash commands
+```
+
+**See [`docs/guides/claude-code-setup.md`](claude-code-setup.md) for full hook documentation.**
+
+### 3. GitHub Actions CI/CD (Remote)
+
+**Location:** `.github/workflows/pr-tests.yml`
 
 Every PR automatically runs:
 1. **Linting** - `ruff check` and `black --check`
 2. **Tests** - Full test suite with coverage
 3. **Coverage Check** - Must maintain 80%+ coverage
+
+**Required for merge** due to branch protection on `develop` and `main`.
 
 **If tests fail**:
 1. Check the Actions tab on GitHub for error details
@@ -307,6 +400,9 @@ uv run pytest -vv -s
 5. **Test before PR** - Don't rely on CI to catch basic issues
 6. **One feature per branch** - Don't mix unrelated changes
 7. **Delete merged branches** - Keep your branch list clean
+8. **Trust the hooks** - Pre-commit and Claude Code hooks help maintain quality
+9. **Update docs proactively** - Don't wait for the hook to remind you
+10. **Use slash commands** - `/test`, `/lint`, `/coverage` for quick checks
 
 ## Resources
 

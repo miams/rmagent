@@ -113,12 +113,13 @@ LOG_LEVEL=DEBUG                      # Enable LLM logging
 
 ### Claude Code Integration
 
-RMAgent includes 11 custom slash commands and automated hooks for Claude Code:
+RMAgent includes 12 custom slash commands and automated hooks for Claude Code:
 
 **Quick Commands:**
 - `/rm-bio <id>` - Generate biography with AI
 - `/rm-person <id>` - Query person from database
 - `/rm-quality` - Run data quality checks
+- `/doc-review [brief|deep]` - Review documentation for accuracy with AI
 - `/test` - Run pytest suite
 - `/coverage` - Run tests with coverage
 - `/check-db` - Verify database connection
