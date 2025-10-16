@@ -140,6 +140,22 @@ class DatabaseSettings(BaseModel):
         return value.expanduser().resolve()
 
 
+class CensusSettings(BaseModel):
+    """Census extraction database configuration (PostgreSQL)."""
+
+    db_url: str = Field(
+        default="postgresql://rmagent:census_dev_password@localhost:5432/census_sidecar"
+    )
+
+    @field_validator("db_url")
+    @classmethod
+    def validate_url(cls, url: str) -> str:
+        """Validate PostgreSQL connection string format."""
+        if not url.startswith("postgresql://"):
+            raise ValueError("Census DB URL must start with 'postgresql://'")
+        return url
+
+
 class OutputSettings(BaseModel):
     """Output directory settings."""
 
@@ -234,6 +250,7 @@ class AppConfig(BaseModel):
 
     llm: LLMSettings
     database: DatabaseSettings
+    census: CensusSettings
     output: OutputSettings
     privacy: PrivacySettings
     citation: CitationSettings
@@ -338,6 +355,13 @@ def load_app_config(
             media_root_directory=Path(media_root) if media_root else None,
         )
 
+        census_settings = CensusSettings(
+            db_url=_env(
+                "CENSUS_DB_URL",
+                "postgresql://rmagent:census_dev_password@localhost:5432/census_sidecar",
+            ),
+        )
+
         output_settings = OutputSettings(
             output_dir=Path(_env("OUTPUT_DIR", "output")),
             export_dir=Path(_env("EXPORT_DIR", "exports")),
@@ -369,6 +393,7 @@ def load_app_config(
         config = AppConfig(
             llm=llm_settings,
             database=database_settings,
+            census=census_settings,
             output=output_settings,
             privacy=privacy_settings,
             citation=citation_settings,

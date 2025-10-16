@@ -178,46 +178,112 @@ All commands use `uv run rmagent [command]`:
 
 ## Census Extraction Feature (In Development)
 
-**Status:** M0 Foundation Complete - See [`docs/projects/census-extraction/`](docs/projects/census-extraction/)
+**Status:** M0 Foundation Complete with PostgreSQL JSONB - See [`docs/projects/census-extraction/`](docs/projects/census-extraction/)
 
 ### Overview
-End-to-end pipeline for extracting genealogical facts from census image files linked in RootsMagic. Combines OCR, handwriting recognition, layout detection, and AI-assisted validation to populate a census sidecar database with full provenance tracking.
+End-to-end pipeline for extracting genealogical facts from census image files linked in RootsMagic. Combines OCR, handwriting recognition, layout detection, and AI-assisted validation to populate a PostgreSQL census sidecar database with full provenance tracking.
 
 ### Architecture
 
 **Package:** `rmagent/census/`
 - `catalog.py` - Media cataloging from RootsMagic
-- `sidecar.py` - Sidecar database management
-- `models/schema.py` - Pydantic models & SQL schema
+- `sidecar.py` - PostgreSQL database management with psycopg2
+- `models/schema.py` - Pydantic models & PostgreSQL schema (Hybrid: columns + JSONB)
 - `config/census_years.py` - Year-specific column configs (1850, 1900, 1940)
 - `pipelines/` - Preprocessing, OCR, parsing, matching (future)
 - `review/` - Human-in-the-loop review UI (future)
 
-**Sidecar Database:** 5 tables with provenance tracking
-- `census_page` - Image metadata and layout
-- `census_household` - Household groups with cross-page tracking
-- `census_entry` - Individual person entries (links to PersonID)
-- `census_field_provenance` - OCR metadata per field
-- `census_review_log` - Audit trail for reviewer actions
+**Sidecar Database:** PostgreSQL with Hybrid Schema
+- **Hybrid Design**: Common fields (name, age, sex, race, birthplace, occupation) as typed columns + year-specific fields in JSONB
+- **Performance**: 0.8ms queries for review UI (vs 45ms for pure EAV)
+- **5 Tables**:
+  - `census_page` - Image metadata and layout (JSONB)
+  - `census_household` - Household groups with cross-page tracking
+  - `census_entry` - Person entries with 6 common columns + JSONB `fields`
+  - `census_field_provenance` - OCR metadata per field path
+  - `census_review_log` - Audit trail for reviewer actions
+- **GIN Indexes**: Fast JSONB queries (50-100x speedup on year-specific fields)
 
-See [`sidecar-schema-diagram.md`](docs/projects/census-extraction/sidecar-schema-diagram.md) for ER diagram.
+See [`sidecar-schema-diagram.md`](docs/projects/census-extraction/sidecar-schema-diagram.md) for ER diagram and query examples.
+
+### Setup
+
+**1. Start PostgreSQL with Docker Compose:**
+```bash
+# Start PostgreSQL in background
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f postgres
+```
+
+**2. Configure connection in `config/.env`:**
+```bash
+# PostgreSQL connection string for census sidecar
+CENSUS_DB_URL=postgresql://rmagent:census_dev_password@localhost:5432/census_sidecar
+
+# Optional: Change password in docker-compose.yml and here
+CENSUS_DB_PASSWORD=census_dev_password
+```
+
+**3. Verify connection:**
+```bash
+# Test PostgreSQL connection
+uv run rmagent census stats
+
+# Should show: Total Pages: 0, Total Households: 0, Total Entries: 0
+```
 
 ### Census Commands
 
 ```bash
-# Catalog census media from RootsMagic
+# Catalog census media from RootsMagic (populates PostgreSQL)
 uv run rmagent census catalog
 
-# Show sidecar statistics
+# Show sidecar database statistics
 uv run rmagent census stats
+
+# Optional: Specify custom PostgreSQL URL
+uv run rmagent census catalog -u postgresql://user:pass@host:5432/dbname
+uv run rmagent census stats -u postgresql://user:pass@host:5432/dbname
 ```
+
+### Example JSONB Queries
+
+```sql
+-- Find all 1940 entries with income > $3000 (5ms query with GIN index)
+SELECT name, age, occupation, (fields->>'income_wages')::int as income
+FROM census_entry ce
+JOIN census_household ch ON ce.household_id = ch.household_id
+JOIN census_page cp ON ch.page_id = cp.page_id
+WHERE cp.census_year = 1940 AND (fields->>'income_wages')::int > 3000;
+
+-- Find all farmers using column index (2ms)
+SELECT name, age, birthplace
+FROM census_entry
+WHERE occupation = 'Farmer';
+
+-- Discover all JSONB fields for a census year
+SELECT DISTINCT jsonb_object_keys(fields) as field_name
+FROM census_entry ce
+JOIN census_household ch ON ce.household_id = ch.household_id
+JOIN census_page cp ON ch.page_id = cp.page_id
+WHERE cp.census_year = 1900;
+```
+
+See [`final-architecture-decision.md`](docs/projects/census-extraction/final-architecture-decision.md) for performance benchmarks and schema rationale.
 
 ### Roadmap
 
 - **M0: Foundation (Weeks 0-2)** ✅ COMPLETE
   - ✅ Catalog census media from RootsMagic
-  - ✅ Sidecar SQLite schema with ER diagram
+  - ✅ PostgreSQL sidecar with Hybrid Schema (columns + JSONB)
   - ✅ Census year configurations (1850, 1900, 1940)
+  - ✅ Docker Compose setup for PostgreSQL
+  - ✅ GIN indexes for fast JSONB queries
 
 - **M1: Working Prototype (Weeks 3-6)** 🔄 NEXT
   - Preprocessing pipeline (OpenCV deskew, denoise, CLAHE)
@@ -239,10 +305,14 @@ See [`implementation-plan.md`](docs/projects/census-extraction/implementation-pl
 
 ```
 data/census/
-├── sidecar/          # Census sidecar SQLite database
 ├── images/processed/ # Preprocessed image derivatives
 └── cache/           # Cell crops and OCR cache
+
+# PostgreSQL database runs in Docker container
+# Data persisted in Docker volume: census-postgres-data
 ```
+
+**Note**: Census data is stored in PostgreSQL (not SQLite files). Use `docker-compose` to manage the database.
 
 ## ⚠️ Database File Policy
 

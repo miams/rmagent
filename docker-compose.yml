@@ -1,0 +1,92 @@
+# Docker Compose for Census Extraction PostgreSQL Database
+#
+# Provides PostgreSQL 16 with JSONB support for the census sidecar database.
+# Uses the Hybrid Schema architecture with GIN indexes for fast JSONB queries.
+#
+# Usage:
+#   docker-compose up -d         # Start PostgreSQL in background
+#   docker-compose down          # Stop and remove containers
+#   docker-compose logs -f       # View logs
+#
+# Connect from host:
+#   psql postgresql://rmagent:census_dev_password@localhost:5432/census_sidecar
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: census-postgres
+    restart: unless-stopped
+
+    environment:
+      # Database configuration
+      POSTGRES_DB: census_sidecar
+      POSTGRES_USER: rmagent
+      POSTGRES_PASSWORD: ${CENSUS_DB_PASSWORD:-census_dev_password}
+
+      # Performance tuning for development
+      # Increase for production based on available memory
+      POSTGRES_SHARED_BUFFERS: 256MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 1GB
+      POSTGRES_WORK_MEM: 16MB
+      POSTGRES_MAINTENANCE_WORK_MEM: 64MB
+
+    ports:
+      # Map PostgreSQL port to host
+      - "5432:5432"
+
+    volumes:
+      # Persist database data
+      - census-postgres-data:/var/lib/postgresql/data
+
+      # Optional: initialization scripts
+      # - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rmagent -d census_sidecar"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    # Resource limits for development
+    # Adjust for production workload
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 512M
+
+  # Optional: pgAdmin for database management
+  # Uncomment to enable web UI at http://localhost:5050
+  # pgadmin:
+  #   image: dpage/pgadmin4:latest
+  #   container_name: census-pgadmin
+  #   restart: unless-stopped
+  #
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@rmagent.local
+  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+  #     PGADMIN_CONFIG_SERVER_MODE: 'False'
+  #
+  #   ports:
+  #     - "5050:80"
+  #
+  #   volumes:
+  #     - census-pgadmin-data:/var/lib/pgadmin
+  #
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+
+volumes:
+  # Named volumes for data persistence
+  census-postgres-data:
+    driver: local
+  # census-pgadmin-data:
+  #   driver: local
+
+networks:
+  default:
+    name: census-network

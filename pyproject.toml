@@ -24,6 +24,9 @@ dependencies = [
     "pydantic>=2.0",
     "python-dotenv>=1.0",
 
+    # Database
+    "psycopg2-binary>=2.9.0",  # PostgreSQL adapter for census sidecar
+
     # CLI and output
     "click>=8.0",
     "rich>=13.0",
@@ -37,6 +40,23 @@ dependencies = [
     "langchain>=0.1.0",
     "langchain-anthropic>=0.1.0",
     "langchain-openai>=0.0.5",
+
+    # Census extraction - image processing
+    "pillow>=10.0",
+    "opencv-python>=4.8.0",
+    "numpy>=1.24.0",
+
+    # Census extraction - OCR
+    "pytesseract>=0.3.10",
+    # Note: kraken (handwriting) deferred due to scipy build issues on macOS
+    # Note: Layout detection using OpenCV (python-doctr has scipy build issues on macOS)
+
+    # Census extraction - matching
+    "rapidfuzz>=3.0.0",
+
+    # Census extraction - review UI
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
 ]
 
 [project.optional-dependencies]

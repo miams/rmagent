@@ -103,30 +103,132 @@ class CensusMediaCatalog:
 
     def _get_census_events_with_media(self, conn: sqlite3.Connection) -> list[dict]:
         """
-        Get all census events that have media attached.
+        Get all census person-media-event links via all pathways.
+
+        Includes 4 pathways to handle both pre-1850 and post-1850 data:
+        1. Media → Event (post-1850 primary person)
+        2. Media → Event + WitnessTable (post-1850 household members)
+        3. Media → Citation → Event (pre-1850)
+        4. Media → Source → Citation → Event (pre-1850)
 
         Returns:
-            List of dicts with event and media information
+            List of dicts with person-media-event information
         """
         query = """
-        SELECT DISTINCT
+        -- Pathway 1: Media → Event (Post-1850 typical) - Primary person
+        SELECT
+            m.MediaID,
+            m.MediaPath,
+            m.MediaFile,
             e.EventID,
             e.OwnerID as PersonID,
             e.Date as EventDate,
-            e.Details,
+            c.CitationID,
+            c.CitationName,
+            n.Surname,
+            n.Given,
+            p.Sex,
+            'Head' as Role,
+            NULL as RoleID,
+            'Media→Event' as LinkPath
+        FROM MultimediaTable m
+        JOIN MediaLinkTable ml ON ml.MediaID = m.MediaID AND ml.OwnerType = 2
+        JOIN EventTable e ON e.EventID = ml.OwnerID
+        JOIN FactTypeTable ft ON ft.FactTypeID = e.EventType AND ft.GedcomTag = 'CENS'
+        LEFT JOIN CitationLinkTable cl ON cl.OwnerID = e.EventID AND cl.OwnerType = 2
+        LEFT JOIN CitationTable c ON c.CitationID = cl.CitationID
+        LEFT JOIN PersonTable p ON p.PersonID = e.OwnerID
+        LEFT JOIN NameTable n ON n.OwnerID = e.OwnerID AND n.IsPrimary = 1
+        WHERE m.MediaType = 1
+
+        UNION ALL
+
+        -- Pathway 2: Media → Event (Post-1850 typical) - Witnesses/household members
+        SELECT
             m.MediaID,
-            m.MediaFile,
             m.MediaPath,
-            m.Caption,
-            m.Description,
-            ml.IsPrimary
-        FROM EventTable e
-        JOIN FactTypeTable ft ON e.EventType = ft.FactTypeID
-        JOIN MediaLinkTable ml ON ml.OwnerType = 2 AND ml.OwnerID = e.EventID
-        JOIN MultimediaTable m ON ml.MediaID = m.MediaID
-        WHERE ft.GedcomTag = 'CENS'  -- Census events
-          AND m.MediaType = 1  -- Image files
-        ORDER BY e.OwnerID, e.SortDate, ml.IsPrimary DESC
+            m.MediaFile,
+            e.EventID,
+            w.PersonID,
+            e.Date as EventDate,
+            c.CitationID,
+            c.CitationName,
+            n.Surname,
+            n.Given,
+            p.Sex,
+            r.RoleName as Role,
+            w.Role as RoleID,
+            'Media→Event+Witness' as LinkPath
+        FROM MultimediaTable m
+        JOIN MediaLinkTable ml ON ml.MediaID = m.MediaID AND ml.OwnerType = 2
+        JOIN EventTable e ON e.EventID = ml.OwnerID
+        JOIN FactTypeTable ft ON ft.FactTypeID = e.EventType AND ft.GedcomTag = 'CENS'
+        JOIN WitnessTable w ON w.EventID = e.EventID
+        LEFT JOIN RoleTable r ON r.RoleID = w.Role
+        LEFT JOIN CitationLinkTable cl ON cl.OwnerID = e.EventID AND cl.OwnerType = 2
+        LEFT JOIN CitationTable c ON c.CitationID = cl.CitationID
+        LEFT JOIN PersonTable p ON p.PersonID = w.PersonID
+        LEFT JOIN NameTable n ON n.OwnerID = w.PersonID AND n.IsPrimary = 1
+        WHERE m.MediaType = 1
+
+        UNION ALL
+
+        -- Pathway 3: Media → Citation → Event (Pre-1850 typical)
+        SELECT
+            m.MediaID,
+            m.MediaPath,
+            m.MediaFile,
+            e.EventID,
+            e.OwnerID as PersonID,
+            e.Date as EventDate,
+            c.CitationID,
+            c.CitationName,
+            n.Surname,
+            n.Given,
+            p.Sex,
+            'Head' as Role,
+            NULL as RoleID,
+            'Media→Citation→Event' as LinkPath
+        FROM MultimediaTable m
+        JOIN MediaLinkTable ml ON ml.MediaID = m.MediaID AND ml.OwnerType = 4
+        JOIN CitationTable c ON c.CitationID = ml.OwnerID
+        JOIN CitationLinkTable cl ON cl.CitationID = c.CitationID AND cl.OwnerType = 2
+        JOIN EventTable e ON e.EventID = cl.OwnerID
+        JOIN FactTypeTable ft ON ft.FactTypeID = e.EventType AND ft.GedcomTag = 'CENS'
+        LEFT JOIN PersonTable p ON p.PersonID = e.OwnerID
+        LEFT JOIN NameTable n ON n.OwnerID = e.OwnerID AND n.IsPrimary = 1
+        WHERE m.MediaType = 1
+
+        UNION ALL
+
+        -- Pathway 4: Media → Source → Citation → Event (Pre-1850 typical)
+        SELECT
+            m.MediaID,
+            m.MediaPath,
+            m.MediaFile,
+            e.EventID,
+            e.OwnerID as PersonID,
+            e.Date as EventDate,
+            c.CitationID,
+            c.CitationName,
+            n.Surname,
+            n.Given,
+            p.Sex,
+            'Head' as Role,
+            NULL as RoleID,
+            'Media→Source→Citation→Event' as LinkPath
+        FROM MultimediaTable m
+        JOIN MediaLinkTable ml ON ml.MediaID = m.MediaID AND ml.OwnerType = 3
+        JOIN SourceTable s ON s.SourceID = ml.OwnerID
+        JOIN CitationTable c ON c.SourceID = s.SourceID
+        JOIN CitationLinkTable cl ON cl.CitationID = c.CitationID AND cl.OwnerType = 2
+        JOIN EventTable e ON e.EventID = cl.OwnerID
+        JOIN FactTypeTable ft ON ft.FactTypeID = e.EventType AND ft.GedcomTag = 'CENS'
+        LEFT JOIN PersonTable p ON p.PersonID = e.OwnerID
+        LEFT JOIN NameTable n ON n.OwnerID = e.OwnerID AND n.IsPrimary = 1
+        WHERE m.MediaType = 1
+
+        ORDER BY MediaPath, EventID, PersonID
         """
 
         results = conn.execute(query).fetchall()
@@ -191,10 +293,11 @@ class CensusMediaCatalog:
         """
         Determine census year from media metadata.
 
-        Tries multiple strategies:
-        1. Linked census event date
-        2. Media caption/description
-        3. Media filename patterns
+        Tries multiple strategies (in priority order):
+        1. MediaPath (most reliable - contains year in path structure)
+        2. MediaFile (filename may contain year)
+        3. Linked census event date
+        4. Media caption/description
 
         Args:
             media: Media record dict
@@ -203,28 +306,44 @@ class CensusMediaCatalog:
         Returns:
             Census year (e.g., 1900) or None if not determinable
         """
-        # Strategy 1: Check if linked to census event
+        import re
+
+        # Strategy 1: Parse MediaPath for year (most reliable)
+        # Example: "?\Records - Census\1790 Federal" → 1790
+        media_path = media.get("MediaPath", "")
+        if media_path:
+            match = re.search(r'\b(1[78]\d{2}|19[0-5]\d)\b', media_path)
+            if match:
+                year = int(match.group(1))
+                if self._is_valid_census_year(year):
+                    return year
+
+        # Strategy 2: Parse filename for year patterns
+        filename = media.get("MediaFile", "")
+        if filename:
+            match = re.search(r'\b(1[78]\d{2}|19[0-5]\d)\b', filename)
+            if match:
+                year = int(match.group(1))
+                if self._is_valid_census_year(year):
+                    return year
+
+        # Strategy 3: Check linked census event date
         linked_event = next(
             (e for e in census_events if e["MediaID"] == media["MediaID"]), None
         )
-
-        if linked_event and linked_event["EventDate"]:
+        if linked_event and linked_event.get("EventDate"):
             year = self._extract_year_from_rm_date(linked_event["EventDate"])
             if self._is_valid_census_year(year):
                 return year
 
-        # Strategy 2: Parse caption/description for year
+        # Strategy 4: Parse caption/description for year
         for text in [media.get("Caption"), media.get("Description")]:
             if text:
-                year = self._extract_year_from_text(text)
-                if self._is_valid_census_year(year):
-                    return year
-
-        # Strategy 3: Parse filename for year patterns
-        filename = media.get("MediaFile", "")
-        year = self._extract_year_from_filename(filename)
-        if self._is_valid_census_year(year):
-            return year
+                match = re.search(r'\b(1[78]\d{2}|19[0-5]\d)\b', text)
+                if match:
+                    year = int(match.group(1))
+                    if self._is_valid_census_year(year):
+                        return year
 
         return None
 
@@ -269,19 +388,27 @@ class CensusMediaCatalog:
 
     def _is_valid_census_year(self, year: Optional[int]) -> bool:
         """
-        Check if year is a valid U.S. Federal Census year.
+        Check if year is a valid census year (federal or state).
 
         Args:
             year: Year to validate
 
         Returns:
-            True if valid census year (1790-1950, every 10 years, excluding 1890)
+            True if valid census year
+            - Federal census: 1790-1950, every 10 years (excluding 1890)
+            - State census: 1855, 1865, 1875, 1885, 1895, 1905, 1915, 1925, 1935, 1945
         """
         if not year:
             return False
 
-        # U.S. Federal Census years: 1790, 1800, ..., 1950 (excluding 1890)
-        return 1790 <= year <= 1950 and year % 10 == 0 and year != 1890
+        # Federal census years: 1790, 1800, ..., 1950 (excluding 1890)
+        if 1790 <= year <= 1950 and year % 10 == 0 and year != 1890:
+            return True
+
+        # State census years (5-year intervals between federal census)
+        # Common in: New York, Iowa, Kansas, Wisconsin, Florida, etc.
+        state_census_years = {1855, 1865, 1875, 1885, 1895, 1905, 1915, 1925, 1935, 1945}
+        return year in state_census_years
 
     def _insert_census_page(self, media: dict, census_year: int) -> None:
         """
@@ -307,40 +434,50 @@ class CensusMediaCatalog:
         else:
             image_path = media_file
 
-        # Insert or update census page
+        # Insert or update census page (PostgreSQL upsert syntax)
         query = """
         INSERT INTO census_page (
             media_id, person_id, census_year, image_path
-        ) VALUES (?, ?, ?, ?)
-        ON CONFLICT(media_id) DO UPDATE SET
-            person_id = excluded.person_id,
-            census_year = excluded.census_year,
-            image_path = excluded.image_path,
+        ) VALUES (%s, %s, %s, %s)
+        ON CONFLICT (media_id) DO UPDATE SET
+            person_id = EXCLUDED.person_id,
+            census_year = EXCLUDED.census_year,
+            image_path = EXCLUDED.image_path,
             updated_at = CURRENT_TIMESTAMP
         """
 
         person_id = media.get("OwnerID") if media.get("OwnerType") == 0 else None
 
-        self.sidecar_db.conn.execute(
-            query, (media["MediaID"], person_id, census_year, image_path)
-        )
+        with self.sidecar_db.conn.cursor() as cur:
+            cur.execute(
+                query, (media["MediaID"], person_id, census_year, image_path)
+            )
         self.sidecar_db.conn.commit()
 
 
 def catalog_census_media(
-    rm_db_path: str | Path, sidecar_db_path: str | Path
+    rm_db_path: str | Path, sidecar_connection_string: str
 ) -> dict:
     """
     Convenience function to catalog census media.
 
     Args:
         rm_db_path: Path to RootsMagic database
-        sidecar_db_path: Path to census sidecar database
+        sidecar_connection_string: PostgreSQL connection string
+            Format: postgresql://user:password@host:port/database
 
     Returns:
         Cataloging statistics dict
+
+    Example:
+        >>> stats = catalog_census_media(
+        ...     "data/Iiams.rmtree",
+        ...     "postgresql://rmagent:password@localhost:5432/census_sidecar"
+        ... )
+        >>> print(stats["total_media"])
+        1400
     """
-    with CensusSidecarDB(sidecar_db_path) as sidecar:
+    with CensusSidecarDB(sidecar_connection_string) as sidecar:
         sidecar.initialize_schema()
         catalog = CensusMediaCatalog(rm_db_path, sidecar)
         return catalog.catalog_census_media()
