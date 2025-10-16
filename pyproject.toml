@@ -48,6 +48,8 @@ dependencies = [
 
     # Census extraction - OCR
     "pytesseract>=0.3.10",
+    "transformers>=4.30.0",  # For TrOCR handwriting recognition
+    "torch>=2.0.0",  # PyTorch for TrOCR models
     # Note: kraken (handwriting) deferred due to scipy build issues on macOS
     # Note: Layout detection using OpenCV (python-doctr has scipy build issues on macOS)
 
