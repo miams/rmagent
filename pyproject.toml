@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "Michael Iams", email = "m.ichaeliams@gmail.com" }
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.13"  # Restricted for TrOCR: numpy 2.0.2 build fails on 3.13
 license = { text = "MIT" }
 keywords = ["genealogy", "rootsmagic", "ai", "biography", "data-quality"]
 classifiers = [
