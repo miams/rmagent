@@ -1,0 +1,35 @@
+REGION-GUIDED DETECTOR TEST RESULTS
+================================================================================
+
+Total images: 179
+Success: 155 (86.6%)
+Partial: 0 (0.0%)
+Failed: 24 (13.4%)
+
+PARTIAL DETECTIONS:
+
+FAILED DETECTIONS:
+  1940, Arizona, Pima - Ijams, Clyde W..jpg
+  1940, California, Los Angeles - Iiams, John Calvin.jpg
+  1940, Colorado, Denver - Shepherd, William C..jpg
+  1940, Illinois, Logan - Ijams, Russell Lynn.jpg
+  1940, Michigan, Eaton - Imes, Sevilla.jpg
+  1940, Mississippi, Adams - Ijams, Clay Benton.jpg
+  1940, Missouri, Vernon - Ijams, Clyde.jpg
+  1940, North Carolina, Davie - Ijames, Cleatus.jpg
+  1940, Ohio, Belmont - Iams, Olga.jpg
+  1940, Ohio, Cuyahoga - Ijams, Frederick.jpg
+  1940, Ohio, Stark - Iams, Jesse Cleveland.jpg
+  1940, Oklahoma, Tulsa - Iams, Jesse Dorsey.jpg
+  1940, Pennsylvania, Fayette - Imes, Coy.jpg
+  1940, Pennsylvania, Juniata - Imes, Jesse James.jpg
+  1940, Pennsylvania, Montgomery - Imes, Warren.jpg
+  1940, Pennsylvania, Washington - Iams, Grace D..jpg
+  1940, Pennsylvania, Washington - Iams, Joseph Clark.jpg
+  1940, Tennessee, Knox - Iams, Thomas.jpg
+  1940, Texas, Harris - Iiams Charles M.jpg
+  1940, Texas, Harris - Iiams, Frank J..jpg
+  1940, Texas, Harris - Ijams, William Joseph.jpg
+  1940, Texas, Milam - Iiams, Frank W..jpg
+  1940, Washington, Clark - Iams, Elizabeth.jpg
+  1940, Wisconsin, Langlade - Iames, Victor W..jpg

@@ -154,6 +154,8 @@
 - Household deduplication remains manual; system stores cross-page links but does not auto-merge.
 
 ## References
+- [Ground Truth Data Standards](ground-truth-standards.md) - Standards for creating and using ground truth datasets for LLM prompt validation
+- [Row Detection Analysis - October 18, 2025](row-detection-analysis-2025-10-18.md) - **CRITICAL**: Current state analysis revealing fundamental flaws in morphological detection approach
 - OpenCV documentation on deskewing and adaptive thresholding.
 - kraken OCR toolkit: https://github.com/mittagessen/kraken
 - doctr (document text recognition): https://github.com/mindee/doctr

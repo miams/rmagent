@@ -55,9 +55,9 @@ for row_idx in range(len(scaled_rows) - 1):
         if col_info["skip_ocr"]:
             continue  # Skip census taker and admin columns
 
-        space_idx = col_info["space_index"]
-        x1 = scaled_cols[space_idx]
-        x2 = scaled_cols[space_idx + 1]
+        col_idx = col_info["column_index"]
+        x1 = scaled_cols[col_idx]
+        x2 = scaled_cols[col_idx + 1]
 
         cell_image = image[y1:y2, x1:x2]
 

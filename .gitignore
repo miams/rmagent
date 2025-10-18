@@ -62,6 +62,10 @@ logs/
 # Database files (don't commit personal data)
 *.rmtree
 
+# Census data and test outputs (large files, local reference only)
+data/census/images/full_179_annotated/
+data/census/images/yavapai_analysis/
+
 # Output
 output/
 exports/

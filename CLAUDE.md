@@ -285,12 +285,12 @@ See [`final-architecture-decision.md`](docs/projects/census-extraction/final-arc
   - ✅ Docker Compose setup for PostgreSQL
   - ✅ GIN indexes for fast JSONB queries
 
-- **M1: Working Prototype (Weeks 3-6)** 🔄 NEXT
-  - Preprocessing pipeline (OpenCV deskew, denoise, CLAHE)
-  - Layout detection (doctr/layoutparser)
-  - OCR pilot (Tesseract + kraken on 10 images)
-  - Person matching (RapidFuzz fuzzy matching)
-  - Review UI MVP (FastAPI + HTMX)
+- **M1: Working Prototype (Weeks 3-6)** 🔄 IN PROGRESS
+  - 🔄 Preprocessing pipeline - Morphological row detection prototype (86.6% success, needs fixes)
+  - 🔄 Layout detection - Region-guided detector implemented, requires validation improvements
+  - ⏳ OCR pilot (Tesseract + kraken on 10 images)
+  - ⏳ Person matching (RapidFuzz fuzzy matching)
+  - ⏳ Review UI MVP (FastAPI + HTMX)
 
 - **M2: MVP Release (Weeks 7-12)**
   - Full batch processing (1,400 images)
